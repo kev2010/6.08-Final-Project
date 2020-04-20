@@ -97,7 +97,7 @@ def join_game(players_cursor, states_cursor, user):
     """
     #   Make sure player isn't already in the game
     joined_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    joined = players_cursor.execute(joined_query, (user,))
+    joined = players_cursor.execute(joined_query, (user,)).fetchall()
     if len(joined) > 0:
         #   TODO: Return proper message for joining full game
         raise ValueError
