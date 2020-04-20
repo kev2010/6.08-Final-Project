@@ -107,6 +107,17 @@ def get_handler(request, players_cursor, states_cursor):
 
 
 def post_handler(request, players_cursor, states_cursor):
+    """
+    Handles a POST request as defined in the request_handler function.
+    Returns a string representing the game state as defined in
+    request_handler.
+
+    :param request: (dict) maps request params to corresponding values
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    :return: (str) a JSON string representing the players and state of 
+        the game as defined above
+    """
     #   Get the user, action, and amount from the POST request
     user = request['form']['user']
     action = request['form']['action']
