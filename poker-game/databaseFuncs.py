@@ -2,17 +2,18 @@ import requests
 import sqlite3
 import datetime
 
+
 def create_player_database(db_name):
   conn = sqlite3.connect(db_name)
   c = conn.cursor()
-  c.execute('''CREATE TABLE players_table (user, bal, bet,cards,position);''')
+  c.execute('''CREATE TABLE IF NOT EXISTS players_table (user text, bal int, bet int, cards text, position int);''')
   conn.commit()
   conn.close()
 
 def create_state_database(db_name):
   conn = sqlite3.connect(db_name)
   c = conn.cursor()
-  c.execute('''CREATE TABLE states_table (deck,board,dealer,pot);''')
+  c.execute('''CREATE TABLE IF NOT EXISTS states_table (deck text, board text, dealer int, pot int);''')
   conn.commit()
   conn.close() 
 
@@ -30,7 +31,7 @@ def update_database(db_name,deck, board, dealer, pot):
   conn.commit()
   conn.close()
 
-def get_db_size(db_name,table_name):
+def get_db_size(db_name, table_name):
   conn = sqlite3.connect(db_name)
   c = conn.cursor()
   count = 0

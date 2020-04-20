@@ -1,85 +1,172 @@
 import sqlite3
-import datetime
-players_db = '__HOME__/team079/'
+import random
+import databaseFuncs
+players_db = '__HOME__/team079/poker-game/players.db'
+state_db = '__HOME__/team079/poker-game/state.db'
 
-locations={
-    "Student Center":[(-71.095863,42.357307),(-71.097730,42.359075),(-71.095102,42.360295),(-71.093900,42.359340),(-71.093289,42.358306)],
-    "Dorm Row":[(-71.093117,42.358147),(-71.092559,42.357069),(-71.102987,42.353866),(-71.106292,42.353517)],
-    "Simmons/Briggs":[(-71.097859,42.359035),(-71.095928,42.357243),(-71.106356,42.353580),(-71.108159,42.354468)],
-    "Boston FSILG (West)":[(-71.124664,42.353342),(-71.125737,42.344906),(-71.092478,42.348014),(-71.092607,42.350266)],
-    "Boston FSILG (East)":[(-71.092409,42.351392),(-71.090842,42.343589),(-71.080478,42.350900),(-71.081766,42.353771)],
-    "Stata/North Court":[(-71.091636,42.361802),(-71.090950,42.360811),(-71.088353,42.361112),(-71.088267,42.362476),(-71.089769,42.362618)],
-    "East Campus":[(-71.089426,42.358306),(-71.090885,42.360716),(-71.088310,42.361017),(-71.087130,42.359162)],
-    "Vassar Academic Buildings":[(-71.094973,42.360359),(-71.091776,42.361770),(-71.090928,42.360636),(-71.094040,42.359574)],
-    "Infinite Corridor/Killian":[(-71.093932,42.359542),(-71.092259,42.357180),(-71.089619,42.358274),(-71.090928,42.360541)],
-    "Kendall Square":[(-71.088117,42.364188),(-71.088225,42.361112),(-71.082774,42.362032)],
-    "Sloan/Media Lab":[(-71.088203,42.361017),(-71.087044,42.359178),(-71.080071,42.361619),(-71.082796,42.361905)],
-    "North Campus":[(-71.11022,42.355325),(-71.101280,42.363934),(-71.089950,42.362666),(-71.108361,42.354484)],
-    "Technology Square":[(-71.093610,42.363157),(-71.092130,42.365837),(-71.088182,42.364188),(-71.088267,42.362650)]
-}
+MAX_PLAYERS = 3
+SMALL_BLIND = 25
+BIG_BLIND = 50
+STARTING_STACK = 1000
+all_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+all_suits = ['s', 'c', 'd', 'h']
+cards = {rank + suit for rank in all_ranks for suit in all_suits}
+
+
+#   TODO: Make these functions take in database name string parameters
+
 
 def request_handler(request):
     # Request Dictionary: {'method': 'GET', 'values': {}, 'args': []}
-    lat = float(request['values']['lat'])
-    lon = float(request['values']['lon'])
-    mitArea = get_area([lat, lon], locations)
+    databaseFuncs.create_player_database(players_db)
+    databaseFuncs.create_state_database(state_db)
 
     if request['method'] == 'GET':
-        return mitArea
+        return ""
     elif request['method'] == 'POST':
-        conn = sqlite3.connect(visits_db)  # connect to that database (will create if it doesn't already exist)
-        c = conn.cursor()  # move cursor into database (allows us to execute commands)
-        outs = ""
-        c.execute('''CREATE TABLE IF NOT EXISTS gps_table (user text, lat float, lon float, location text, timing timestamp);''') # run a CREATE TABLE command
-        thirty_seconds_ago = datetime.datetime.now()- datetime.timedelta(seconds = 30) # create time for fifteen minutes ago!
-        user = request['values']['user']
-        c.execute('''INSERT into gps_table VALUES (?,?,?,?,?);''', (user, lat, lon, mitArea, datetime.datetime.now()))
-        things = c.execute('''SELECT * FROM dated_table WHERE timing > ? AND location = ? ORDER BY timing ASC;''',(thirty_seconds_ago, mitArea)).fetchall()
-        outs = "Users with same location in past 30 seconds:\n"
-        for x in things:
-            outs+=str(x)+"\n"
-        conn.commit() # commit commands
-        conn.close() # close connection to database
-        return outs
+        conn_players = sqlite3.connect(players_db)
+        c_player = conn_players.cursor()
+        conn_state = sqlite3.connect(state_db)
+        c_state = conn_state.cursor()
 
-def bounding_box(point_coord, box):
-    minX = min([box[x][0] for x in range(len(box))])
-    maxX = max([box[x][0] for x in range(len(box))])
-    minY = min([box[y][1] for y in range(len(box))])
-    maxY = max([box[y][1] for y in range(len(box))])
-    return (minX <= point_coord[0] <= maxX) and (minY <= point_coord[1] <= maxY)
+        user = request['form']['user']
+        action = request['form']['action']
+        amount = request['form']['amount']
 
-def within_area(point_coord, area):
-    translatedArea = [(p[0]-point_coord[0], p[1]-point_coord[1]) for p in area]
-    translatedArea.append((area[0][0]-point_coord[0], area[0][1]-point_coord[1]))
-    crossingEdges = []
-    numCrossed = 0
-    for i in range(len(translatedArea)-1):
-        if sign(translatedArea[i][1]) != sign(translatedArea[i+1][1]):
-            crossingEdges.append((translatedArea[i], translatedArea[i+1]))
-    for edge in crossingEdges:
-        if sign(edge[0][0]) == 1 and sign(edge[1][0]) == 1:
-            numCrossed += 1
-        elif sign(edge[0][0]) == -1 and sign(edge[1][0]) == -1:
-            continue
+        #   Split actions based on type of request
+        #   TODO: implement other actions
+        game_state = ""
+        if action == "join":
+            game_state = join_game(c_player, c_state, user)
+        elif action == "leave":
+            raise ValueError
+        elif action == "check":
+            raise ValueError
+        elif action == "bet":
+            raise ValueError
+        elif action == "raise":
+            raise ValueError
+        elif action == "fold":
+            raise ValueError
         else:
-            intersection = (edge[0][0]*edge[1][1] - edge[0][1]*edge[1][0])/(edge[1][1] - edge[0][1])
-            if intersection > 0:
-                numCrossed += 1
-    return numCrossed % 2 == 1
+            return "Requested action not recognized!"
 
-def get_area(point_coord,locations):
-    for region in locations:
-        if within_area(point_coord, locations[region]):
-            return region
-    return "Outside MIT"
+        #   TODO: Figure out if this is the right order of commit/close
+        conn_players.commit()
+        conn_players.close()
+        conn_state.commit()
+        conn_state.close()
+        return game_state
 
-def sign(x):
-    if x > 0:
-        return 1.
-    elif x < 0:
-        return -1.
-    elif x == 0:
-        return 0.
-    else:
-        return x
+
+def join_game(players_cursor, states_cursor, user):
+    """
+    Handles a join game request. Adds the user to the game if it
+    is not full. Otherwise, rejects the user from joining.
+
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    :param user: (str) non-empty username
+    :return: (str) a JSON string representing the state of the game as
+             defined in the request handler
+    """
+    #   Check if the game is already full
+    players_query = '''SELECT * FROM players_table;'''
+    players = players_cursor.execute(players_query).fetchall()
+
+    if len(players) == MAX_PLAYERS:
+        #   TODO: Return proper JSON message for joining full game
+        return "Sorry, can't join!"
+
+    #   Since the game is not full, add the player to the game
+    insert_player = '''INSERT into players_table VALUES (?,?,?,?,?);'''
+    players_cursor.execute(insert_player,
+                           (user, STARTING_STACK, 0, "", len(players)))
+
+    #   If new player makes the game full, begin game with random dealer
+    dealer = random.randint(0, MAX_PLAYERS - 1)
+    start_new_hand(players_cursor, states_cursor, dealer)
+
+    #   TODO: Return proper JSON message of the state of the game
+    result = "players:\n"
+    for p in players:
+        result += str(p) + "\n"
+    result += "\nstate:\n"
+    current_state_query = '''SELECT * FROM states_table;'''
+    state = states_cursor.execute(current_state_query).fetchall()
+    result += state[0]
+    return result
+
+
+def start_new_hand(players_cursor, state_cursor, dealer_position):
+    """
+    Begins a new hand at the table. Posts blinds and deals two cards
+    to each player. Updates player and game states.
+
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param state_cursor: (SQL Cursor) cursor for the states_table
+    :param dealer_position: (int) the dealer position ranging [0, # players)
+    """
+    #   Post blinds
+    post_blinds(players_cursor, dealer_position)
+
+    #   Deal cards
+    deal_table(players_cursor, state_cursor)
+
+
+def post_blinds(players_cursor, dealer_position):
+    """
+    Post blinds for the small blind and big blind positions.
+
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param dealer_position: (int) the dealer position ranging [0, # players)
+    """
+    query = '''SELECT * FROM players_db;'''
+    players = players_cursor.execute(query).fetchall()
+    small = dealer_position + 1
+    big = dealer_position + 2
+
+    for seat in players:
+        user = seat[0]
+        bal = seat[1]
+        position = seat[4]
+        #   Update player's balance and bet if they are small/big blind
+        if position == small or position == big:
+            blind = SMALL_BLIND if (position == small) else BIG_BLIND
+            bet = blind if (bal >= blind) else bal
+            bal = (bal - blind) if (bal >= blind) else 0
+            update_blinds = ''' UPDATE players_db
+                                SET bal = ? ,
+                                    bet = ?
+                                WHERE user = ?'''
+            players_cursor.execute(update_blinds, (bal, bet, user))
+
+
+def deal_table(players_cursor, state_cursor):
+    """
+    Deals two random cards to each player without replacement. 
+    These two cards are updated in the players_db. The remaining deck of cards
+    is stored in state_db.
+
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param state_cursor: (SQL Cursor) cursor for the states_table
+    """
+    deck = {c for c in cards}
+    players = players_cursor.execute('''SELECT * FROM players_db''').fetchall()
+
+    for seat in players:
+        user = seat[0]
+        #   Draw two cards, update the current deck, and update player
+        two_cards = random.sample(deck, 2)
+        deck.remove(two_cards[0])
+        deck.remove(two_cards[1])
+        hand = ",".join(two_cards)
+        update_cards = ''' UPDATE players_table
+                           SET cards = ?
+                           WHERE user = ? '''
+        players_cursor.execute(update_cards, (hand, user))
+
+    #   Update the deck with remaining cards
+    update_deck = ''' UPDATE states_table
+                      SET deck = ? '''
+    state_cursor.execute(update_deck, (",".join(deck)))
