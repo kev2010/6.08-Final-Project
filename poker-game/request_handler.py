@@ -178,15 +178,16 @@ def deal_table(players_cursor, state_cursor):
     #   Update the deck with remaining cards
     update_deck = ''' UPDATE states_table
                       SET deck = ? '''
-    state_cursor.execute(update_deck, (",".join(deck)))
+    state_cursor.execute(update_deck, (",".join(deck),))
 
 
 # if __name__ == "__main__":
-#     request = {'method': 'POST',
-#                'args': [],
-#                'values': {},
-#                'content-type': 'application/x-www-form-urlencoded',
-#                'is_json': False,
-#                'data': b'user=kev2010&action=join&amount=0',
-#                'form': {'user': 'kev2010', 'action': 'join', 'amount': '0'}}
-#     request_handler(request)
+#     deck = {c for c in cards}
+#     for i in range(3):
+#         two_cards = random.sample(deck, 2)
+#         deck.remove(two_cards[0])
+#         deck.remove(two_cards[1])
+#         hand = ",".join(two_cards)
+#         print(hand)
+#     print(len(",".join(deck)))
+    
