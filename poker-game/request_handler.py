@@ -130,7 +130,7 @@ def post_blinds(players_cursor, dealer_position):
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param dealer_position: (int) the dealer position ranging [0, # players)
     """
-    query = '''SELECT * FROM players_db;'''
+    query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(query).fetchall()
     small = dealer_position + 1
     big = dealer_position + 2
@@ -144,7 +144,7 @@ def post_blinds(players_cursor, dealer_position):
             blind = SMALL_BLIND if (position == small) else BIG_BLIND
             bet = blind if (bal >= blind) else bal
             bal = (bal - blind) if (bal >= blind) else 0
-            update_blinds = ''' UPDATE players_db
+            update_blinds = ''' UPDATE players_table
                                 SET bal = ? ,
                                     bet = ?
                                 WHERE user = ?'''
@@ -154,14 +154,14 @@ def post_blinds(players_cursor, dealer_position):
 def deal_table(players_cursor, state_cursor):
     """
     Deals two random cards to each player without replacement. 
-    These two cards are updated in the players_db. The remaining deck of cards
-    is stored in state_db.
+    These two cards are updated in the players_table. The remaining deck of cards
+    is stored in state_table.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param state_cursor: (SQL Cursor) cursor for the states_table
     """
     deck = {c for c in cards}
-    players = players_cursor.execute('''SELECT * FROM players_db''').fetchall()
+    players = players_cursor.execute('''SELECT * FROM players_table''').fetchall()
 
     for seat in players:
         user = seat[0]
