@@ -1,7 +1,6 @@
 import sqlite3
 import random
-import importlib
-importlib.import_module(databaseFuncs)
+import databaseFuncs
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
@@ -176,4 +175,11 @@ def deal_table(players_cursor, state_cursor):
 
 
 if __name__ == "__main__":
-    
+    request = {'method': 'POST',
+               'args': [],
+               'values': {},
+               'content-type': 'application/x-www-form-urlencoded',
+               'is_json': False,
+               'data': b'user=kev2010&action=join&amount=0',
+               'form': {'user': 'kev2010', 'action': 'join', 'amount': '0'}}
+    request_handler(request)
