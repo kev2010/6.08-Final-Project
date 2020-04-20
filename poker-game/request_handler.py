@@ -58,7 +58,7 @@ def request_handler(request):
     such as the cards if player object is not the user sending the
     post request. The game_state also contains the state with the board
     cards, the current dealer position, and the total pot size.
-    
+
     :param request: (dict) maps request params to corresponding values
     :return: (str) a JSON string representing the players and state of 
             the game as defined above
@@ -92,6 +92,17 @@ def request_handler(request):
 
 
 def get_handler(request, players_cursor, states_cursor):
+    """
+    Handles a GET request as defined in the request_handler function.
+    Returns a string representing the game state as defined in
+    request_handler.
+
+    :param request: (dict) maps request params to corresponding values
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    :return: (str) a JSON string representing the players and state of 
+        the game as defined above
+    """
     return ""
 
 
