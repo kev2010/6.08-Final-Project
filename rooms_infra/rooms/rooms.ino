@@ -112,6 +112,8 @@ void extract_join_buffer(char* response_buffer) {
   char* ptr;
   ptr = strtok(response_buffer, delimiter);
   memset(room_ids, 0, strlen(room_ids));
+  sprintf(room_ids, ptr);
+  Serial.println(room_ids);
 
   ptr = strtok(NULL, delimiter);  
   no_of_selections = atoi(ptr) + 1; // update numbers of selections, add 1 for "Go back" selection
