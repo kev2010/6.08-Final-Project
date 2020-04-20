@@ -48,6 +48,12 @@ def request_handler(request):
         #   TODO: implement other actions
         if action == "join":
             join_game(c_player, c_state, user)
+        elif action == "start":
+            #   Check if the user is the host, which is player 0
+            user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+            user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+            if user_position == 0:
+                start_game(players_cursor, states_cursor)
         elif action == "leave":
             raise ValueError
         elif action == "check":
