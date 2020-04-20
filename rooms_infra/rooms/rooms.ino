@@ -19,7 +19,8 @@ char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
 
 char menu_choices[OUT_BUFFER_SIZE];
-char room_ids[1000];
+char all_room_ids[5000];
+char room_id[500]; // room_id to join
 
 char host[] = "Host room";
 char join[] = "Join room";
@@ -111,18 +112,40 @@ void extract_join_buffer(char* response_buffer) {
   char delimiter[] = "&";
   char* ptr;
   ptr = strtok(response_buffer, delimiter);
-  memset(room_ids, 0, strlen(room_ids));
-  sprintf(room_ids, ptr);
-  Serial.println(room_ids);
+  memset(all_room_ids, 0, strlen(all_room_ids));
+  sprintf(all_room_ids, ptr);
+  Serial.println(all_room_ids);
 
-  ptr = strtok(NULL, delimiter);  
+  ptr = strtok(NULL, delimiter);
   no_of_selections = atoi(ptr) + 1; // update numbers of selections, add 1 for "Go back" selection
-  Serial.println(no_of_selections);
-  
+  //Serial.println(no_of_selections);
+
   ptr = strtok(NULL, delimiter);
   memset(menu_choices, 0, strlen(menu_choices));
   sprintf(menu_choices, ptr);
 }
+
+void extract_room_id() {
+  char delimiter[] = "$";
+  char *token;
+  uint8_t counter = 1;
+  char all_room_ids_copy[5000]; // copy of all_room_ids
+  memset(room_id, 0, strlen(room_id));
+  sprintf(all_room_ids_copy, all_room_ids);
+  /* get the first token */
+  token = strtok(all_room_ids_copy, delimiter);
+  /* walk through other tokens */
+  while ( token != NULL ) {
+    if (counter == selection) {
+      sprintf(room_id, token); // found room_id corresponding to selection
+      Serial.println(room_id);
+      break;       
+    }
+    token = strtok(NULL, delimiter);
+    counter ++ ;
+  }
+}
+
 
 void loop() {
 
@@ -188,26 +211,28 @@ void loop() {
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
         join_room_get_req();
-        extract_join_buffer(response_buffer); // also updates number of selections no_of_selections
+        extract_join_buffer(response_buffer); // also updates no_of_selections
         draw_join_lobby_menu(menu_choices, selection);
       }
-      Serial.println(no_of_selections);
+
       new_selection = update_selection(selection, 100, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_join_lobby_menu(menu_choices, selection);
       }
+
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
         if (selection == 0) {
-          state = ROOM;
-        } else if (selection == 1) {
-          state = ROOM;
-        } else if (selection == 2) {
-          state = ROOM;
-        } else if (selection == 3) {
           state = MAIN_LOBBY;
+        }
+        // make POST request when joining room
+        else {
+          extract_room_id();
+          //join_room_post_req(user, room_id);
+          state = ROOM;
+
         }
       }
       old_transition_btn = transition_btn;

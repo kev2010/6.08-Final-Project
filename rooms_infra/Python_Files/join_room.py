@@ -46,7 +46,7 @@ def request_handler(request):
         i = 1
         room_ids = ""
         for r in result:
-            room_ids += str(r[0]) + "$" # will give esp all room id numbers
+            room_ids += str(r[0]) + "$" # will return to esp all room id numbers as well
             room_descriptions += "Room " + str(i) + ","
             room_descriptions += " host: " + str(r[1]) + "," + "@"
             room_descriptions += "users: " + str(r[2]) + ","
