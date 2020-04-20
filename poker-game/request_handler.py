@@ -223,24 +223,25 @@ def start_new_hand(players_cursor, state_cursor, dealer_position):
     :param dealer_position: (int) the dealer position ranging [0, # players)
     """
     #   Post blinds
-    post_blinds(players_cursor, dealer_position)
+    post_blinds(players_cursor, state_cursor, dealer_position)
 
     #   Deal cards
     deal_table(players_cursor, state_cursor)
 
 
-def post_blinds(players_cursor, dealer_position):
+def post_blinds(players_cursor, state_cursor, dealer_position):
     """
     Post blinds for the small blind and big blind positions.
-    Assumes that there are at least three players.
+    Assumes that there are at least three players. Updates the
+    pot size and dealer position.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param dealer_position: (int) the dealer position ranging [0, # players)
     """
     query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(query).fetchall()
-    small = dealer_position + 1
-    big = dealer_position + 2
+    small = (dealer_position + 1) % MAX_PLAYERS
+    big = (dealer_position + 2) % MAX_PLAYERS
 
     for seat in players:
         user = seat[0]
@@ -256,13 +257,20 @@ def post_blinds(players_cursor, dealer_position):
                                     bet = ?
                                 WHERE user = ?'''
             players_cursor.execute(update_blinds, (bal, bet, user))
+    
+    #   Update the pot size and dealer position
+    state_update = ''' UPDATE states_table
+                       SET dealer = ? ,
+                           pot = ? '''
+    state_cursor.execute(state_update, 
+                        (dealer_position, SMALL_BLIND + BIG_BLIND))
 
 
 def deal_table(players_cursor, state_cursor):
     """
     Deals two random cards to each player without replacement. 
-    These two cards are updated in the players_table. The remaining deck of cards
-    is stored in state_table.
+    These two cards are updated in the players_table. The remaining 
+    deck of cards is stored in state_table.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param state_cursor: (SQL Cursor) cursor for the states_table
