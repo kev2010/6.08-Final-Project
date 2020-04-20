@@ -34,7 +34,7 @@ void join_room_get_req(){ // maybe change to require username
   char body[200]; //for body;
   //sprintf(body, "username=%s&game_id=%d", user, selection); //generate body, posting to User, 1 step
   int body_len = strlen(body); //calculate body length (for header reporting)
-  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/rooms_infra/Python_Files/join_room.py HTTP/1.1\r\n");
+  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/join_room.py HTTP/1.1\r\n");
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
   strcat(request_buffer, "Content-Type: application/x-www-form-urlencoded\r\n");
   sprintf(request_buffer + strlen(request_buffer), "Content-Length: %d\r\n", body_len); //append string formatted to end of request buffer
