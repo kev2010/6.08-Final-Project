@@ -49,7 +49,7 @@ def request_handler(request):
             room_descriptions += "Room " + str(i) + ","
             room_descriptions += " host: " + str(r[1]) + "," + "@"
             room_descriptions += " capacity " + str(r[2]) + ","
-            room_descriptions += "game: " + GAME_ID_TO_NAME[int(r[3])]
+            room_descriptions += " game: " + GAME_ID_TO_NAME[int(r[3])]
             # room_descriptions += ", game: " + str(r[3])
             room_descriptions += "@"
             i += 1
