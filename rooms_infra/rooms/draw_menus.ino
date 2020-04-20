@@ -28,13 +28,19 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) {
   /* get the first token */
   token = strtok(menu_copy, s);
   /* walk through other tokens */
+  uint8_t i = 0;
   while ( token != NULL ) {
-    tft.drawString(token, 10, 20 + 10*counter, 1);
+    if (i%2 == 0 && i!=0) {
+      tft.drawString(token, 10, 40 + 20*counter, 1);
+    } else {
+      tft.drawString(token, 10, 40 + 20*counter + 10, 1);
+      counter ++ ;
+    }    
     token = strtok(NULL, s);
-    counter ++ ;
+    i ++ ;
   }
 
-  tft.drawString(">", 3, 10 + (selection * 10), 1);
+  tft.drawString(">", 3, 10 + (selection * 30), 1);
 }
 
 void draw_room_screen() {
