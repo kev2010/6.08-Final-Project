@@ -10,6 +10,8 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp);''')
     c.execute('''CREATE TABLE IF NOT EXISTS rooms (room_id text, host_username text, capacity int, game_id int, open_time timestamp);''')
     c.execute('''CREATE TABLE IF NOT EXISTS games (game_id int, room_id int, capacity int, start_time timestamp);''')
+    conn.commit()  # commit commands
+    conn.close()  # close connection to database
 
 # create_db()
 
