@@ -10,6 +10,8 @@ def create_db():
     c.execute('''CREATE TABLE IF NOT EXISTS rooms (room_id int, host_username text, capacity int, game_id int, open_time timestamp);''')
     c.execute('''CREATE TABLE IF NOT EXISTS games (game_id int, room_id int, capacity int, start_time timestamp);''')
 
+# create_db()
+
 def check_online():
     #checks for everyone in the users db and removes and deletes from games/rooms if they haven't been active for >10s
     conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
