@@ -198,7 +198,7 @@ void loop() {
           state = MAIN_LOBBY;
         } else {
           state = ROOM;
-          // host_room_post_req(user, selection);
+          host_room_post_req(user, selection);
         }
       }
       old_transition_btn = transition_btn;
@@ -257,6 +257,7 @@ void loop() {
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
         if (selection == 0) {
+          leave_room_post_req(user); // notify that user left room 
           state = MAIN_LOBBY;
         }
       }

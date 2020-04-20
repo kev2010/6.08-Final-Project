@@ -15,22 +15,24 @@ def request_handler(request):
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         #First get the room_id
-        room_id = c.execute("SELECT room_id FROM users WHERE username=\""+username+"\"")[0][0]
+        result = c.execute('''SELECT room_id FROM users WHERE username = ?;''', (username,)).fetchall()
+        room_id = result[0][1]
 
         #Get the room data. Are they the host?
-        result = c.execute("SELECT * FROM rooms WHERE room_id="+str(room_id))
+        result = c.execute('''SELECT * FROM rooms WHERE room_id = ?;''', (room_id,)).fetchall()
         host_username = result[0][1]
         is_host = host_username == username
 
         #Update the capacity of the room
         capacity = result[0][2]
-        c.execute("UPDATE rooms SET capacity = "+str(capacity)+" WHERE room_id =" + str(room_id))
+        c.execute('''UPDATE rooms SET capacity = ? WHERE room_id = ?;''', (str(capacity-1), str(room_id)))
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
         if is_host:
-            delete_room(room_id)
+            #delete_room(room_id)
+            return "Room deleted because host left."
 
         else:
             return "You have successfully left. \n Welcome back to the lobby."
