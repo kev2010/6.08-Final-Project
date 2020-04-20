@@ -90,7 +90,7 @@ void setup() {
   tft.drawString(turn_off, 20, 120, 1);
   tft.drawString("*", 5, 100, 1);
 
-  //ping_online();
+  ping_online();
 
   state = MAIN_LOBBY;
   flag = true;
