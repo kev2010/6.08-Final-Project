@@ -62,7 +62,8 @@ def request_handler(request):
 def join_game(players_cursor, states_cursor, user):
     """
     Handles a join game request. Adds the user to the game if it
-    is not full. Otherwise, rejects the user from joining.
+    is not full. Otherwise, rejects the user from joining. If the game
+    becomes full, then start the game.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param states_cursor: (SQL Cursor) cursor for the states_table
@@ -84,8 +85,9 @@ def join_game(players_cursor, states_cursor, user):
                            (user, STARTING_STACK, 0, "", len(players)))
 
     #   If new player makes the game full, begin game with random dealer
-    dealer = random.randint(0, MAX_PLAYERS - 1)
-    start_new_hand(players_cursor, states_cursor, dealer)
+    if len(players) == MAX_PLAYERS - 1:
+        dealer = random.randint(0, MAX_PLAYERS - 1)
+        start_new_hand(players_cursor, states_cursor, dealer)
 
     #   TODO: Return proper JSON message of the state of the game
     result = "players:\n"
