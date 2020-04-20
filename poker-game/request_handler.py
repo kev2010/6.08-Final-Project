@@ -1,6 +1,6 @@
 import sqlite3
 import random
-import databaseFuncs
+from databaseFuncs import *
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
@@ -18,8 +18,8 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 
 def request_handler(request):
     # Request Dictionary: {'method': 'GET', 'values': {}, 'args': []}
-    databaseFuncs.create_player_database(players_db)
-    databaseFuncs.create_state_database(state_db)
+    create_player_database(players_db)
+    create_state_database(state_db)
 
     if request['method'] == 'GET':
         return ""
@@ -172,3 +172,14 @@ def deal_table(players_cursor, state_cursor):
     update_deck = ''' UPDATE states_table
                       SET deck = ? '''
     state_cursor.execute(update_deck, (",".join(deck)))
+
+
+if __name__ == "__main__":
+    request = {'method': 'POST',
+               'args': [],
+               'values': {},
+               'content-type': 'application/x-www-form-urlencoded',
+               'is_json': False,
+               'data': b'user=kev2010&action=join&amount=0',
+               'form': {'user': 'kev2010', 'action': 'join', 'amount': '0'}}
+    request_handler(request)

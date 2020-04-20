@@ -35,7 +35,7 @@ def get_db_size(db_name, table_name):
   conn = sqlite3.connect(db_name)
   c = conn.cursor()
   count = 0
-  things = c.execute('''SELECT * FROM ?;''',(table_name))).fetchall()
+  things = c.execute('''SELECT * FROM ?;''',(table_name)).fetchall()
   for elt in things:
     count += 1
   conn.commit()
@@ -53,7 +53,7 @@ def get_player(db_name,table_name, user):
   conn = sqlite3.connect(db_name)
   c = conn.cursor()
   count = 0
-  things = c.execute('''SELECT * FROM ? WHERE user = ?;''',(table_name,user))).fetchall()
+  things = c.execute('''SELECT * FROM ? WHERE user = ?;''',(table_name,user)).fetchall()
   conn.commit()
   conn.close()
   return str(things)
