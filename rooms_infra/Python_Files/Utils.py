@@ -1,7 +1,7 @@
 import sqlite3
 import datetime
 
-db = '__HOME__/team079/project.db'
+db = '__HOME__/project.db'
 
 def create_db():
     #only run once

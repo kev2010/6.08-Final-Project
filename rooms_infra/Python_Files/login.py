@@ -2,7 +2,7 @@ import sqlite3
 # from Utils.py import *
 import datetime
 
-db = '__HOME__/team079/project.db'
+db = '__HOME__/project.db'
 
 GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "Tichu"}
 
