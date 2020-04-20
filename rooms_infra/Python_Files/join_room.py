@@ -43,15 +43,18 @@ def request_handler(request):
 
         room_descriptions = ""
         
-        for i in range(len(result)):
-            room_descriptions += "Room " + str(i+1)
-            room_descriptions += ", hosted by " + str(result[i][1])
-            room_descriptions += ", capacity " + str(result[i][2])
-            room_descriptions += ", game: " + GAME_ID_TO_NAME[int(result[i][3])]
+        i = 1
+        
+        for r in result:
+            room_descriptions += "Room " + str(i)
+            room_descriptions += ", hosted by " + str(r[1])
+            room_descriptions += ", capacity " + str(r[2])
+            room_descriptions += ", game: " + GAME_ID_TO_NAME[int(r[3])]
             # room_descriptions += ", game: " + str(r[3])
             room_descriptions += "\n"
+            i += 1
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
-        return "length=" + str(len(result)) + "$" + room_descriptions
+        return str(i) + "&" + room_descriptions + "&" 

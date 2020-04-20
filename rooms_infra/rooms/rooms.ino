@@ -100,7 +100,6 @@ uint8_t update_selection(uint8_t selection, uint8_t initial_height, uint8_t no_o
   if (selection_btn != old_selection_btn && selection_btn == 1) {
     tft.fillScreen(TFT_BLACK); //fill background
     tft.setCursor(0, 0, 1); // set the cursor
-    // tft.println(response_buffer); //print the result
     selection  = (selection + 1) % no_of_selections;
   }
   old_selection_btn = selection_btn;
@@ -162,13 +161,16 @@ void loop() {
       }
 
       transition_btn = digitalRead(PIN_2);
+      Serial.println(transition_btn);
+      Serial.println(selection);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
+        Serial.println(selection);
         if (selection == 3) {
           state = MAIN_LOBBY;
         } else {
           state = ROOM;
-          host_room_post_req();
+          // host_room_post_req(user, selection);
         }
 
         old_transition_btn = transition_btn;
@@ -181,14 +183,14 @@ void loop() {
           // no_of_selections = 4;
           flag = false;
           tft.fillScreen(TFT_BLACK); //fill background
-          join_room_get_request();
-          extract_join_buffer(resonse_buffer);                    
+          join_room_get_req();
+          extract_join_buffer(response_buffer);                    
           draw_join_lobby_menu(menu_choices, selection);
         }
         new_selection = update_selection(selection, 100, no_of_selections);
         if (new_selection != selection) {
           selection = new_selection;
-          draw_join_lobby_menu(selection);
+          draw_join_lobby_menu(menu_choices, selection);
         }
         transition_btn = digitalRead(PIN_2);
         if (transition_btn != old_transition_btn && transition_btn == 1) {
@@ -234,3 +236,5 @@ void loop() {
       }
 
   }
+
+}
