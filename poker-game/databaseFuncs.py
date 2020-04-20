@@ -3,14 +3,14 @@ import sqlite3
 import datetime
 
 def create_player_database(db_name):
-  conn = sqlite3.connect(example_db)
+  conn = sqlite3.connect(db_name)
   c = conn.cursor()
   c.execute('''CREATE TABLE players_table (user, bal, bet,cards,position);''')
   conn.commit()
   conn.close()
 
 def create_state_database(db_name):
-  conn = sqlite3.connect(example_db)
+  conn = sqlite3.connect(db_name)
   c = conn.cursor()
   c.execute('''CREATE TABLE states_table (deck,board,dealer,pot);''')
   conn.commit()
