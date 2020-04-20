@@ -57,4 +57,4 @@ def request_handler(request):
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
-        return str(i) + "&" + room_descriptions + "&" 
+        return str(i-1) + "&" + room_descriptions + "&" 

@@ -161,7 +161,6 @@ void loop() {
       }
 
       transition_btn = digitalRead(PIN_2);
-      Serial.println(transition_btn);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
         Serial.println("new state");
@@ -175,7 +174,6 @@ void loop() {
         }
       }
       old_transition_btn = transition_btn;
-
       break;
 
     case JOIN_LOBBY:
