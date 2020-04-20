@@ -1,7 +1,7 @@
 import sqlite3
 import sys
 sys.path.insert(0, "~/team079/rooms_infra/Python_Files/helpers.py")
-#from helpers import *
+from helpers import *
 import datetime
 
 db = '__HOME__/project.db'
