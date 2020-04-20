@@ -1,6 +1,6 @@
 import sqlite3
 
-db = '__HOME__/project.db'
+db = '__HOME__/team079/project.db'
 
 GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "Tichu"}
 
