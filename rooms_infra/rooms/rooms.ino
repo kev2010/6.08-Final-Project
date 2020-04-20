@@ -5,8 +5,8 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
-char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
-char password[] = "vastbug510"; //Password for 6.08 Lab
+char network[] = "Harris";  //SSID for 6.08 Lab
+char password[] = "sofia7511"; //Password for 6.08 Lab
 
 char user[] = "jkaklam";
 
@@ -161,8 +161,8 @@ void loop() {
       }
 
       transition_btn = digitalRead(PIN_2);
-      Serial.println(transition_btn);
-      Serial.println(selection);
+      //      Serial.println(transition_btn);
+//      Serial.println(selection);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
         Serial.println(selection);
@@ -172,69 +172,68 @@ void loop() {
           state = ROOM;
           // host_room_post_req(user, selection);
         }
-
-        old_transition_btn = transition_btn;
-
-        break;
-
-      case JOIN_LOBBY:
-        if (flag) {
-          selection = 0;
-          // no_of_selections = 4;
-          flag = false;
-          tft.fillScreen(TFT_BLACK); //fill background
-          join_room_get_req();
-          extract_join_buffer(response_buffer);                    
-          draw_join_lobby_menu(menu_choices, selection);
-        }
-        new_selection = update_selection(selection, 100, no_of_selections);
-        if (new_selection != selection) {
-          selection = new_selection;
-          draw_join_lobby_menu(menu_choices, selection);
-        }
-        transition_btn = digitalRead(PIN_2);
-        if (transition_btn != old_transition_btn && transition_btn == 1) {
-          flag = true;
-          if (selection == 0) {
-            state = ROOM;
-          } else if (selection == 1) {
-            state = ROOM;
-          } else if (selection == 2) {
-            state = ROOM;
-          } else if (selection == 3) {
-            state = MAIN_LOBBY;
-          }
-        }
-        old_transition_btn = transition_btn;
-
-
-        break;
-
-      case ROOM:
-        if (flag) {
-          selection = 0;
-          no_of_selections = 1; // CHANGE ME
-          flag = false;
-          tft.fillScreen(TFT_BLACK); //fill background
-          draw_room_screen();
-        }
-        //      new_selection = update_selection(selection, 100, no_of_selections);
-        //      if (new_selection != selection) {
-        //        selection = new_selection;
-        //        draw_room_screen();
-        //      }
-        transition_btn = digitalRead(PIN_2);
-        if (transition_btn != old_transition_btn && transition_btn == 1) {
-          flag = true;
-          if (selection == 0) {
-            state = MAIN_LOBBY;
-          }
-        }
-        old_transition_btn = transition_btn;
-
-        break;
       }
 
+      old_transition_btn = transition_btn;
+
+      break;
+
+    case JOIN_LOBBY:
+      if (flag) {
+        selection = 0;
+        // no_of_selections = 4;
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        join_room_get_req();
+        extract_join_buffer(response_buffer);
+        draw_join_lobby_menu(menu_choices, selection);
+      }
+      new_selection = update_selection(selection, 100, no_of_selections);
+      if (new_selection != selection) {
+        selection = new_selection;
+        draw_join_lobby_menu(menu_choices, selection);
+      }
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        flag = true;
+        if (selection == 0) {
+          state = ROOM;
+        } else if (selection == 1) {
+          state = ROOM;
+        } else if (selection == 2) {
+          state = ROOM;
+        } else if (selection == 3) {
+          state = MAIN_LOBBY;
+        }
+      }
+      old_transition_btn = transition_btn;
+
+
+      break;
+
+    case ROOM:
+      if (flag) {
+        selection = 0;
+        no_of_selections = 1; // CHANGE ME
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        draw_room_screen();
+      }
+      //      new_selection = update_selection(selection, 100, no_of_selections);
+      //      if (new_selection != selection) {
+      //        selection = new_selection;
+      //        draw_room_screen();
+      //      }
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        flag = true;
+        if (selection == 0) {
+          state = MAIN_LOBBY;
+        }
+      }
+      old_transition_btn = transition_btn;
+
+      break;
   }
 
 }
