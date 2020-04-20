@@ -44,8 +44,9 @@ def request_handler(request):
         room_descriptions = ""
         
         i = 1
-        
+        room_ids = ""
         for r in result:
+            room_ids += str(r[0]) + "$" # will give esp all room id numbers
             room_descriptions += "Room " + str(i) + ","
             room_descriptions += " host: " + str(r[1]) + "," + "@"
             room_descriptions += "users: " + str(r[2]) + ","
@@ -57,4 +58,4 @@ def request_handler(request):
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
-        return str(i-1) + "&" + room_descriptions + "&" 
+        return room_ids + "&" str(i-1) + "&" + room_descriptions + "&" 

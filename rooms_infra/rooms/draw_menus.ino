@@ -16,7 +16,7 @@ void draw_host_lobby_menu(uint8_t selection) {
   tft.drawString("*", 5, 100 + (selection * 10), 1);
 }
 
-void draw_join_lobby_menu(char* menu_choices, uint8_t selection) {
+void draw_join_lobby_menu(char* menu_choices, uint8_t selection) { // can only support 3-4 rooms on display
   tft.drawString("Go back", 10, 10, 1);
 
   char s[] = "@";

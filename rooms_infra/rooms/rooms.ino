@@ -19,6 +19,7 @@ char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
 
 char menu_choices[OUT_BUFFER_SIZE];
+char room_ids[1000];
 
 char host[] = "Host room";
 char join[] = "Join room";
@@ -110,8 +111,12 @@ void extract_join_buffer(char* response_buffer) {
   char delimiter[] = "&";
   char* ptr;
   ptr = strtok(response_buffer, delimiter);
+  memset(room_ids, 0, strlen(room_ids));
+
+  ptr = strtok(NULL, delimiter);  
   no_of_selections = atoi(ptr) + 1; // update numbers of selections, add 1 for "Go back" selection
   Serial.println(no_of_selections);
+  
   ptr = strtok(NULL, delimiter);
   memset(menu_choices, 0, strlen(menu_choices));
   sprintf(menu_choices, ptr);
