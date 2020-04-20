@@ -1,6 +1,6 @@
 import sqlite3
 import random
-from databaseFuncs import *
+# from databaseFuncs import *
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
@@ -18,16 +18,23 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 
 def request_handler(request):
     # Request Dictionary: {'method': 'GET', 'values': {}, 'args': []}
-    create_player_database(players_db)
-    create_state_database(state_db)
+    # create_player_database(players_db)
+    # create_state_database(state_db)
 
     if request['method'] == 'GET':
         return ""
     elif request['method'] == 'POST':
         conn_players = sqlite3.connect(players_db)
         c_player = conn_players.cursor()
+        c_player.execute('''CREATE TABLE IF NOT EXISTS players_table 
+                            (user text, bal int, bet int, cards text, 
+                            position int);''')
         conn_state = sqlite3.connect(state_db)
         c_state = conn_state.cursor()
+        c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
+                           (deck text, board text, dealer int, 
+                           pot int);''')
+
 
         user = request['form']['user']
         action = request['form']['action']
