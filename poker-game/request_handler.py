@@ -201,7 +201,15 @@ def start_game(players_cursor, states_cursor):
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param states_cursor: (SQL Cursor) cursor for the states_table
     """
+    #   Insert a game state entry into the states_table, where
+    #       deck = cards
+    #       board = ""
+    #       dealer = random int from 0 to max_players-1
+    #       pot = 0
+    new_state = '''INSERT into states_table 
+                   VALUES (?,?,?,?);'''
     dealer = random.randint(0, MAX_PLAYERS - 1)
+    states_cursor.execute(new_state, (cards, "", dealer, 0))
     start_new_hand(players_cursor, states_cursor, dealer)
 
 
