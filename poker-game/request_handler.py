@@ -18,74 +18,153 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 
 def request_handler(request):
     """
-    :return: (str) a JSON string representing the state of the game as
-            defined in the request handler
+    Handles POST/GET requests for the poker game server. Assumes the POST/GET
+    requests provide the following information:
+
+    POST: user={user: str}&action={action: str}&amount={amount:str of int}
+    GET:None
+    
+    Returns a string representing the state of the poker game. The string is
+    in the form of a JSON in the following format:
+
+        game_state:
+            {
+                "players": [
+                    {
+                        "user": kev2010, 
+                        "bal": 850,
+                        "bet": 150,
+                        "cards": "Ah,Kd"
+                        "position": 0
+                    },
+                    {
+                        "user": baptiste, 
+                        "bal": 950,
+                        "bet": 50,
+                        "cards": ""
+                        "position": 1
+                    },
+                    ...
+                ],
+                "state": {
+                    "board": "Ah,7d,2s",
+                    "dealer": 3,
+                    "pot": 225"
+                }
+            }
+
+    The game_state provides a list of players with the corresponding
+    information. Some fields in the player information are private,
+    such as the cards if player object is not the user sending the
+    post request. The game_state also contains the state with the board
+    cards, the current dealer position, and the total pot size.
+
+    :param request: (dict) maps request params to corresponding values
+    :return: (str) a JSON string representing the players and state of 
+            the game as defined above
     """
-    # Request Dictionary: {'method': 'GET', 'values': {}, 'args': []}
+    #   Initialize the players_table and states_table SQL database
     # create_player_database(players_db)
     # create_state_database(state_db)
+    conn_players = sqlite3.connect(players_db)
+    c_player = conn_players.cursor()
+    c_player.execute('''CREATE TABLE IF NOT EXISTS players_table 
+                        (user text, bal int, bet int, cards text, 
+                        position int);''')
+    conn_state = sqlite3.connect(state_db)
+    c_state = conn_state.cursor()
+    c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
+                        (deck text, board text, dealer int, 
+                        pot int);''')
 
+    game_state = ""
     if request['method'] == 'GET':
-        return ""
+        game_state = get_handler(request, c_player, c_state)
     elif request['method'] == 'POST':
-        conn_players = sqlite3.connect(players_db)
-        c_player = conn_players.cursor()
-        c_player.execute('''CREATE TABLE IF NOT EXISTS players_table 
-                            (user text, bal int, bet int, cards text, 
-                            position int);''')
-        conn_state = sqlite3.connect(state_db)
-        c_state = conn_state.cursor()
-        c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
-                           (deck text, board text, dealer int, 
-                           pot int);''')
+        game_state = post_handler(request, c_player, c_state)
+
+    #   TODO: Figure out if this is the right order of commit/close
+    conn_players.commit()
+    conn_players.close()
+    conn_state.commit()
+    conn_state.close()
+    return game_state
 
 
-        user = request['form']['user']
-        action = request['form']['action']
-        amount = request['form']['amount']
+def get_handler(request, players_cursor, states_cursor):
+    """
+    Handles a GET request as defined in the request_handler function.
+    Returns a string representing the game state as defined in
+    request_handler.
 
-        #   Split actions based on type of request
-        #   TODO: implement other actions
-        if action == "join":
-            join_game(c_player, c_state, user)
-        elif action == "leave":
-            raise ValueError
-        elif action == "check":
-            raise ValueError
-        elif action == "bet":
-            raise ValueError
-        elif action == "raise":
-            raise ValueError
-        elif action == "fold":
-            raise ValueError
-        else:
-            return "Requested action not recognized!"
+    :param request: (dict) maps request params to corresponding values
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    :return: (str) a JSON string representing the players and state of 
+        the game as defined above
+    """
+    return ""
 
-        #   TODO: Return proper JSON message of the state of the game
-        players_query = '''SELECT * FROM players_table;'''
-        players = c_player.execute(players_query).fetchall()
-        result = "players:\n"
-        for p in players:
-            result += str(p) + "\n"
-        result += "\nstate:\n"
-        current_state_query = '''SELECT * FROM states_table;'''
-        state = c_state.execute(current_state_query).fetchall()
-        for s in state:
-            result += str(s) + "\n"
 
-        #   TODO: Figure out if this is the right order of commit/close
-        conn_players.commit()
-        conn_players.close()
-        conn_state.commit()
-        conn_state.close()
-        return result
+def post_handler(request, players_cursor, states_cursor):
+    """
+    Handles a POST request as defined in the request_handler function.
+    Returns a string representing the game state as defined in
+    request_handler.
+
+    :param request: (dict) maps request params to corresponding values
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    :return: (str) a JSON string representing the players and state of 
+        the game as defined above
+    """
+    #   Get the user, action, and amount from the POST request
+    user = request['form']['user']
+    action = request['form']['action']
+    amount = request['form']['amount']
+
+    #   Split actions based on type of request
+    #   TODO: implement other actions
+    if action == "join":
+        join_game(players_cursor, states_cursor, user)
+    elif action == "start":
+        #   Check if the user is the host, which is player 0
+        user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+        user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+        if user_position == 0:
+            start_game(players_cursor, states_cursor)
+    elif action == "leave":
+        raise ValueError
+    elif action == "check":
+        raise ValueError
+    elif action == "bet":
+        raise ValueError
+    elif action == "raise":
+        raise ValueError
+    elif action == "fold":
+        raise ValueError
+    else:
+        return "Requested action not recognized!"
+
+    #   TODO: Return proper JSON message of the state of the game
+    players_query = '''SELECT * FROM players_table;'''
+    players = players_cursor.execute(players_query).fetchall()
+    result = "players:\n"
+    for p in players:
+        result += str(p) + "\n"
+    result += "\nstate:\n"
+    current_state_query = '''SELECT * FROM states_table;'''
+    state = states_cursor.execute(current_state_query).fetchall()
+    for s in state:
+        result += str(s) + "\n"
+
+    return result
 
 
 def join_game(players_cursor, states_cursor, user):
     """
     Handles a join game request. Adds the user to the game if it
-    is not full. Otherwise, rejects the user from joining. If the game
-    becomes full, then start the game.
+    is not full. Otherwise, rejects the user from joining.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param states_cursor: (SQL Cursor) cursor for the states_table
@@ -99,8 +178,8 @@ def join_game(players_cursor, states_cursor, user):
     joined_query = '''SELECT * FROM players_table WHERE user = ?;'''
     joined = players_cursor.execute(joined_query, (user,)).fetchall()
     if len(joined) > 0:
-        #   TODO: Return proper message for joining full game
-        raise ValueError
+        #   TODO: Return proper message for already in game
+         raise ValueError
 
     #   Check if the game is already full
     players_query = '''SELECT * FROM players_table;'''
@@ -114,10 +193,24 @@ def join_game(players_cursor, states_cursor, user):
     players_cursor.execute(insert_player,
                            (user, STARTING_STACK, 0, "", len(players)))
 
-    #   If new player makes the game full, begin game with random dealer
-    if len(players) == MAX_PLAYERS - 1:
-        dealer = random.randint(0, MAX_PLAYERS - 1)
-        start_new_hand(players_cursor, states_cursor, dealer)
+
+def start_game(players_cursor, states_cursor):
+    """
+    Starts the game with at least two players.
+    
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    """
+    #   Insert a game state entry into the states_table, where
+    #       deck = ",".join(cards)
+    #       board = ""
+    #       dealer = random int from 0 to max_players-1
+    #       pot = 0
+    new_state = '''INSERT into states_table 
+                   VALUES (?,?,?,?);'''
+    dealer = random.randint(0, MAX_PLAYERS - 1)
+    states_cursor.execute(new_state, (",".join(cards), "", dealer, 0))
+    start_new_hand(players_cursor, states_cursor, dealer)
 
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
@@ -139,6 +232,7 @@ def start_new_hand(players_cursor, state_cursor, dealer_position):
 def post_blinds(players_cursor, dealer_position):
     """
     Post blinds for the small blind and big blind positions.
+    Assumes that there are at least three players.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param dealer_position: (int) the dealer position ranging [0, # players)
