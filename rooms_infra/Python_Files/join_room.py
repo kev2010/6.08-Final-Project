@@ -32,6 +32,7 @@ def request_handler(request):
         c.execute('''UPDATE rooms SET capacity = ? WHERE room_id = ?;''', (str(capacity+1), room_id))
         # c.execute("UPDATE rooms SET capacity = "+str(capacity+1)+" WHERE room_id =" + room_id)
         c.execute('''UPDATE users SET room_id = ? WHERE username = ?;''', (room_id, username))
+        c.execute('''UPDATE users SET game_id = ? WHERE username = ?;''', (game_id, username))
 
         description_of_all_activities = "Welcome to room" + str(room_id) + ". The host is " + host + "\n"
         description_of_all_activities += "Here, the activity is " + GAME_ID_TO_NAME[game_id]
