@@ -103,7 +103,8 @@ def join_game(players_cursor, states_cursor, user):
     result += "\nstate:\n"
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
-    result += state[0]
+    for s in state:
+        result += str(s) + "\n"
     return result
 
 
@@ -130,7 +131,7 @@ def post_blinds(players_cursor, dealer_position):
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param dealer_position: (int) the dealer position ranging [0, # players)
     """
-    query = '''SELECT * FROM players_db;'''
+    query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(query).fetchall()
     small = dealer_position + 1
     big = dealer_position + 2
@@ -144,7 +145,7 @@ def post_blinds(players_cursor, dealer_position):
             blind = SMALL_BLIND if (position == small) else BIG_BLIND
             bet = blind if (bal >= blind) else bal
             bal = (bal - blind) if (bal >= blind) else 0
-            update_blinds = ''' UPDATE players_db
+            update_blinds = ''' UPDATE players_table
                                 SET bal = ? ,
                                     bet = ?
                                 WHERE user = ?'''
@@ -154,14 +155,14 @@ def post_blinds(players_cursor, dealer_position):
 def deal_table(players_cursor, state_cursor):
     """
     Deals two random cards to each player without replacement. 
-    These two cards are updated in the players_db. The remaining deck of cards
-    is stored in state_db.
+    These two cards are updated in the players_table. The remaining deck of cards
+    is stored in state_table.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param state_cursor: (SQL Cursor) cursor for the states_table
     """
     deck = {c for c in cards}
-    players = players_cursor.execute('''SELECT * FROM players_db''').fetchall()
+    players = players_cursor.execute('''SELECT * FROM players_table''').fetchall()
 
     for seat in players:
         user = seat[0]
@@ -178,15 +179,16 @@ def deal_table(players_cursor, state_cursor):
     #   Update the deck with remaining cards
     update_deck = ''' UPDATE states_table
                       SET deck = ? '''
-    state_cursor.execute(update_deck, (",".join(deck)))
+    state_cursor.execute(update_deck, (",".join(deck),))
 
 
-if __name__ == "__main__":
-    request = {'method': 'POST',
-               'args': [],
-               'values': {},
-               'content-type': 'application/x-www-form-urlencoded',
-               'is_json': False,
-               'data': b'user=kev2010&action=join&amount=0',
-               'form': {'user': 'kev2010', 'action': 'join', 'amount': '0'}}
-    request_handler(request)
+# if __name__ == "__main__":
+#     deck = {c for c in cards}
+#     for i in range(3):
+#         two_cards = random.sample(deck, 2)
+#         deck.remove(two_cards[0])
+#         deck.remove(two_cards[1])
+#         hand = ",".join(two_cards)
+#         print(hand)
+#     print(len(",".join(deck)))
+    
