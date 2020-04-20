@@ -8,14 +8,14 @@ def request_handler(request):
     if request['method'] == "POST":
         args = request['form']
         username = str(args['username'])
-        room_id = int(args['room_id'])
+        room_id = str(args['room_id'])
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         # ping(username)
 
-        result = c.execute("SELECT * FROM rooms WHERE room_id="+str(room_id))
+        result = c.execute("SELECT * FROM rooms WHERE room_id="+room_id)
         if len(result) == 0:
             return "Invalid room id!"
 
@@ -23,7 +23,7 @@ def request_handler(request):
         host = result[0][1]
         capacity = result[0][2]
 
-        c.execute("UPDATE rooms SET capacity = "+str(capacity+1)+" WHERE room_id =" + str(room_id))
+        c.execute("UPDATE rooms SET capacity = "+str(capacity+1)+" WHERE room_id =" + room_id)
 
         description_of_all_activities = "Welcome to room" + str(room_id) + ". The host is" + host + "\n"
         description_of_all_activities += "Here, the activity is " + GAME_ID_TO_NAME[game_id]
