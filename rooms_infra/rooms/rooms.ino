@@ -22,7 +22,7 @@ char menu_choices[OUT_BUFFER_SIZE];
 
 char host[] = "Host room";
 char join[] = "Join room";
-char turn_off[] = "Turn_off";
+char turn_off[] = "Turn off";
 
 uint8_t state;
 #define MAIN_LOBBY 0

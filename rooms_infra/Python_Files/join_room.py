@@ -51,7 +51,7 @@ def request_handler(request):
             room_descriptions += ", capacity " + str(r[2])
             room_descriptions += ", game: " + GAME_ID_TO_NAME[int(r[3])]
             # room_descriptions += ", game: " + str(r[3])
-            room_descriptions += "\n"
+            room_descriptions += "@"
             i += 1
 
         conn.commit()  # commit commands
