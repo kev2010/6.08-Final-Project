@@ -103,7 +103,8 @@ def join_game(players_cursor, states_cursor, user):
     result += "\nstate:\n"
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
-    result += state
+    for s in state:
+        result += str(s) + "\n"
     return result
 
 
