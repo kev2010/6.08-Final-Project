@@ -5,8 +5,8 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
-char network[] = "";  //SSID for 6.08 Lab
-char password[] = ""; //Password for 6.08 Lab
+char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
+char password[] = "vastbug510"; //Password for 6.08 Lab
 
 char user[] = "jkaklam";
 
@@ -17,6 +17,8 @@ const uint16_t IN_BUFFER_SIZE = 1000; //size of buffer to hold HTTP request
 const uint16_t OUT_BUFFER_SIZE = 1000; //size of buffer to hold HTTP response
 char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
+
+char menu_choices[OUT_BUFFER_SIZE];
 
 char host[] = "Host room";
 char join[] = "Join room";
@@ -86,7 +88,7 @@ void setup() {
   tft.drawString(turn_off, 20, 120, 1);
   tft.drawString("*", 5, 100, 1);
 
-  ping_online();
+  //ping_online();
 
   state = MAIN_LOBBY;
   flag = true;
@@ -103,6 +105,16 @@ uint8_t update_selection(uint8_t selection, uint8_t initial_height, uint8_t no_o
   }
   old_selection_btn = selection_btn;
   return selection;
+}
+
+void extract_join_buffer(char* response_buffer) {
+  char delimiter[] = "&";
+  char* ptr;
+  ptr = strtok(response_buffer, delimiter);
+  no_of_selections = atoi(ptr);
+  ptr = strtok(NULL, delimiter);
+  memset(menu_choices, 0, strlen(menu_choices));
+  sprintf(menu_choices, ptr);
 }
 
 void loop() {
@@ -166,10 +178,12 @@ void loop() {
       case JOIN_LOBBY:
         if (flag) {
           selection = 0;
-          no_of_selections = 4;
+          // no_of_selections = 4;
           flag = false;
           tft.fillScreen(TFT_BLACK); //fill background
-          draw_join_lobby_menu(selection);
+          join_room_get_request();
+          extract_join_buffer(resonse_buffer);                    
+          draw_join_lobby_menu(menu_choices, selection);
         }
         new_selection = update_selection(selection, 100, no_of_selections);
         if (new_selection != selection) {
