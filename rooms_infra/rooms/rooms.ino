@@ -230,7 +230,7 @@ void loop() {
         // make POST request when joining room
         else {
           extract_room_id();
-          //join_room_post_req(user, room_id);
+          join_room_post_req(user, room_id);
           state = ROOM;
 
         }

@@ -16,12 +16,18 @@ def request_handler(request):
         # ping(username)
 
         result = c.execute('''SELECT * FROM rooms WHERE room_id = ?;''', (room_id,)).fetchall()
-        if len(result) == 0:
-            return "Invalid room id!"
+        try:
+            game_id = int(result[0][3])
+            host = result[0][1]
+            capacity = result[0][2]
+        except:
+            conn.commit()  # commit commands
+            conn.close()  # close connection to database
+            return "Invalid room id !"
 
-        game_id = int(result[0][3])
-        host = result[0][1]
-        capacity = result[0][2]
+#        game_id = int(result[0][3])
+#        host = result[0][1]
+#        capacity = result[0][2]
 
         c.execute('''UPDATE rooms SET capacity = ? WHERE room_id = ?;''', (str(capacity+1), room_id))
         # c.execute("UPDATE rooms SET capacity = "+str(capacity+1)+" WHERE room_id =" + room_id)
