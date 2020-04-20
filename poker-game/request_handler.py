@@ -17,6 +17,10 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 
 
 def request_handler(request):
+    """
+    :return: (str) a JSON string representing the state of the game as
+            defined in the request handler
+    """
     # Request Dictionary: {'method': 'GET', 'values': {}, 'args': []}
     # create_player_database(players_db)
     # create_state_database(state_db)
@@ -42,9 +46,8 @@ def request_handler(request):
 
         #   Split actions based on type of request
         #   TODO: implement other actions
-        game_state = ""
         if action == "join":
-            game_state = join_game(c_player, c_state, user)
+            join_game(c_player, c_state, user)
         elif action == "leave":
             raise ValueError
         elif action == "check":
@@ -58,12 +61,24 @@ def request_handler(request):
         else:
             return "Requested action not recognized!"
 
+        #   TODO: Return proper JSON message of the state of the game
+        players_query = '''SELECT * FROM players_table;'''
+        players = c_player.execute(players_query).fetchall()
+        result = "players:\n"
+        for p in players:
+            result += str(p) + "\n"
+        result += "\nstate:\n"
+        current_state_query = '''SELECT * FROM states_table;'''
+        state = c_state.execute(current_state_query).fetchall()
+        for s in state:
+            result += str(s) + "\n"
+
         #   TODO: Figure out if this is the right order of commit/close
         conn_players.commit()
         conn_players.close()
         conn_state.commit()
         conn_state.close()
-        return game_state
+        return result
 
 
 def join_game(players_cursor, states_cursor, user):
@@ -75,16 +90,24 @@ def join_game(players_cursor, states_cursor, user):
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param states_cursor: (SQL Cursor) cursor for the states_table
     :param user: (str) non-empty username
-    :return: (str) a JSON string representing the state of the game as
-             defined in the request handler
+    :raises:
+        TODO: Custom errors for joining
+        ValueError: if player is already in the game
+                    or the game is full
     """
+    #   Make sure player isn't already in the game
+    joined_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    joined = players_cursor.execute(joined_query, (user,))
+    if len(joined) > 0:
+        #   TODO: Return proper message for joining full game
+        raise ValueError
+
     #   Check if the game is already full
     players_query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(players_query).fetchall()
-
     if len(players) == MAX_PLAYERS:
-        #   TODO: Return proper JSON message for joining full game
-        return "Sorry, can't join!"
+        #   TODO: Return proper message for joining full game
+        raise ValueError
 
     #   Since the game is not full, add the player to the game
     insert_player = '''INSERT into players_table VALUES (?,?,?,?,?);'''
@@ -95,17 +118,6 @@ def join_game(players_cursor, states_cursor, user):
     if len(players) == MAX_PLAYERS - 1:
         dealer = random.randint(0, MAX_PLAYERS - 1)
         start_new_hand(players_cursor, states_cursor, dealer)
-
-    #   TODO: Return proper JSON message of the state of the game
-    result = "players:\n"
-    for p in players:
-        result += str(p) + "\n"
-    result += "\nstate:\n"
-    current_state_query = '''SELECT * FROM states_table;'''
-    state = states_cursor.execute(current_state_query).fetchall()
-    for s in state:
-        result += str(s) + "\n"
-    return result
 
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
