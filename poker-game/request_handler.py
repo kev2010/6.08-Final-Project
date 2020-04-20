@@ -1,6 +1,6 @@
 import sqlite3
 import random
-import databaseFuncs
+from databaseFuncs import *
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
@@ -18,8 +18,8 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 
 def request_handler(request):
     # Request Dictionary: {'method': 'GET', 'values': {}, 'args': []}
-    databaseFuncs.create_player_database(players_db)
-    databaseFuncs.create_state_database(state_db)
+    create_player_database(players_db)
+    create_state_database(state_db)
 
     if request['method'] == 'GET':
         return ""
