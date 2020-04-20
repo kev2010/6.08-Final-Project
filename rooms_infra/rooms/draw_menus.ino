@@ -30,12 +30,12 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) { // can only s
   /* walk through other tokens */
   uint8_t i = 0;
   while ( token != NULL ) {
-    if (i%2 == 0) {
-      tft.drawString(token, 10, 35 + 25*counter, 1);
-    } else if (i%2 == 1){
-      tft.drawString(token, 10, 35 + 25*counter + 10, 1);
+    if (i % 2 == 0) {
+      tft.drawString(token, 10, 35 + 25 * counter, 1);
+    } else if (i % 2 == 1) {
+      tft.drawString(token, 10, 35 + 25 * counter + 10, 1);
       counter ++ ;
-    }    
+    }
     token = strtok(NULL, s);
     i ++ ;
   }
