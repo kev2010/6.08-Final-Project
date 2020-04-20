@@ -103,7 +103,7 @@ def join_game(players_cursor, states_cursor, user):
     result += "\nstate:\n"
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
-    result += state[0]
+    result += state
     return result
 
 
@@ -181,12 +181,12 @@ def deal_table(players_cursor, state_cursor):
     state_cursor.execute(update_deck, (",".join(deck)))
 
 
-if __name__ == "__main__":
-    request = {'method': 'POST',
-               'args': [],
-               'values': {},
-               'content-type': 'application/x-www-form-urlencoded',
-               'is_json': False,
-               'data': b'user=kev2010&action=join&amount=0',
-               'form': {'user': 'kev2010', 'action': 'join', 'amount': '0'}}
-    request_handler(request)
+# if __name__ == "__main__":
+#     request = {'method': 'POST',
+#                'args': [],
+#                'values': {},
+#                'content-type': 'application/x-www-form-urlencoded',
+#                'is_json': False,
+#                'data': b'user=kev2010&action=join&amount=0',
+#                'form': {'user': 'kev2010', 'action': 'join', 'amount': '0'}}
+#     request_handler(request)
