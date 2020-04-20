@@ -1,6 +1,7 @@
 import sqlite3
 import random
-import databaseFuncs
+import importlib
+importlib.import_module(databaseFuncs)
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
@@ -172,3 +173,7 @@ def deal_table(players_cursor, state_cursor):
     update_deck = ''' UPDATE states_table
                       SET deck = ? '''
     state_cursor.execute(update_deck, (",".join(deck)))
+
+
+if __name__ == "__main__":
+    
