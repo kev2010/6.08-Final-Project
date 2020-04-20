@@ -35,6 +35,10 @@ def check_online():
 
     return to_leave
 
+
+def say_hi():
+    return "hi"
+
 def gone_offline(username):
     #remove username from the server, and makes according actions
 

@@ -19,4 +19,6 @@ def request_handler(request):
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
+        return say_hi()
+
         return "Hello user "+username+", you are online!"
