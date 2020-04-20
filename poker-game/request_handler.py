@@ -84,8 +84,7 @@ def request_handler(request):
 def join_game(players_cursor, states_cursor, user):
     """
     Handles a join game request. Adds the user to the game if it
-    is not full. Otherwise, rejects the user from joining. If the game
-    becomes full, then start the game.
+    is not full. Otherwise, rejects the user from joining.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param states_cursor: (SQL Cursor) cursor for the states_table
@@ -99,8 +98,8 @@ def join_game(players_cursor, states_cursor, user):
     joined_query = '''SELECT * FROM players_table WHERE user = ?;'''
     joined = players_cursor.execute(joined_query, (user,)).fetchall()
     if len(joined) > 0:
-        #   TODO: Return proper message for joining full game
-        raise ValueError
+        #   TODO: Return proper message for already in game
+         raise ValueError
 
     #   Check if the game is already full
     players_query = '''SELECT * FROM players_table;'''
@@ -119,6 +118,15 @@ def join_game(players_cursor, states_cursor, user):
         dealer = random.randint(0, MAX_PLAYERS - 1)
         start_new_hand(players_cursor, states_cursor, dealer)
 
+
+def start_game(players_cursor, states_cursor):
+    """
+    Starts the game with at least two players.
+    
+    :param players_cursor: (SQL Cursor) cursor for the players_table
+    :param states_cursor: (SQL Cursor) cursor for the states_table
+    """
+    
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
     """
