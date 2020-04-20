@@ -29,15 +29,29 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) { // can only s
   token = strtok(menu_copy, s);
   /* walk through other tokens */
   uint8_t i = 0;
+
+  uint8_t number_of_pages = (no_of_selections / 4) + 1;
+  uint8_t page_to_show = (selection / 4) + 1;
+  uint8_t first_room = 4 * (page_to_show - 1) + 1 ;
+
   while ( token != NULL ) {
-    if (i % 2 == 0) {
-      tft.drawString(token, 10, 35 + 25 * counter, 1);
-    } else if (i % 2 == 1) {
-      tft.drawString(token, 10, 35 + 25 * counter + 10, 1);
-      counter ++ ;
+    //    if (counter < selection) {
+    //      i++ ;
+    //      continue;
+    //    }
+
+    if (selection / 4 == counter / 4) {
+      if (i % 2 == 0) {
+        tft.drawString(token, 10, 35 + 25 * counter, 1);
+      } else if (i % 2 == 1) {
+        tft.drawString(token, 10, 35 + 25 * counter + 10, 1);
+        counter ++ ;
+      }
+      token = strtok(NULL, s);
+      i ++ ;
+    } else {
+      counter++;
     }
-    token = strtok(NULL, s);
-    i ++ ;
   }
 
   tft.drawString(">", 3, 10 + (selection * 25), 1);
