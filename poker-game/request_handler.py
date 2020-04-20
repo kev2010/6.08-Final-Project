@@ -113,11 +113,6 @@ def join_game(players_cursor, states_cursor, user):
     players_cursor.execute(insert_player,
                            (user, STARTING_STACK, 0, "", len(players)))
 
-    #   If new player makes the game full, begin game with random dealer
-    if len(players) == MAX_PLAYERS - 1:
-        dealer = random.randint(0, MAX_PLAYERS - 1)
-        start_new_hand(players_cursor, states_cursor, dealer)
-
 
 def start_game(players_cursor, states_cursor):
     """
@@ -126,7 +121,9 @@ def start_game(players_cursor, states_cursor):
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param states_cursor: (SQL Cursor) cursor for the states_table
     """
-    
+    dealer = random.randint(0, MAX_PLAYERS - 1)
+    start_new_hand(players_cursor, states_cursor, dealer)
+
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
     """
@@ -147,6 +144,7 @@ def start_new_hand(players_cursor, state_cursor, dealer_position):
 def post_blinds(players_cursor, dealer_position):
     """
     Post blinds for the small blind and big blind positions.
+    Assumes that there are at least three players.
 
     :param players_cursor: (SQL Cursor) cursor for the players_table
     :param dealer_position: (int) the dealer position ranging [0, # players)
