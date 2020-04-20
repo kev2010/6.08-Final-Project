@@ -22,10 +22,11 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) {
   char s[] = "@";
   char *token;
   uint8_t counter = 0;
-
+  char menu_copy[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
+  memset(menu_copy, 0, strlen(menu_copy));
+  sprintf(menu_copy, menu_choices);
   /* get the first token */
-  token = strtok(menu_choices, s);
-
+  token = strtok(menu_copy, s);
   /* walk through other tokens */
   while ( token != NULL ) {
     tft.drawString(token, 10, 20 + 10*counter, 1);
@@ -33,7 +34,7 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) {
     counter ++ ;
   }
 
-  tft.drawString(">", 5, 10 + (selection * 10), 1);
+  tft.drawString(">", 3, 10 + (selection * 10), 1);
 }
 
 void draw_room_screen() {

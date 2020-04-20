@@ -110,7 +110,8 @@ void extract_join_buffer(char* response_buffer) {
   char delimiter[] = "&";
   char* ptr;
   ptr = strtok(response_buffer, delimiter);
-  no_of_selections = atoi(ptr);
+  no_of_selections = atoi(ptr) + 1; // update numbers of selections, add 1 for "Go back" selection
+  Serial.println(no_of_selections);
   ptr = strtok(NULL, delimiter);
   memset(menu_choices, 0, strlen(menu_choices));
   sprintf(menu_choices, ptr);
@@ -163,13 +164,10 @@ void loop() {
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
-        Serial.println("new state");
-        //Serial.println(selection);
         if (selection == 3) {
           state = MAIN_LOBBY;
         } else {
           state = ROOM;
-          Serial.println("entered room!");
           // host_room_post_req(user, selection);
         }
       }
@@ -183,9 +181,10 @@ void loop() {
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
         join_room_get_req();
-        extract_join_buffer(response_buffer);
+        extract_join_buffer(response_buffer); // also updates number of selections no_of_selections
         draw_join_lobby_menu(menu_choices, selection);
       }
+      Serial.println(no_of_selections);
       new_selection = update_selection(selection, 100, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
