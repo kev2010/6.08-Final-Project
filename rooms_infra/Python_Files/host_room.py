@@ -27,6 +27,6 @@ def request_handler(request):
         conn.close()  # close connection to database
 
         message = "Welcome to room " + str(room_id) + ".\n"
-        message += "You are playing game " + GAME_ID_TO_NAME[str(game_id)]+"."
+        message += "You are playing game " + GAME_ID_TO_NAME[int(game_id)]+"."
 
         return message
