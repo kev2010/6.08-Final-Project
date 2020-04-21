@@ -14,7 +14,7 @@ char user[] = "jkaklam";
 const int RESPONSE_TIMEOUT = 6000; //ms to wait for response from host
 
 const uint16_t IN_BUFFER_SIZE = 1000; //size of buffer to hold HTTP request
-const uint16_t OUT_BUFFER_SIZE = 1000; //size of buffer to hold HTTP response
+const uint16_t OUT_BUFFER_SIZE = 6000; //size of buffer to hold HTTP response
 char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
 

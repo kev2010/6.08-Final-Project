@@ -27,7 +27,7 @@ def request_handler(request):
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
-        message = "Welcome to room " + str(room_id) + ".\n"
-        message += "You are playing game " + GAME_ID_TO_NAME[int(game_id)]+"."
+        message = "Welcome to the room!" + "@" + " You are the host." + "@"
+        message += "Here, we play " + GAME_ID_TO_NAME[game_id] + "."
 
         return message
