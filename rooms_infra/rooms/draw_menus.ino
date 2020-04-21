@@ -65,6 +65,7 @@ void draw_room_screen() {
   uint8_t counter = 0;
   char room_message[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
   memset(room_message, 0, strlen(room_message));
+  Serial.println(response_buffer);
   sprintf(room_message, response_buffer);
   /* get the first token */
   token = strtok(room_message, s);
@@ -72,6 +73,7 @@ void draw_room_screen() {
   while ( token != NULL ) {
     tft.drawString(token, 10, 50 + 15 * counter, 1);
     token = strtok(NULL, s);
+    counter ++ ;
   }
   tft.drawString("-----------------------", 0, 90, 1);
   tft.drawString("Go back", 20, 100, 1);

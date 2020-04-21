@@ -34,8 +34,8 @@ def request_handler(request):
         c.execute('''UPDATE users SET room_id = ? WHERE username = ?;''', (room_id, username))
         c.execute('''UPDATE users SET game_id = ? WHERE username = ?;''', (game_id, username))
 
-        description_of_all_activities = "Welcome to the room" + "@" + " The host is " + host + "@"
-        description_of_all_activities += "Here, we play " + GAME_ID_TO_NAME[game_id]
+        description_of_all_activities = "Welcome to the room!" + "@" + " The host is " + host + "." + "@"
+        description_of_all_activities += "Here, we play " + GAME_ID_TO_NAME[game_id] + "."
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
