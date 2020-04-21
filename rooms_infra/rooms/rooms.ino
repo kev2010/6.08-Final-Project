@@ -248,11 +248,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_room_screen();
       }
-      //      new_selection = update_selection(selection, 100, no_of_selections);
-      //      if (new_selection != selection) {
-      //        selection = new_selection;
-      //        draw_room_screen();
-      //      }
+      
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
