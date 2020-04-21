@@ -9,7 +9,6 @@ db = '__HOME__/project.db'
 GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "Tichu"}
 
 def request_handler(request):
-    create_db();
     if request['method'] == "POST":
         args = request['form']
         username = str(args['username'])
