@@ -13,7 +13,7 @@ def create_db():
     conn.commit()  # commit commands
     conn.close()  # close connection to database
 
-# create_db()
+#create_db()
 
 def check_online():
     #checks for everyone in the users db and removes and deletes from games/rooms if they haven't been active for >10s

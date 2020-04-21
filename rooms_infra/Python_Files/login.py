@@ -1,7 +1,7 @@
 import sqlite3
-import sys
-sys.path.insert(0, "~/team079/rooms_infra/Python_Files/helpers.py")
-from helpers import *
+#import sys
+#sys.path.insert(0, "~/team079/rooms_infra/Python_Files/helpers.py")
+#from helpers import *
 import datetime
 
 db = '__HOME__/project.db'
@@ -18,7 +18,5 @@ def request_handler(request):
         c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
         conn.commit()  # commit commands
         conn.close()  # close connection to database
-
-        return say_hi()
 
         return "Hello user "+username+", you are online!"
