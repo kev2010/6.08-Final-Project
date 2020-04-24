@@ -22,7 +22,7 @@ def request_handler(request):
     requests provide the following information:
 
     POST: user={user: str}&action={action: str}&amount={amount:str of int}
-    GET:None
+    GET: None
     
     Returns a string representing the state of the poker game. The string is
     in the form of a JSON in the following format:
@@ -59,9 +59,12 @@ def request_handler(request):
     post request. The game_state also contains the state with the board
     cards, the current dealer position, and the total pot size.
 
-    :param request: (dict) maps request params to corresponding values
-    :return: (str) a JSON string representing the players and state of 
-            the game as defined above
+    Args:
+        request (dict): maps request params to corresponding values
+    
+    Returns:
+        A JSON string representing the players and state of 
+        the game as defined above
     """
     #   Initialize the players_table and states_table SQL database
     # create_player_database(players_db)
@@ -97,10 +100,13 @@ def get_handler(request, players_cursor, states_cursor):
     Returns a string representing the game state as defined in
     request_handler.
 
-    :param request: (dict) maps request params to corresponding values
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param states_cursor: (SQL Cursor) cursor for the states_table
-    :return: (str) a JSON string representing the players and state of 
+    Args:
+        request (dict): maps request params to corresponding values
+        players_cursor (SQL Cursor): cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+
+    Returns:
+        A JSON string representing the players and state of 
         the game as defined above
     """
     return ""
@@ -112,10 +118,13 @@ def post_handler(request, players_cursor, states_cursor):
     Returns a string representing the game state as defined in
     request_handler.
 
-    :param request: (dict) maps request params to corresponding values
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param states_cursor: (SQL Cursor) cursor for the states_table
-    :return: (str) a JSON string representing the players and state of 
+    Args:
+        request (dict): maps request params to corresponding values
+        players_cursor (SQL Cursor): cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+
+    Returns:
+        A JSON string representing the players and state of 
         the game as defined above
     """
     #   Get the user, action, and amount from the POST request
@@ -166,10 +175,12 @@ def join_game(players_cursor, states_cursor, user):
     Handles a join game request. Adds the user to the game if it
     is not full. Otherwise, rejects the user from joining.
 
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param states_cursor: (SQL Cursor) cursor for the states_table
-    :param user: (str) non-empty username
-    :raises:
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+    
+    Raises:
         TODO: Custom errors for joining
         ValueError: if player is already in the game
                     or the game is full
@@ -198,8 +209,9 @@ def start_game(players_cursor, states_cursor):
     """
     Starts the game with at least two players.
     
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param states_cursor: (SQL Cursor) cursor for the states_table
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
     """
     #   Insert a game state entry into the states_table, where
     #       deck = ",".join(cards)
@@ -213,14 +225,21 @@ def start_game(players_cursor, states_cursor):
     start_new_hand(players_cursor, states_cursor, dealer)
 
 
+def leave_game(players_curor, states_cursor):
+    """
+
+    """
+
+
 def start_new_hand(players_cursor, state_cursor, dealer_position):
     """
     Begins a new hand at the table. Posts blinds and deals two cards
     to each player. Updates player and game states.
 
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param state_cursor: (SQL Cursor) cursor for the states_table
-    :param dealer_position: (int) the dealer position ranging [0, # players)
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        dealer_position (int): the dealer position ranging [0, # players)
     """
     #   Post blinds
     post_blinds(players_cursor, state_cursor, dealer_position)
@@ -235,8 +254,10 @@ def post_blinds(players_cursor, state_cursor, dealer_position):
     Assumes that there are at least three players. Updates the
     pot size and dealer position.
 
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param dealer_position: (int) the dealer position ranging [0, # players)
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        dealer_position (int): the dealer position ranging [0, # players)
     """
     query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(query).fetchall()
@@ -272,8 +293,9 @@ def deal_table(players_cursor, state_cursor):
     These two cards are updated in the players_table. The remaining 
     deck of cards is stored in state_table.
 
-    :param players_cursor: (SQL Cursor) cursor for the players_table
-    :param state_cursor: (SQL Cursor) cursor for the states_table
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
     """
     deck = {c for c in cards}
     players = players_cursor.execute('''SELECT * FROM players_table''').fetchall()
@@ -294,15 +316,3 @@ def deal_table(players_cursor, state_cursor):
     update_deck = ''' UPDATE states_table
                       SET deck = ? '''
     state_cursor.execute(update_deck, (",".join(deck),))
-
-
-# if __name__ == "__main__":
-#     deck = {c for c in cards}
-#     for i in range(3):
-#         two_cards = random.sample(deck, 2)
-#         deck.remove(two_cards[0])
-#         deck.remove(two_cards[1])
-#         hand = ",".join(two_cards)
-#         print(hand)
-#     print(len(",".join(deck)))
-    
