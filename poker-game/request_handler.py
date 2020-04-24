@@ -225,9 +225,14 @@ def start_game(players_cursor, states_cursor):
     start_new_hand(players_cursor, states_cursor, dealer)
 
 
-def leave_game(players_curor, states_cursor):
+def leave_game(players_curor, states_cursor, user):
     """
+    Handles a leave game request. Deletes the user from the game.
 
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
     """
 
 
