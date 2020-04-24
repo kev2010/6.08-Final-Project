@@ -137,11 +137,7 @@ def post_handler(request, players_cursor, states_cursor):
     if action == "join":
         join_game(players_cursor, states_cursor, user)
     elif action == "start":
-        #   Check if the user is the host, which is player 0
-        user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-        user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
-        if user_position == 0:
-            start_game(players_cursor, states_cursor)
+        start_game(players_cursor, states_cursor, user)
     elif action == "leave":
         raise ValueError
     elif action == "check":
@@ -205,24 +201,35 @@ def join_game(players_cursor, states_cursor, user):
                            (user, STARTING_STACK, 0, "", len(players)))
 
 
-def start_game(players_cursor, states_cursor):
+def start_game(players_cursor, states_cursor, user):
     """
-    Starts the game with at least two players.
+    Handles a start game request. Starts the game if the request
+    was sent by the host, and there are at least two players.
     
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+    
+    Raises:
+        ValueError: if the user trying to start is not the host
     """
-    #   Insert a game state entry into the states_table, where
-    #       deck = ",".join(cards)
-    #       board = ""
-    #       dealer = random int from 0 to max_players-1
-    #       pot = 0
-    new_state = '''INSERT into states_table 
-                   VALUES (?,?,?,?);'''
-    dealer = random.randint(0, MAX_PLAYERS - 1)
-    states_cursor.execute(new_state, (",".join(cards), "", dealer, 0))
-    start_new_hand(players_cursor, states_cursor, dealer)
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+    if user_position == 0:
+        #   Insert a game state entry into the states_table, where
+        #       deck = ",".join(cards)
+        #       board = ""
+        #       dealer = random int from 0 to max_players-1
+        #       pot = 0
+        new_state = '''INSERT into states_table 
+                    VALUES (?,?,?,?);'''
+        dealer = random.randint(0, MAX_PLAYERS - 1)
+        states_cursor.execute(new_state, (",".join(cards), "", dealer, 0))
+        start_new_hand(players_cursor, states_cursor, dealer)
+    else:
+        raise ValueError
+
 
 
 def leave_game(players_curor, states_cursor, user):
