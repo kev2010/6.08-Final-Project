@@ -232,7 +232,7 @@ def start_game(players_cursor, states_cursor, user):
 
 
 
-def leave_game(players_curor, states_cursor, user):
+def leave_game(players_cursor, states_cursor, user):
     """
     Handles a leave game request. Deletes the user from the game.
 
@@ -241,7 +241,8 @@ def leave_game(players_curor, states_cursor, user):
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
     """
-
+    leave_query = '''DELETE FROM players_table WHERE user = ?'''
+    players_cursor.execute(leave_query, (user,))
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
     """
