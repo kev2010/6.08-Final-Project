@@ -308,6 +308,7 @@ def check(players_cursor, states_cursor, user):
                 if len(board_cards) == 1:   #  empty case
                     board_cards = []
                 next_stage(players_cursor, states_cursor, len(board_cards))
+                break
             elif i != 0:
                 next_player = players[position]
                 if next_player[3] != '':  #  If the user has cards
