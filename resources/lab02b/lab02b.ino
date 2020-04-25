@@ -5,8 +5,8 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
-char network[] = "608_24G";  //SSID for 6.08 Lab 2.4 GHz devices
-char password[] = "608g2020"; //Password for 6.08 Lab 2.4 GHz devices
+char network[] = "BTHub6-3JRW";  //SSID for 6.08 Lab 2.4 GHz devices
+char password[] = "HVpPptcx3DTE"; //Password for 6.08 Lab 2.4 GHz devices
 
 const uint8_t LOOP_PERIOD = 10; //milliseconds
 uint32_t primary_timer = 0;

@@ -13,7 +13,6 @@ def create_db():
     conn.commit()  # commit commands
     conn.close()  # close connection to database
 
-#create_db()
 
 def check_online():
     #checks for everyone in the users db and removes and deletes from games/rooms if they haven't been active for >10s
@@ -30,8 +29,6 @@ def check_online():
     for r in result:
         gone_offline(r[0])
         to_leave.append(r[0])
-
-
 
     return to_leave
 
@@ -58,8 +55,8 @@ def gone_offline(username):
     if host_name == username or capacity == 1:
         delete_room(room_id)
     else:
-        c.execute("UPDATE rooms SET capacity = " + str(capacity-1) + " WHERE room_id =" + str(room_id))
-        c.execute("UPDATE games SET capacity = " + str(capacity-1) + " WHERE room_id =" + str(room_id))
+        c.execute("UPDATE rooms SET capacity = " + str(capacity-1) + " WHERE room_id =\"" + str(room_id)+"\"")
+        c.execute("UPDATE games SET capacity = " + str(capacity-1) + " WHERE room_id =\"" + str(room_id)+"\"")
         c.execute("DELETE FROM users WHERE username=(?,)", (username,))
 
     conn.commit()  # commit commands

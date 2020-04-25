@@ -5,10 +5,10 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
-char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
-char password[] = "vastbug510"; //Password for 6.08 Lab
+char network[] = "BTHub6-3JRW";  //SSID for 6.08 Lab
+char password[] = "HVpPptcx3DTE"; //Password for 6.08 Lab
 
-char user[] = "jkaklam";
+char user[] = "baptiste";
 
 char user2[] = "petros";
 char user3[] = "christos";
