@@ -301,8 +301,9 @@ def check(players_cursor, states_cursor, user):
         #   that has cards, or end the action
         for i in range(len(players)):
             position = (user_position + i) % len(players)
-            #   If this user is the dealer, then the original user has ended the action
-            if position == game_state[2]:
+            #   If this user is the small blind, then the original 
+            #   user has ended the action
+            if position == (game_state[2] + 1) % len(players):
                 board_cards = game_state[1].split(',')
                 if len(board_cards) == 1:   #  empty case
                     board_cards = []
