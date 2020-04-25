@@ -485,12 +485,13 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
                 break
         
         #   Update game state
+        new_deck = ",".join(deck)
         new_board = game_state[1] + ",".join(new_cards)
         update_cards = ''' UPDATE states_table
                            SET deck = ?,
                                board = ?,
                                action = ?'''
-        states_cursor.execute(update_cards, (deck, new_board, next_action))
+        states_cursor.execute(update_cards, (new_deck, new_board, next_action))
 
 
 def showdown():
