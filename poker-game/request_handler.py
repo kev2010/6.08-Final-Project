@@ -275,7 +275,7 @@ def check(players_cursor, states_cursor, user):
     #   Make sure checking is a legal option
     #   Checking is legal only if there are no bets yet
     bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = states_cursor.execute(bets_query, (0,)).fetchall()
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
     if bets:
         raise ValueError
 
@@ -305,16 +305,12 @@ def call(players_cursor, states_cursor, user):
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
     if game_action != user_position:
-        print(game_action)
-        print(type(game_action))
-        print(user_position)
-        print(type(user_position))
         raise ValueError
 
     #   Make sure calling is a legal option
     #   Calling is legal only if there are bets present
     bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = states_cursor.execute(bets_query, (0,)).fetchall()
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
     if len(bets) == 0:
         raise ValueError
     
