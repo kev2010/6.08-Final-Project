@@ -139,7 +139,7 @@ def post_handler(request, players_cursor, states_cursor):
     elif action == "start":
         start_game(players_cursor, states_cursor, user)
     elif action == "leave":
-        raise ValueError
+        leave_game(players_cursor, states_cursor, user)
     elif action == "check":
         raise ValueError
     elif action == "bet":
