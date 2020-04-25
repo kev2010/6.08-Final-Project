@@ -248,7 +248,15 @@ def leave_game(players_cursor, states_cursor, user):
 
 
 def check(players_cursor, states_cursor, user):
-    pass
+    """
+    Handles a check request. Passes the turn to the next player if
+    it is a legal action.
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+    """
 
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
