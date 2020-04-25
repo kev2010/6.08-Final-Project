@@ -299,7 +299,7 @@ def check(players_cursor, states_cursor, user):
     else:
         #   Otherwise, we pass the action to the next player
         #   that has cards, or end the action
-        for i in range(len(players)):
+        for i in range(1, len(players)):
             position = (user_position + i) % len(players)
             #   If this user is the small blind, then the original 
             #   user has ended the action
