@@ -10,6 +10,10 @@ char password[] = "vastbug510"; //Password for 6.08 Lab
 
 char user[] = "jkaklam";
 
+char user2[] = "petros";
+char user3[] = "christos";
+char user4[] = "dimitris";
+
 //Some constants and some resources:
 const int RESPONSE_TIMEOUT = 6000; //ms to wait for response from host
 
@@ -17,6 +21,8 @@ const uint16_t IN_BUFFER_SIZE = 1000; //size of buffer to hold HTTP request
 const uint16_t OUT_BUFFER_SIZE = 6000; //size of buffer to hold HTTP response
 char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
+
+char response_buffer_2[OUT_BUFFER_SIZE]; // may need multiple char array buffers to hold HTTP response (not used now)
 
 char menu_choices[OUT_BUFFER_SIZE];
 char all_room_ids[5000];
@@ -27,10 +33,12 @@ char join[] = "Join room";
 char turn_off[] = "Turn off";
 
 uint8_t state;
-#define MAIN_LOBBY 0
-#define HOST_LOBBY 1
-#define JOIN_LOBBY 2
-#define ROOM 3
+#define OFF 0
+#define LOGIN_PAGE 1
+#define MAIN_LOBBY 2
+#define HOST_LOBBY 3
+#define JOIN_LOBBY 4
+#define ROOM 5
 
 const uint8_t PIN_1 = 16; //button 1
 const uint8_t PIN_2 = 5; //button 2
@@ -46,6 +54,7 @@ uint8_t old_selection_btn = 1; //for button edge detection!
 uint8_t old_transition_btn = 1;
 
 uint32_t timer;
+const uint32_t ping_period = 10000;
 
 void setup() {
   Serial.begin(115200);
@@ -58,6 +67,9 @@ void setup() {
   delay(100); //wait a bit (100 ms)
   pinMode(PIN_1, INPUT_PULLUP);
   pinMode(PIN_2, INPUT_PULLUP);
+
+  pinMode(14, OUTPUT);
+  digitalWrite(14, 1);
 
   WiFi.begin(network, password); //attempt to connect to wifi
   uint8_t count = 0; //count used for Wifi check times
@@ -90,9 +102,10 @@ void setup() {
   tft.drawString(turn_off, 20, 120, 1);
   tft.drawString("*", 5, 100, 1);
 
-  ping_online(user);
+  ping_online(user); // will use same function to post online status every 10 seconds
 
-  state = MAIN_LOBBY;
+  //  state = MAIN_LOBBY;
+  state = LOGIN_PAGE;
   flag = true;
 
 }
@@ -139,7 +152,7 @@ void extract_room_id() {
     if (counter == selection) {
       sprintf(room_id, token); // found room_id corresponding to selection
       Serial.println(room_id);
-      break;       
+      break;
     }
     token = strtok(NULL, delimiter);
     counter ++ ;
@@ -148,8 +161,58 @@ void extract_room_id() {
 
 
 void loop() {
+  if (millis() - timer >= ping_period) {
+    ping_online(user);
+    timer = millis();
+  }
 
   switch (state) {
+
+    case OFF:
+      if (flag) {
+        selection = 0;
+        no_of_selections = 1;
+        flag = false;
+        digitalWrite(14, 0);
+      }
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        flag = true;
+        digitalWrite(14, 1);
+        state = LOGIN_PAGE;
+      }
+      old_transition_btn = transition_btn;
+
+      break;
+
+    case LOGIN_PAGE:
+      if (flag) {
+        selection = 0;
+        no_of_selections = 2;
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        draw_login_page(selection);
+      }
+      new_selection = update_selection(selection, 100, no_of_selections);
+      if (new_selection != selection) {
+        selection = new_selection;
+        draw_login_page(selection);
+      }
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        flag = true;
+        if (selection == 0) {
+          state = MAIN_LOBBY;
+        } else if (selection == 1) {
+          state = OFF;
+        }
+      }
+      old_transition_btn = transition_btn;
+
+      break;
+
     case MAIN_LOBBY:
       if (flag) {
         selection = 0;
@@ -171,6 +234,8 @@ void loop() {
           state = HOST_LOBBY;
         } else if (selection == 1) {
           state = JOIN_LOBBY;
+        } else if (selection == 2) {
+          state = LOGIN_PAGE;
         }
       }
       old_transition_btn = transition_btn;
@@ -248,12 +313,12 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_room_screen();
       }
-      
+
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
         if (selection == 0) {
-          leave_room_post_req(user); // notify that user left room 
+          leave_room_post_req(user); // notify that user left room
           state = MAIN_LOBBY;
         }
       }

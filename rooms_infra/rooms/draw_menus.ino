@@ -1,9 +1,17 @@
+void draw_login_page(uint8_t selection) {
+  tft.drawString("LOGIN PAGE", 20, 10, 2);
+  tft.drawString("-----------------------", 0, 30, 2);
+  tft.drawString("Login", 40, 50, 2);
+  tft.drawString("Turn off", 40, 70, 2);
+  tft.drawString(">", 25, 50 + (selection * 20), 2);
+}
+
 void draw_lobby_menu(uint8_t selection) {
   tft.drawString("MAIN LOBBY", 20, 10, 2);
   tft.drawString("-----------------------", 0, 30, 2);
   tft.drawString(host, 40, 50, 2);
   tft.drawString(join, 40, 70, 2);
-  tft.drawString(turn_off, 40, 90, 2);
+  tft.drawString("Logout", 40, 90, 2);
   tft.drawString(">", 25, 50 + (selection * 20), 2);
 }
 
@@ -13,6 +21,7 @@ void draw_host_lobby_menu(uint8_t selection) {
   tft.drawString("Poker", 40, 50, 2);
   tft.drawString("Blackjack", 40, 70, 2);
   tft.drawString("Tichu", 40, 90, 2);
+  tft.drawString("Go back", 40, 110, 2);
   tft.drawString(">", 25, 50 + (selection * 20), 2);
 }
 
