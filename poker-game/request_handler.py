@@ -216,14 +216,14 @@ def start_game(players_cursor, states_cursor, user):
     Raises:
         ValueError: if the user trying to start is not the host
     """
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
-    if user_position == 0:
+    users_query = '''SELECT * FROM players_table;'''
+    users = players_cursor.execute(users_query).fetchall()
+    if users[0][4] == user:
         #   Insert a game state entry into the states_table
         deck = ",".join(cards)
         board = ""
-        dealer = random.randint(0, MAX_PLAYERS - 1)
-        action = (dealer + 3) % MAX_PLAYERS
+        dealer = random.randint(0, len(users) - 1)
+        action = (dealer + 3) % len(users)
         pot = 0
 
         new_state = '''INSERT into states_table 
@@ -249,17 +249,52 @@ def leave_game(players_cursor, states_cursor, user):
 
 def check(players_cursor, states_cursor, user):
     """
-    Handles a check request. Passes the turn to the next player if
-    it is a legal action.
+    Handles a poker check request. Passes the turn to the next player or
+    goes to the next stage if checking is a legal action. Assumes the 
+    board has either 3, 4, or 5 cards.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
+    
+    Raises:
+        ValueError: if action is not on the user or checking is illegal
     """
+    #   Make sure action is on the user
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure checking is a legal option
+    #   Checking is legal only if there are no bets yet
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = states_cursor.execute(bets_query, (0,)).fetchall()
+    if bets:
+        raise ValueError
+
+    #   Otherwise, we pass the action to the next player
+    #   that has cards, or end the action
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    for i in range(len(players)):
+        position = (user_position + i) % len(players)
+        #   If this user is the dealer, then the original user has ended the action
+        if position == game_state[2]:
+            next_stage()
+        else:
+            user = players[position]
+            if user[3] != '':  #  If the user has cards
+                update_action = ''' UPDATE states_table
+                                    SET action = ? '''
+                states_cursor.execute(update_action, (position,))
 
 
-def start_new_hand(players_cursor, state_cursor, dealer_position):
+def start_new_hand(players_cursor, states_cursor, dealer_position):
     """
     Begins a new hand at the table. Posts blinds and deals two cards
     to each player. Updates player and game states.
@@ -270,13 +305,13 @@ def start_new_hand(players_cursor, state_cursor, dealer_position):
         dealer_position (int): the dealer position ranging [0, # players)
     """
     #   Post blinds
-    post_blinds(players_cursor, state_cursor, dealer_position)
+    post_blinds(players_cursor, states_cursor, dealer_position)
 
     #   Deal cards
-    deal_table(players_cursor, state_cursor)
+    deal_table(players_cursor, states_cursor)
 
 
-def post_blinds(players_cursor, state_cursor, dealer_position):
+def post_blinds(players_cursor, states_cursor, dealer_position):
     """
     Post blinds for the small blind and big blind positions.
     Assumes that there are at least three players. Updates the
@@ -289,8 +324,8 @@ def post_blinds(players_cursor, state_cursor, dealer_position):
     """
     query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(query).fetchall()
-    small = (dealer_position + 1) % MAX_PLAYERS
-    big = (dealer_position + 2) % MAX_PLAYERS
+    small = (dealer_position + 1) % len(players)
+    big = (dealer_position + 2) % len(players)
 
     for seat in players:
         user = seat[0]
@@ -313,11 +348,11 @@ def post_blinds(players_cursor, state_cursor, dealer_position):
                            pot = ?,
                            action = ?'''
     update_values = (dealer_position, SMALL_BLIND + BIG_BLIND, 
-                    (dealer_position + 3) % MAX_PLAYERS)
-    state_cursor.execute(state_update, update_values)
+                    (dealer_position + 3) % len(players))
+    states_cursor.execute(state_update, update_values)
 
 
-def deal_table(players_cursor, state_cursor):
+def deal_table(players_cursor, states_cursor):
     """
     Deals two random cards to each player without replacement. 
     These two cards are updated in the players_table. The remaining 
@@ -345,4 +380,26 @@ def deal_table(players_cursor, state_cursor):
     #   Update the deck with remaining cards
     update_deck = ''' UPDATE states_table
                       SET deck = ? '''
-    state_cursor.execute(update_deck, (",".join(deck),))
+    states_cursor.execute(update_deck, (",".join(deck),))
+
+
+def next_stage():
+    pass
+
+
+def deal_flop():
+    pass
+
+
+def deal_turn():
+    pass
+
+
+def deal_river():
+    pass
+
+
+def showdown():
+    pass
+
+
