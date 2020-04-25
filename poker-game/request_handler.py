@@ -371,7 +371,7 @@ def call(players_cursor, states_cursor, user):
     
     #   Update action
     found = False
-    for i in range(len(players)):
+    for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
         #  user has cards and hasn't bet the right amount condition
