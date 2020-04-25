@@ -313,6 +313,7 @@ def check(players_cursor, states_cursor, user):
                     update_action = ''' UPDATE states_table
                                         SET action = ? '''
                     states_cursor.execute(update_action, (position,))
+                    break
 
 #   TODO: TEST THIS
 def call(players_cursor, states_cursor, user):
@@ -485,7 +486,6 @@ def deal_table(players_cursor, states_cursor):
                       SET deck = ? '''
     states_cursor.execute(update_deck, (",".join(deck),))
 
-
 #   TODO: TEST THIS
 def next_stage(players_cursor, states_cursor, num_board_cards):
     """
@@ -535,7 +535,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         
         #   Update game state
         new_deck = ",".join(deck)
-        new_board = game_state[1] + ",".join(new_cards)
+        new_board = game_state[1] + "," + ",".join(new_cards)
         update_cards = ''' UPDATE states_table
                            SET deck = ?,
                                board = ?,
