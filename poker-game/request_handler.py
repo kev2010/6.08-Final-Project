@@ -14,6 +14,8 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 
 
 #   TODO: Make these functions take in database name string parameters
+#   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
+#   TODO: Potentially make a function for passing action? Does it relate to checking/calling/etc.
 
 
 def request_handler(request):
@@ -281,7 +283,22 @@ def check(players_cursor, states_cursor, user):
 
     #   Otherwise, we pass the action to the next player
     #   that has cards, or end the action
-    pass_action(players_cursor, states_cursor, user_position)
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    for i in range(len(players)):
+        position = (user_position + i) % len(players)
+        #   If this user is the dealer, then the original user has ended the action
+        if position == game_state[2]:
+            board_cards = game_state[1].split(',')
+            if len(board_cards) == 1:   #  empty case
+                board_cards = []
+            next_stage(players_cursor, states_cursor, len(board_cards))
+        else:
+            user = players[position]
+            if user[3] != '':  #  If the user has cards
+                update_action = ''' UPDATE states_table
+                                    SET action = ? '''
+                states_cursor.execute(update_action, (position,))
 
 #   TODO: TEST THIS
 def call(players_cursor, states_cursor, user):
@@ -329,8 +346,28 @@ def call(players_cursor, states_cursor, user):
                             bet = ?
                         WHERE user = ?'''
     players_cursor.execute(update_blinds, (new_bal, new_bet, user))
+
+    #   Update the pot size
+    bet_delta = new_bet - player[2]
+    update_pot = ''' UPDATE states_table
+                     SET pot = ?'''
+    states_cursor.execute(update_pot, (game_state[4] + bet_delta,))
+    
     #   Update action
-    pass_action(players_cursor, states_cursor, user_position)
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    for i in range(len(players)):
+        position = (user_position + i) % len(players)
+        user = players[position]
+        if user[3] != '' and user[2] != max_bet:  #  user has cards and hasn't bet the right amt
+            update_action = ''' UPDATE states_table
+                                SET action = ? '''
+            states_cursor.execute(update_action, (position,))
+
+    board_cards = game_state[1].split(',')
+    if len(board_cards) == 1:   #  empty case
+        board_cards = []
+    next_stage(players_cursor, states_cursor, len(board_cards))
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
@@ -421,53 +458,38 @@ def deal_table(players_cursor, states_cursor):
                       SET deck = ? '''
     states_cursor.execute(update_deck, (",".join(deck),))
 
-#   TODO: TEST THIS
-def pass_action(players_cursor, states_cursor, user_position):
-    """
-    Passes the action to the next player in the round, if any. 
-    Otherwise, goes to the next stage of the game.
-
-    Args:
-        players_cursor (SQL Cursor) cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user_position (int): the user's position ranging [0, # players)
-    """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    for i in range(len(players)):
-        position = (user_position + i) % len(players)
-        #   If this user is the dealer, then the original user has ended the action
-        if position == game_state[2]:
-            board_cards = game_state[1].split(',')
-            next_stage(players_cursor, states_cursor, len(board_cards))
-        else:
-            user = players[position]
-            if user[3] != '':  #  If the user has cards
-                update_action = ''' UPDATE states_table
-                                    SET action = ? '''
-                states_cursor.execute(update_action, (position,))
 
 #   TODO: TEST THIS
 def next_stage(players_cursor, states_cursor, num_board_cards):
     """
     Updates the game state by going into the next stage (e.g. Preflop to Flop,
-    Flop to Turn, Turn to River, or River to Showdown)
+    Flop to Turn, Turn to River, or River to Showdown). Collects all bets on
+    previous street and updates the pot size.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         num_board_cards (int): 0, 3, 4, or 5 for the # of cards on the board
     """
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+
+    #   Remove all the bets 
+    #   Note: we don't need to update the pot size b/c calling/betting/raising
+    #   should automatically update the pot size as the action goes. Re-updating
+    #   here will just double count the bets
+    for user in players:
+        update_bet = ''' UPDATE players_table
+                            SET bet = ?
+                            WHERE user = ?'''
+        players_cursor.execute(update_bet, (0, user[0]))
+
+    #   Update game state for the next street
     if num_board_cards == 5:  #  River
         showdown()
     else:
-        query = '''SELECT * FROM states_table;'''
-        game_state  = states_cursor.execute(query).fetchall()[0]
-        players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-        players = players_cursor.execute(players_query).fetchall()
-
         #   Draw the next card(s) for the board based on street
         to_deal = 3 if num_board_cards == 0 else 1
         deck = {c for c in game_state[0].split(',')}
