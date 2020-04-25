@@ -394,26 +394,37 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         states_cursor (SQL Cursor): cursor for the states_table
         num_board_cards (int): 0, 3, 4, or 5 for the # of cards on the board
     """
-    if num_board_cards == 0:  #  Preflop
-        deal_flop()
-    elif num_board_cards == 3:  #  Flop
-        deal_turn()
-    elif num_board_cards == 4:  #  Turn
-        deal_river()
-    elif num_board_cards == 5:  #  River
+    if num_board_cards == 5:  #  River
         showdown()
+    else:
+        query = '''SELECT * FROM states_table;'''
+        game_state  = states_cursor.execute(query).fetchall()[0]
+        players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+        players = players_cursor.execute(players_query).fetchall()
 
+        #   Draw the next card(s) for the board based on street
+        to_deal = 3 if num_board_cards == 0 else 1
+        deck = {c for c in game_state[0].split(',')}
+        new_cards = random.sample(deck, to_deal)
+        deck.difference_update(new_cards)
 
-def deal_flop():
-    pass
-
-
-def deal_turn():
-    pass
-
-
-def deal_river():
-    pass
+        #   Find the next action to go to
+        #   This should be the first user with cards after the dealer
+        next_action = 0
+        for i in range(1, len(players) + 1):
+            position = (game_state[2] + i) % len(players)
+            user = players[position]
+            if user[3] != '':  #  If the user has cards
+                next_action = position
+                break
+        
+        #   Update game state
+        new_board = game_state[1] + ",".join(new_cards)
+        update_cards = ''' UPDATE states_table
+                           SET deck = ?,
+                               board = ?,
+                               action = ?'''
+        states_cursor.execute(update_cards, (deck, new_board, next_action))
 
 
 def showdown():
