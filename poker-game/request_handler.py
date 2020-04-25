@@ -306,6 +306,10 @@ def call(players_cursor, states_cursor, user):
     user = players_cursor.execute(user_query, (user,)).fetchall()[0]
     user_position = user[4]
     if game_action != user_position:
+        print(game_action)
+        print(type(game_action))
+        print(user_position)
+        print(type(user_position))
         raise ValueError
 
     #   Make sure calling is a legal option
