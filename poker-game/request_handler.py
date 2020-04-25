@@ -144,6 +144,8 @@ def post_handler(request, players_cursor, states_cursor):
         leave_game(players_cursor, states_cursor, user)
     elif action == "check":
         check(players_cursor, states_cursor, user)
+    elif action == "call":
+        call(players_cursor, states_cursor, user)
     elif action == "bet":
         raise ValueError
     elif action == "raise":
@@ -246,7 +248,7 @@ def leave_game(players_cursor, states_cursor, user):
     leave_query = '''DELETE FROM players_table WHERE user = ?'''
     players_cursor.execute(leave_query, (user,))
 
-
+#   TODO: TEST THIS
 def check(players_cursor, states_cursor, user):
     """
     Handles a poker check request. Passes the turn to the next player or
@@ -279,20 +281,56 @@ def check(players_cursor, states_cursor, user):
 
     #   Otherwise, we pass the action to the next player
     #   that has cards, or end the action
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    for i in range(len(players)):
-        position = (user_position + i) % len(players)
-        #   If this user is the dealer, then the original user has ended the action
-        if position == game_state[2]:
-            board_cards = game_state[1].split(',')
-            next_stage(players_cursor, states_cursor, len(board_cards))
-        else:
-            user = players[position]
-            if user[3] != '':  #  If the user has cards
-                update_action = ''' UPDATE states_table
-                                    SET action = ? '''
-                states_cursor.execute(update_action, (position,))
+    pass_action(players_cursor, states_cursor, user_position)
+
+
+def call(players_cursor, states_cursor, user):
+    """
+    Handles a poker call request. Calls the previous bet and passes
+    the turn to the next player or goes to the next stage if calling
+    is a legal action. Assumes the board has either 0, 3, 4, or 5 cards.
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+    
+    Raises:
+        ValueError: if action is not on the user or calling is illegal 
+    """
+    #   Make sure action is on the user
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    user = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = user[4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure calling is a legal option
+    #   Calling is legal only if there are bets present
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = states_cursor.execute(bets_query, (0,)).fetchall()
+    if len(bets) == 0:
+        raise ValueError
+    
+    #   Find the max bet that user has to call
+    max_bet = 0
+    for better in bets:
+        if better[2] > max_bet:
+            max_bet = better[2]
+    to_call = min(max_bet, user[1])  #  Min of bet and the user's chip stack
+    #   Put the bet in front of the user
+    new_bet = to_call
+    new_bal = user[1] + user[2] - to_call
+    update_blinds = ''' UPDATE players_table
+                        SET bal = ? ,
+                            bet = ?
+                        WHERE user = ?'''
+    players_cursor.execute(update_blinds, (new_bal, new_bet, user))
+    #   Update action
+    pass_action(players_cursor, states_cursor, user_position)
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
@@ -383,7 +421,35 @@ def deal_table(players_cursor, states_cursor):
                       SET deck = ? '''
     states_cursor.execute(update_deck, (",".join(deck),))
 
+#   TODO: TEST THIS
+def pass_action(players_cursor, states_cursor, user_position):
+    """
+    Passes the action to the next player in the round, if any. 
+    Otherwise, goes to the next stage of the game.
 
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user_position (int): the user's position ranging [0, # players)
+    """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    for i in range(len(players)):
+        position = (user_position + i) % len(players)
+        #   If this user is the dealer, then the original user has ended the action
+        if position == game_state[2]:
+            board_cards = game_state[1].split(',')
+            next_stage(players_cursor, states_cursor, len(board_cards))
+        else:
+            user = players[position]
+            if user[3] != '':  #  If the user has cards
+                update_action = ''' UPDATE states_table
+                                    SET action = ? '''
+                states_cursor.execute(update_action, (position,))
+
+#   TODO: TEST THIS
 def next_stage(players_cursor, states_cursor, num_board_cards):
     """
     Updates the game state by going into the next stage (e.g. Preflop to Flop,
