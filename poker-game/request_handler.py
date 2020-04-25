@@ -265,9 +265,12 @@ def check(players_cursor, states_cursor, user):
     Raises:
         ValueError: if action is not on the user or checking is illegal
     """
-    #   Make sure action is on the user
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
     game_action = game_state[3]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
@@ -275,16 +278,26 @@ def check(players_cursor, states_cursor, user):
         raise ValueError
 
     #   Make sure checking is a legal option
-    #   Checking is legal only if there are no bets yet
+    #   Checking is legal only if there are no bets yet or in the big blind special case
     bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
     bets = players_cursor.execute(bets_query, (0,)).fetchall()
     if bets:
-        raise ValueError
+        #   Find max bet
+        max_bet = 0
+        for better in bets:
+            if better[2] > max_bet:
+                max_bet = better[2]
+        #   See if it's big blind special case
+        preflop = len(game_state[1]) == 0
+        big_blind_pos = (game_state[2] + 2) % len(players)
+        big_blind_special = preflop and user_position == big_blind_pos and max_bet == BIG_BLIND 
+        if big_blind_special:
+            next_stage(players_cursor, states_cursor, 0)
+        else:
+            raise ValueError
 
     #   Otherwise, we pass the action to the next player
     #   that has cards, or end the action
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
     for i in range(len(players)):
         position = (user_position + i) % len(players)
         #   If this user is the dealer, then the original user has ended the action
@@ -294,8 +307,8 @@ def check(players_cursor, states_cursor, user):
                 board_cards = []
             next_stage(players_cursor, states_cursor, len(board_cards))
         else:
-            user = players[position]
-            if user[3] != '':  #  If the user has cards
+            next_player = players[position]
+            if next_player[3] != '':  #  If the user has cards
                 update_action = ''' UPDATE states_table
                                     SET action = ? '''
                 states_cursor.execute(update_action, (position,))
@@ -315,9 +328,12 @@ def call(players_cursor, states_cursor, user):
     Raises:
         ValueError: if action is not on the user or calling is illegal 
     """
-    #   Make sure action is on the user
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
     game_action = game_state[3]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
@@ -354,13 +370,19 @@ def call(players_cursor, states_cursor, user):
     states_cursor.execute(update_pot, (game_state[4] + bet_delta,))
     
     #   Update action
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
     found = False
     for i in range(len(players)):
         position = (user_position + i) % len(players)
-        user = players[position]
-        if user[3] != '' and user[2] != max_bet:  #  user has cards and hasn't bet the right amt
+        next_player = players[position]
+        #  user has cards and hasn't bet the right amount condition
+        has_cards_wrong_bet = next_player[3] != '' and next_player[2] != max_bet 
+        #  NOTE: special case where everyone limps preflop
+        #  TODO: perhaps this actually isn't a special case?
+        preflop = len(game_state[1]) == 0
+        big_blind_pos = (game_state[2] + 2) % len(players)
+        big_blind_special = preflop and next_player[4] == big_blind_pos and max_bet == BIG_BLIND 
+
+        if has_cards_wrong_bet or big_blind_special: 
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
