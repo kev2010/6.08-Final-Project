@@ -143,7 +143,7 @@ def post_handler(request, players_cursor, states_cursor):
     elif action == "leave":
         leave_game(players_cursor, states_cursor, user)
     elif action == "check":
-        raise ValueError
+        check(players_cursor, states_cursor, user)
     elif action == "bet":
         raise ValueError
     elif action == "raise":
@@ -285,7 +285,8 @@ def check(players_cursor, states_cursor, user):
         position = (user_position + i) % len(players)
         #   If this user is the dealer, then the original user has ended the action
         if position == game_state[2]:
-            next_stage()
+            board_cards = game_state[1].split(',')
+            next_stage(players_cursor, states_cursor, len(board_cards))
         else:
             user = players[position]
             if user[3] != '':  #  If the user has cards
@@ -383,8 +384,24 @@ def deal_table(players_cursor, states_cursor):
     states_cursor.execute(update_deck, (",".join(deck),))
 
 
-def next_stage():
-    pass
+def next_stage(players_cursor, states_cursor, num_board_cards):
+    """
+    Updates the game state by going into the next stage (e.g. Preflop to Flop,
+    Flop to Turn, Turn to River, or River to Showdown)
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        num_board_cards (int): 0, 3, 4, or 5 for the # of cards on the board
+    """
+    if num_board_cards == 0:  #  Preflop
+        deal_flop()
+    elif num_board_cards == 3:  #  Flop
+        deal_turn()
+    elif num_board_cards == 4:  #  Turn
+        deal_river()
+    elif num_board_cards == 5:  #  River
+        showdown()
 
 
 def deal_flop():
