@@ -220,7 +220,7 @@ def start_game(players_cursor, states_cursor, user):
     """
     users_query = '''SELECT * FROM players_table;'''
     users = players_cursor.execute(users_query).fetchall()
-    if users[0][4] == user:
+    if users[0][0] == user:
         #   Insert a game state entry into the states_table
         deck = ",".join(cards)
         board = ""
@@ -283,7 +283,7 @@ def check(players_cursor, states_cursor, user):
     #   that has cards, or end the action
     pass_action(players_cursor, states_cursor, user_position)
 
-
+#   TODO: TEST THIS
 def call(players_cursor, states_cursor, user):
     """
     Handles a poker call request. Calls the previous bet and passes
@@ -495,5 +495,3 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
 
 def showdown():
     pass
-
-
