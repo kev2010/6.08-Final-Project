@@ -356,6 +356,7 @@ def call(players_cursor, states_cursor, user):
     #   Update action
     players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
     players = players_cursor.execute(players_query).fetchall()
+    found = False
     for i in range(len(players)):
         position = (user_position + i) % len(players)
         user = players[position]
@@ -363,11 +364,14 @@ def call(players_cursor, states_cursor, user):
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
-
-    board_cards = game_state[1].split(',')
-    if len(board_cards) == 1:   #  empty case
-        board_cards = []
-    next_stage(players_cursor, states_cursor, len(board_cards))
+            found = True
+            break
+    
+    if not found:
+        board_cards = game_state[1].split(',')
+        if len(board_cards) == 1:   #  empty case
+            board_cards = []
+        next_stage(players_cursor, states_cursor, len(board_cards))
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
