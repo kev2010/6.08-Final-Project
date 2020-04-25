@@ -49,6 +49,7 @@ def request_handler(request):
                 "state": {
                     "board": "Ah,7d,2s",
                     "dealer": 3,
+                    "action": 1,
                     "pot": 225"
                 }
             }
@@ -57,7 +58,8 @@ def request_handler(request):
     information. Some fields in the player information are private,
     such as the cards if player object is not the user sending the
     post request. The game_state also contains the state with the board
-    cards, the current dealer position, and the total pot size.
+    cards, the current dealer position, who's action it's on, and 
+    the total pot size.
 
     Args:
         request (dict): maps request params to corresponding values
@@ -77,8 +79,8 @@ def request_handler(request):
     conn_state = sqlite3.connect(state_db)
     c_state = conn_state.cursor()
     c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
-                        (deck text, board text, dealer int, 
-                        pot int);''')
+                        (deck text, board text, dealer int, action
+                        int, pot int);''')
 
     game_state = ""
     if request['method'] == 'GET':
@@ -217,19 +219,19 @@ def start_game(players_cursor, states_cursor, user):
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
     if user_position == 0:
-        #   Insert a game state entry into the states_table, where
-        #       deck = ",".join(cards)
-        #       board = ""
-        #       dealer = random int from 0 to max_players-1
-        #       pot = 0
-        new_state = '''INSERT into states_table 
-                    VALUES (?,?,?,?);'''
+        #   Insert a game state entry into the states_table
+        deck = ",".join(cards)
+        board = ""
         dealer = random.randint(0, MAX_PLAYERS - 1)
-        states_cursor.execute(new_state, (",".join(cards), "", dealer, 0))
+        action = (dealer + 3) % MAX_PLAYERS
+        pot = 0
+
+        new_state = '''INSERT into states_table 
+                    VALUES (?,?,?,?,?);'''
+        states_cursor.execute(new_state, (deck, board, dealer, action, pot))
         start_new_hand(players_cursor, states_cursor, dealer)
     else:
         raise ValueError
-
 
 
 def leave_game(players_cursor, states_cursor, user):
@@ -243,6 +245,11 @@ def leave_game(players_cursor, states_cursor, user):
     """
     leave_query = '''DELETE FROM players_table WHERE user = ?'''
     players_cursor.execute(leave_query, (user,))
+
+
+def check(players_cursor, states_cursor, user):
+    pass
+
 
 def start_new_hand(players_cursor, state_cursor, dealer_position):
     """
@@ -292,12 +299,14 @@ def post_blinds(players_cursor, state_cursor, dealer_position):
                                 WHERE user = ?'''
             players_cursor.execute(update_blinds, (bal, bet, user))
     
-    #   Update the pot size and dealer position
+    #   Update the pot size, dealer position, who's action it is
     state_update = ''' UPDATE states_table
                        SET dealer = ? ,
-                           pot = ? '''
-    state_cursor.execute(state_update, 
-                        (dealer_position, SMALL_BLIND + BIG_BLIND))
+                           pot = ?,
+                           action = ?'''
+    update_values = (dealer_position, SMALL_BLIND + BIG_BLIND, 
+                    (dealer_position + 3) % MAX_PLAYERS)
+    state_cursor.execute(state_update, update_values)
 
 
 def deal_table(players_cursor, state_cursor):
