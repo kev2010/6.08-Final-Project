@@ -303,8 +303,7 @@ def call(players_cursor, states_cursor, user):
     game_state  = states_cursor.execute(query).fetchall()[0]
     game_action = game_state[3]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = user[4]
+    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
     if game_action != user_position:
         print(game_action)
         print(type(game_action))
