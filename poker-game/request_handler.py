@@ -535,7 +535,8 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         
         #   Update game state
         new_deck = ",".join(deck)
-        new_board = game_state[1] + "," + ",".join(new_cards)
+        comma = "," if to_deal != 3 else ""
+        new_board = game_state[1] + comma + ",".join(new_cards)
         update_cards = ''' UPDATE states_table
                            SET deck = ?,
                                board = ?,
