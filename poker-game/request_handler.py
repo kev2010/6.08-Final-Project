@@ -303,7 +303,8 @@ def call(players_cursor, states_cursor, user):
     game_state  = states_cursor.execute(query).fetchall()[0]
     game_action = game_state[3]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = player[4]
     if game_action != user_position:
         raise ValueError
 
@@ -319,10 +320,10 @@ def call(players_cursor, states_cursor, user):
     for better in bets:
         if better[2] > max_bet:
             max_bet = better[2]
-    to_call = min(max_bet, user[1])  #  Min of bet and the user's chip stack
+    to_call = min(max_bet, player[1])  #  Min of bet and the user's chip stack
     #   Put the bet in front of the user
     new_bet = to_call
-    new_bal = user[1] + user[2] - to_call
+    new_bal = player[1] + player[2] - to_call
     update_blinds = ''' UPDATE players_table
                         SET bal = ? ,
                             bet = ?
