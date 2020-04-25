@@ -281,37 +281,38 @@ def check(players_cursor, states_cursor, user):
     #   Checking is legal only if there are no bets yet or in the big blind special case
     bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
     bets = players_cursor.execute(bets_query, (0,)).fetchall()
-    if bets:
-        #   Find max bet
-        max_bet = 0
-        for better in bets:
-            if better[2] > max_bet:
-                max_bet = better[2]
-        #   See if it's big blind special case
-        preflop = len(game_state[1]) == 0
-        big_blind_pos = (game_state[2] + 2) % len(players)
-        big_blind_special = preflop and user_position == big_blind_pos and max_bet == BIG_BLIND 
-        if big_blind_special:
-            next_stage(players_cursor, states_cursor, 0)
-        else:
-            raise ValueError
-
-    #   Otherwise, we pass the action to the next player
-    #   that has cards, or end the action
-    for i in range(len(players)):
-        position = (user_position + i) % len(players)
-        #   If this user is the dealer, then the original user has ended the action
-        if position == game_state[2]:
-            board_cards = game_state[1].split(',')
-            if len(board_cards) == 1:   #  empty case
-                board_cards = []
-            next_stage(players_cursor, states_cursor, len(board_cards))
-        else:
-            next_player = players[position]
-            if next_player[3] != '':  #  If the user has cards
-                update_action = ''' UPDATE states_table
-                                    SET action = ? '''
-                states_cursor.execute(update_action, (position,))
+    #   Find max bet
+    max_bet = 0
+    for better in bets:
+        if better[2] > max_bet:
+            max_bet = better[2]
+    #   See if it's big blind special case
+    preflop = len(game_state[1]) == 0
+    big_blind_pos = (game_state[2] + 2) % len(players)
+    big_blind_special = preflop and user_position == big_blind_pos and max_bet == BIG_BLIND
+    if bets and not big_blind_special:
+        raise ValueError
+    
+    #   Take care of BB special case if necessary
+    if big_blind_special:
+        next_stage(players_cursor, states_cursor, 0)
+    else:
+        #   Otherwise, we pass the action to the next player
+        #   that has cards, or end the action
+        for i in range(len(players)):
+            position = (user_position + i) % len(players)
+            #   If this user is the dealer, then the original user has ended the action
+            if position == game_state[2]:
+                board_cards = game_state[1].split(',')
+                if len(board_cards) == 1:   #  empty case
+                    board_cards = []
+                next_stage(players_cursor, states_cursor, len(board_cards))
+            else:
+                next_player = players[position]
+                if next_player[3] != '':  #  If the user has cards
+                    update_action = ''' UPDATE states_table
+                                        SET action = ? '''
+                    states_cursor.execute(update_action, (position,))
 
 #   TODO: TEST THIS
 def call(players_cursor, states_cursor, user):
