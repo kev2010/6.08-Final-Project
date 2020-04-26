@@ -1,6 +1,17 @@
 import sqlite3
 import datetime
-from Utils import *
+
+import importlib.util
+# spec = importlib.util.spec_from_file_location("module.name", "/path/to/file.py")
+# Utils = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Utils)
+#
+# var/jail/home/username
+#
+# f
+
+sys.path.insert(0, 'var/jail/home/team079/team079/rooms_infra/utils/')
+from utils import helpers
 
 db = '__HOME__/project.db'
 
@@ -30,17 +41,15 @@ def request_handler(request):
             conn.commit()  # commit commands
             conn.close()  # close connection to database
 
-
-
         c.execute("UPDATE users SET last_ping = " + str(datetime.datetime.now()) + " WHERE username =\"" + username+"\"")
 
         # Check if they need to be kicked out of a room
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
-        need_to_leave = check_online()
+        need_to_leave = helpers.check_online()
 
         for leave_user in need_to_leave:
-            gone_offline(leave_user)
+            helpers.gone_offline(leave_user)
 
         result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,))
 
