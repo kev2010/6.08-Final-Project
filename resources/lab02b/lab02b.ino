@@ -89,7 +89,7 @@ void loop() {
   uint8_t button1 = digitalRead(INPUT_PIN1);
   uint8_t button2 = digitalRead(INPUT_PIN2);
 //  float acc_mag = sqrt(x * x + y * y + z * z);
-  float acc_mag = abs(z);
+  float acc_mag = sqrt(z*z);
 //  Serial.print(acc_mag);
   float avg_acc_mag = 1.0 / 3.0 * (acc_mag + old_acc_mag + older_acc_mag);
 //  step_reporter_fsm(avg_acc_mag); //run step_reporter_fsm (from lab02a)
