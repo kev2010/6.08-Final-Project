@@ -34,7 +34,7 @@ def request_handler(request):
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-        result = c.execute("SELECT * FROM users WHERE username=?", (username,))
+        result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
         return result
         if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
@@ -53,7 +53,7 @@ def request_handler(request):
         for leave_user in need_to_leave:
             gone_offline(leave_user)
 
-        result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,))
+        result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,)).fetchall()
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
@@ -74,7 +74,7 @@ def check_online():
     conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
     c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-    result = c.execute('''SELECT * FROM users WHERE last_ping < (?,);''', (datetime.datetime.now() - datetime.timedelta(seconds=30),))
+    result = c.execute('''SELECT * FROM users WHERE last_ping < (?,);''', (datetime.datetime.now() - datetime.timedelta(seconds=30),)).fetchall()
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
@@ -93,12 +93,12 @@ def gone_offline(username):
     conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
     c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-    result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,))
+    result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,)).fetchall()
 
     room_id = result[0][1]
     game_id = result[0][2]
 
-    result2 = c.execute("SELECT * FROM rooms WHERE room_id=(?,)", (room_id,))
+    result2 = c.execute("SELECT * FROM rooms WHERE room_id=(?,)", (room_id,)).fetchall()
 
     host_name = result2[0][1]
     capacity = result2[0][2]
@@ -117,7 +117,7 @@ def delete_room(room_id):
     conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
     c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-    result = c.execute("SELECT * FROM users WHERE room_id=(?,)", (room_id,))
+    result = c.execute("SELECT * FROM users WHERE room_id=(?,)", (room_id,)).fetchall()
 
     for r in result:
         #remove them from game and room
