@@ -47,8 +47,8 @@ def request_handler(request):
         # Check if they need to be kicked out of a room
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
-        need_to_leave = check_online()
-        return "ok"
+        return check_online()
+
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
 
@@ -78,6 +78,7 @@ def check_online():
     conn.commit()  # commit commands
     conn.close()  # close connection to database
 
+    return "ok"
     to_leave = []
 
     for r in result:
