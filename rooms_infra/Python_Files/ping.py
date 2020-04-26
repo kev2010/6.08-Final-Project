@@ -34,7 +34,7 @@ def request_handler(request):
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-        c.execute('''DELETE * FROM users;''')
+        c.execute('''truncate table users''')
 
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
