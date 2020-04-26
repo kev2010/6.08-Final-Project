@@ -18,7 +18,7 @@ char user4[] = "dimitris";
 const int RESPONSE_TIMEOUT = 6000; //ms to wait for response from host
 
 const uint16_t IN_BUFFER_SIZE = 1000; //size of buffer to hold HTTP request
-const uint16_t OUT_BUFFER_SIZE = 6000; //size of buffer to hold HTTP response
+const uint16_t OUT_BUFFER_SIZE = 6000; //size of buffer to hold HTTP response // max is 35,000
 char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
 
@@ -92,19 +92,12 @@ void setup() {
     Serial.println(WiFi.status());
     ESP.restart(); // restart the ESP (proper way)
   }
+
   timer = millis();
 
 
-
-  tft.drawString("-----------------------", 0, 90, 1);
-  tft.drawString(host, 20, 100, 1);
-  tft.drawString(join, 20, 110, 1);
-  tft.drawString(turn_off, 20, 120, 1);
-  tft.drawString("*", 5, 100, 1);
-
   ping_online(user); // will use same function to post online status every 10 seconds
 
-  //  state = MAIN_LOBBY;
   state = LOGIN_PAGE;
   flag = true;
 
@@ -161,9 +154,12 @@ void extract_room_id() {
 
 
 void loop() {
-  if (millis() - timer >= ping_period) {
-    ping_online(user);
-    timer = millis();
+  // only ping online if in states that require online status
+  if (state != OFF && state != LOGIN_PAGE ) {
+    if (millis() - timer >= ping_period) {
+      ping_online(user);
+      timer = millis();
+    }
   }
 
   switch (state) {
@@ -203,8 +199,13 @@ void loop() {
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
+        // selection = 0: login and ping online
         if (selection == 0) {
+          ping_online(user);
+          timer = millis();
           state = MAIN_LOBBY;
+
+        // selection = 1: turn off
         } else if (selection == 1) {
           state = OFF;
         }
@@ -234,7 +235,8 @@ void loop() {
           state = HOST_LOBBY;
         } else if (selection == 1) {
           state = JOIN_LOBBY;
-        } else if (selection == 2) {
+        } else if (selection == 2) { // logout
+          //logout(user);
           state = LOGIN_PAGE;
         }
       }
