@@ -44,7 +44,7 @@ def request_handler(request):
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
 
-        c.execute("UPDATE users SET last_ping = " + str(datetime.datetime.now()) + " WHERE username =\"" + username+"\"")
+        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
 
         # Check if they need to be kicked out of a room
 
