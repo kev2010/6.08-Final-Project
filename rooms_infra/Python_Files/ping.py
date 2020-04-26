@@ -36,9 +36,9 @@ def request_handler(request):
 
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
-        c.execute('''DELETE FROM users''')
-        conn.commit()
-        
+        # c.execute('''DELETE FROM users''')
+        # conn.commit()
+
         if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
             c = conn.cursor()  # move cursor into database (allows us to execute commands)
@@ -50,7 +50,7 @@ def request_handler(request):
         # Check if they need to be kicked out of a room
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
-        return check_online()
+        check_online()
 
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
@@ -85,7 +85,7 @@ def check_online():
     to_leave = []
 
     for r in result:
-        return gone_offline(r[0])
+        gone_offline(r[0])
         to_leave.append(r[0])
 
     return to_leave
@@ -108,7 +108,7 @@ def gone_offline(username):
 
 
     if host_name == username or capacity == 1:
-        return delete_room(room_id)
+        delete_room(room_id)
 
     else:
         c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
@@ -124,15 +124,12 @@ def delete_room(room_id):
 
     result = c.execute("SELECT * FROM users WHERE room_id=?", (room_id,)).fetchall()
 
-    result2 = c.execute("SELECT * FROM users").fetchall()
-    return len(result2)
     for r in result:
         #remove them from game and room
         user = r[0]
         c.execute("UPDATE users SET game_id = ? WHERE username =?", (-1, user))
         c.execute("UPDATE users SET room_id = ? WHERE username =?", (-1, user))
 
-    return "hi"
     #delete the game and room
     c.execute("DELETE FROM games WHERE room_id=?", (room_id,))
     c.execute("DELETE FROM rooms WHERE room_id=?", (room_id,))
