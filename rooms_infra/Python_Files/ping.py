@@ -51,8 +51,8 @@ def request_handler(request):
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
         need_to_leave = check_online()
 
-        for leave_user in need_to_leave:
-            gone_offline(leave_user)
+        # for leave_user in need_to_leave:
+        #     gone_offline(leave_user)
 
         result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,)).fetchall()
 
