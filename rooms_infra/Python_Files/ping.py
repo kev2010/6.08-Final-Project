@@ -13,7 +13,7 @@ import datetime
 # sys.path.insert(0, 'var/jail/home/team079/team079/rooms_infra/utils/')
 # from utils import helpers
 
-from utils import helpers
+from utils.helpers import check_online
 
 db = '__HOME__/project.db'
 
