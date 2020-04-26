@@ -48,7 +48,7 @@ def request_handler(request):
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
         need_to_leave = check_online()
-
+        return "ok"
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
 
