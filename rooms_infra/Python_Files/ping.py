@@ -105,8 +105,7 @@ def gone_offline(username):
 
 
     if host_name == username or capacity == 1:
-        return "good"
-        delete_room(room_id)
+        return delete_room(room_id)
 
     else:
         c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
@@ -121,7 +120,7 @@ def delete_room(room_id):
     c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
     result = c.execute("SELECT * FROM users WHERE room_id=?", (room_id,)).fetchall()
-
+    return str(len(result))
     for r in result:
         #remove them from game and room
         user = r[0]
