@@ -103,9 +103,11 @@ def gone_offline(username):
     host_name = result2[0][1]
     capacity = result2[0][2]
 
-    return "good"
+
     if host_name == username or capacity == 1:
+        return "good"
         delete_room(room_id)
+
     else:
         c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("UPDATE games SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
