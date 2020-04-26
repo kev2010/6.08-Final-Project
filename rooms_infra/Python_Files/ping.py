@@ -43,7 +43,6 @@ def request_handler(request):
             c = conn.cursor()  # move cursor into database (allows us to execute commands)
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
-            conn.close()  # close connection to database
 
         c.execute("UPDATE users SET last_ping = " + str(datetime.datetime.now()) + " WHERE username =\"" + username+"\"")
 
