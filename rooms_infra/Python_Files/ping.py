@@ -1,10 +1,10 @@
 import sqlite3
 import datetime
 
-import importlib.util
-spec = importlib.util.spec_from_file_location("utils", "var/jail/home/team079/team079/rooms_infra/utils/helpers.py")
-Utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Utils)
+# import importlib.util
+# spec = importlib.util.spec_from_file_location("utils", "var/jail/home/team079/team079/rooms_infra/utils/helpers.py")
+# Utils = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(Utils)
 #
 # var/jail/home/username
 #
@@ -12,6 +12,8 @@ spec.loader.exec_module(Utils)
 # import sys
 # sys.path.insert(0, 'var/jail/home/team079/team079/rooms_infra/utils/')
 # from utils import helpers
+
+from utils import helpers
 
 db = '__HOME__/project.db'
 
