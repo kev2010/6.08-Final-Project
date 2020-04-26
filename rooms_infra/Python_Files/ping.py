@@ -18,15 +18,19 @@ def request_handler(request):
         args = request['form']
         username = str(args['username'])
 
-        if user not exists:
+        conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
+        c = conn.cursor()  # move cursor into database (allows us to execute commands)
+
+        result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,))
+
+        if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
             c = conn.cursor()  # move cursor into database (allows us to execute commands)
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
             conn.close()  # close connection to database
 
-        conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
-        c = conn.cursor()  # move cursor into database (allows us to execute commands)
+
 
         c.execute("UPDATE users SET last_ping = " + str(datetime.datetime.now()) + " WHERE username =\"" + username+"\"")
 
