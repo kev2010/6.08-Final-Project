@@ -82,8 +82,7 @@ def check_online():
     to_leave = []
 
     for r in result:
-        gone_offline(r[0])
-        return "ok"
+        return gone_offline(r[0])
         to_leave.append(r[0])
 
     return to_leave
@@ -104,6 +103,7 @@ def gone_offline(username):
     host_name = result2[0][1]
     capacity = result2[0][2]
 
+    return "good"
     if host_name == username or capacity == 1:
         delete_room(room_id)
     else:
