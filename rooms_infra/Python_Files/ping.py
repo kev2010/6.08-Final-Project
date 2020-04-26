@@ -42,6 +42,7 @@ def request_handler(request):
         if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
             c = conn.cursor()  # move cursor into database (allows us to execute commands)
+            c.execute('''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp);''')
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
 
