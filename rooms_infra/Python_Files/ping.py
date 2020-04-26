@@ -124,7 +124,7 @@ def delete_room(room_id):
         #remove them from game and room
         user = r[0]
         c.execute("UPDATE users SET game_id = ? WHERE username =?", (-1, user))
-        c.execute("UPDATE users SET room_id = ? WHERE username =?", (-1, user))
+        # c.execute("UPDATE users SET room_id = ? WHERE username =?", (-1, user))
         return "lol"
 
     return "hi"
