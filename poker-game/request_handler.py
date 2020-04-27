@@ -152,7 +152,7 @@ def post_handler(request, players_cursor, states_cursor):
     elif action == "call":
         call(players_cursor, states_cursor, user)
     elif action == "bet":
-        raise ValueError
+        bet(players_cursor, states_cursor, user, amount)
     elif action == "raise":
         raise ValueError
     elif action == "fold":
