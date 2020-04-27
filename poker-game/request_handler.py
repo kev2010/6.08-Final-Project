@@ -157,19 +157,7 @@ def post_handler(request, players_cursor, states_cursor):
     else:
         return "Requested action not recognized!"
 
-    #   TODO: Return proper JSON message of the state of the game
-    players_query = '''SELECT * FROM players_table;'''
-    players = players_cursor.execute(players_query).fetchall()
-    result = "players:\n"
-    for p in players:
-        result += str(p) + "\n"
-    result += "\nstate:\n"
-    current_state_query = '''SELECT * FROM states_table;'''
-    state = states_cursor.execute(current_state_query).fetchall()
-    for s in state:
-        result += str(s) + "\n"
-
-    return result
+    return display_game(players_cursor, states_cursor)
 
 
 def display_game(players_cursor, states_cursor):
@@ -207,7 +195,20 @@ def display_game(players_cursor, states_cursor):
         A string of the state of the game, formatted as described
         above
     """
+    #   TODO: Return proper JSON message of the state of the game
+    players_query = '''SELECT * FROM players_table;'''
+    players = players_cursor.execute(players_query).fetchall()
+    result = "players:\n"
+    for p in players:
+        result += str(p) + "\n"
 
+    result += "\nstate:\n"
+    current_state_query = '''SELECT * FROM states_table;'''
+    state = states_cursor.execute(current_state_query).fetchall()
+    for s in state:
+        result += str(s) + "\n"
+    
+    return result
 
 
 def join_game(players_cursor, states_cursor, user):
