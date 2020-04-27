@@ -5,10 +5,10 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
-char network[] = "BTHub6-3JRW";  //SSID for 6.08 Lab
-char password[] = "HVpPptcx3DTE"; //Password for 6.08 Lab
+char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
+char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "baptiste";
+char user[] = "giannis";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -18,7 +18,7 @@ char user4[] = "dimitris";
 const int RESPONSE_TIMEOUT = 6000; //ms to wait for response from host
 
 const uint16_t IN_BUFFER_SIZE = 1000; //size of buffer to hold HTTP request
-const uint16_t OUT_BUFFER_SIZE = 6000; //size of buffer to hold HTTP response
+const uint16_t OUT_BUFFER_SIZE = 6000; //size of buffer to hold HTTP response // max is 35,000
 char request_buffer[IN_BUFFER_SIZE]; //char array buffer to hold HTTP request
 char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
 
@@ -92,25 +92,18 @@ void setup() {
     Serial.println(WiFi.status());
     ESP.restart(); // restart the ESP (proper way)
   }
+
   timer = millis();
 
 
+  // ping_online(user); // will use same function to post online status every 10 seconds
 
-  tft.drawString("-----------------------", 0, 90, 1);
-  tft.drawString(host, 20, 100, 1);
-  tft.drawString(join, 20, 110, 1);
-  tft.drawString(turn_off, 20, 120, 1);
-  tft.drawString("*", 5, 100, 1);
-
-  ping_online(user); // will use same function to post online status every 10 seconds
-
-  //  state = MAIN_LOBBY;
   state = LOGIN_PAGE;
   flag = true;
 
 }
 
-uint8_t update_selection(uint8_t selection, uint8_t initial_height, uint8_t no_of_selections) {
+uint8_t update_selection(uint8_t selection, uint8_t no_of_selections) {
   selection_btn = digitalRead(PIN_1);
   if (selection_btn != old_selection_btn && selection_btn == 1) {
     tft.fillScreen(TFT_BLACK); //fill background
@@ -161,9 +154,16 @@ void extract_room_id() {
 
 
 void loop() {
-  if (millis() - timer >= ping_period) {
-    ping_online(user);
-    timer = millis();
+  // only ping online if in states that require online status
+  if (state != OFF && state != LOGIN_PAGE ) {
+    if (millis() - timer >= ping_period) {
+      ping_online(user);
+      timer = millis();
+      // check if server returns "1" (everything ok) or "-1" (need to leave the room)
+//      if (state == ROOM && strcmp(response_buffer, "-1") == 0){
+//        state = LOGIN_PAGE;
+//      }
+    }
   }
 
   switch (state) {
@@ -194,7 +194,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_login_page(selection);
       }
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_login_page(selection);
@@ -203,8 +203,13 @@ void loop() {
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
+        // selection = 0: login and ping online
         if (selection == 0) {
+          ping_online(user);
+          timer = millis();
           state = MAIN_LOBBY;
+
+        // selection = 1: turn off
         } else if (selection == 1) {
           state = OFF;
         }
@@ -221,7 +226,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_lobby_menu(selection);
       }
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_lobby_menu(selection);
@@ -234,7 +239,8 @@ void loop() {
           state = HOST_LOBBY;
         } else if (selection == 1) {
           state = JOIN_LOBBY;
-        } else if (selection == 2) {
+        } else if (selection == 2) { // logout
+          //logout(user);
           state = LOGIN_PAGE;
         }
       }
@@ -250,7 +256,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_host_lobby_menu(selection);
       }
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_host_lobby_menu(selection);
@@ -270,6 +276,7 @@ void loop() {
       break;
 
     case JOIN_LOBBY:
+      Serial.println("Join Lobby!");
       if (flag) {
         selection = 0;
         // no_of_selections = 4;
@@ -280,7 +287,7 @@ void loop() {
         draw_join_lobby_menu(menu_choices, selection);
       }
 
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_join_lobby_menu(menu_choices, selection);

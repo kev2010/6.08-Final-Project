@@ -110,10 +110,13 @@ def get_handler(request, players_cursor, states_cursor):
         states_cursor (SQL Cursor): cursor for the states_table
 
     Returns:
-        A JSON string representing the players and state of 
+        TODO: A JSON string representing the players and state of 
         the game as defined above
+
+        Currently returns the game state as specified by the
+        display_game function
     """
-    return ""
+    return display_game(players_cursor, states_cursor)
 
 
 def post_handler(request, players_cursor, states_cursor):
@@ -134,7 +137,7 @@ def post_handler(request, players_cursor, states_cursor):
     #   Get the user, action, and amount from the POST request
     user = request['form']['user']
     action = request['form']['action']
-    amount = request['form']['amount']
+    amount = int(request['form']['amount'])
 
     #   Split actions based on type of request
     #   TODO: implement other actions
@@ -149,26 +152,65 @@ def post_handler(request, players_cursor, states_cursor):
     elif action == "call":
         call(players_cursor, states_cursor, user)
     elif action == "bet":
-        raise ValueError
+        bet(players_cursor, states_cursor, user, amount)
     elif action == "raise":
-        raise ValueError
+        raise_bet(players_cursor, states_cursor, user, amount)
     elif action == "fold":
         raise ValueError
     else:
         return "Requested action not recognized!"
 
+    return display_game(players_cursor, states_cursor)
+
+
+def display_game(players_cursor, states_cursor):
+    """
+    Returns the poker game state in a properly formatted string.
+    The return format is as follows:
+        
+        players:
+        (user:str, bal:int, bet:int, cards:str, position:int)
+        ...
+
+        state:
+        (deck:str, board:str, dealer:int, action:int, pot:int)
+    
+    There can be multiple players, but there is only one state
+    for the poker game. The following is an example string that
+    could be returned.
+
+        players:
+        ('kev2010', 950, 0, '2s,9s', 0)
+        ('jasonllu', 950, 0, 'Jh,8s', 1)
+        ('baptiste', 950, 0, '7d,4c', 2)
+
+        state:
+        ('Js,3s,8h, ...', 'Qd,2h,9h,3d', 0, 1, 150)
+    
+    Note that the deck in the state will have more cards, as
+    indicated by the "...".
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+    
+    Returns:
+        A string of the state of the game, formatted as described
+        above
+    """
     #   TODO: Return proper JSON message of the state of the game
     players_query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(players_query).fetchall()
     result = "players:\n"
     for p in players:
         result += str(p) + "\n"
+
     result += "\nstate:\n"
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
     for s in state:
         result += str(s) + "\n"
-
+    
     return result
 
 
@@ -361,14 +403,14 @@ def call(players_cursor, states_cursor, user):
     #   Put the bet in front of the user
     new_bet = to_call
     new_bal = player[1] + player[2] - to_call
-    update_blinds = ''' UPDATE players_table
+    bet_delta = new_bet - player[2]
+    update_chips = ''' UPDATE players_table
                         SET bal = ? ,
                             bet = ?
                         WHERE user = ?'''
-    players_cursor.execute(update_blinds, (new_bal, new_bet, user))
+    players_cursor.execute(update_chips, (new_bal, new_bet, user))
 
     #   Update the pot size
-    bet_delta = new_bet - player[2]
     update_pot = ''' UPDATE states_table
                      SET pot = ?'''
     states_cursor.execute(update_pot, (game_state[4] + bet_delta,))
@@ -398,6 +440,159 @@ def call(players_cursor, states_cursor, user):
         if len(board_cards) == 1:   #  empty case
             board_cards = []
         next_stage(players_cursor, states_cursor, len(board_cards))
+
+
+def bet(players_cursor, states_cursor, user, amount):
+    """
+    Handles a poker bet request. Bets the specified amount and passes
+    the turn to the next player if betting is a legal action. Assumes 
+    the board has either 0, 3, 4, or 5 cards.
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+        amount (int): a non-zero amount to bet. Must be a size that is
+            legal in poker
+    
+    Raises:
+        TODO: customize errors
+        ValueError: if action is not on the user, betting is illegal,
+            or the size is illegal 
+    """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
+    #   TODO: perhaps make this a function?
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = player[4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure betting is a legal option
+    #   Betting is legal only if there are no bets present
+    #   Otherwise, it would be considered raising
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if bets:
+        raise ValueError
+
+    #   Make sure bet size is legal (at least the big blind)
+    if amount < BIG_BLIND:
+        raise ValueError
+
+    #   Update player state with the bet
+    new_bal = player[1] - amount
+    update_chips = ''' UPDATE players_table
+                        SET bal = ? ,
+                            bet = ?
+                        WHERE user = ?'''
+    players_cursor.execute(update_chips, (new_bal, amount, user))
+
+    #   Update the pot size
+    update_pot = ''' UPDATE states_table
+                     SET pot = ?'''
+    states_cursor.execute(update_pot, (game_state[4] + amount,))
+    
+    #   Update action
+    for i in range(1, len(players)):
+        position = (user_position + i) % len(players)
+        next_player = players[position]
+        if next_player[3] != '': 
+            update_action = ''' UPDATE states_table
+                                SET action = ? '''
+            states_cursor.execute(update_action, (position,))
+            break
+
+
+def raise_bet(players_cursor, states_cursor, user, amount):
+    """
+    Handles a poker raise request. Raises to the specified amount 
+    and passes the turn to the next player if raising is legal. 
+    Assumes the board has either 0, 3, 4, or 5 cards.
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+        amount (int): a non-zero amount to raise to. Must be a 
+            size that is legal in poker
+    
+    Raises:
+        TODO: customize errors
+        ValueError: if action is not on the user, raising is illegal,
+            or the size to raise to is illegal 
+    """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
+    #   TODO: perhaps make this a function?
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = player[4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure raising is a legal option
+    #   Raising is legal only if there are bets present
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if len(bets) == 0:
+        raise ValueError
+
+    #   Make sure raise size is legal
+    #   Must be raising BY at least twice the previous raise 
+    max_bet = 0  #   Find the largest and 2nd largest bet
+    max_bet_index = 0
+    for better in bets:
+        if better[2] > max_bet:
+            max_bet = better[2]
+            max_bet_index = bets.index(better)
+    
+    second_max_bet = 0
+    if len(bets) != 1:
+        #   TODO: Maybe don't copy? 
+        other_bets = [bets[i] for i in range(len(bets)) if i != max_bet_index]
+        for better in other_bets:
+            if better[2] > second_max_bet:
+                second_max_bet = better[2]
+    
+    if amount < 2*max_bet - second_max_bet:
+        raise ValueError
+
+    #   Update player state with the raise
+    new_bal = player[1] + player[2] - amount
+    raise_delta = amount - player[2]
+    update_chips = ''' UPDATE players_table
+                        SET bal = ? ,
+                            bet = ?
+                        WHERE user = ?'''
+    players_cursor.execute(update_chips, (new_bal, amount, user))
+
+    #   Update the pot size
+    update_pot = ''' UPDATE states_table
+                     SET pot = ?'''
+    states_cursor.execute(update_pot, (game_state[4] + raise_delta,))
+    
+    #   Update action
+    #   TODO: perhaps combine all the "update action" code together?
+    for i in range(1, len(players)):
+        position = (user_position + i) % len(players)
+        next_player = players[position]
+        if next_player[3] != '': 
+            update_action = ''' UPDATE states_table
+                                SET action = ? '''
+            states_cursor.execute(update_action, (position,))
+            break
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):

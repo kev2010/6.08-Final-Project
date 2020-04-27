@@ -30,7 +30,7 @@ def request_handler(request):
         result = c.execute('''SELECT * FROM rooms''').fetchall()
         conn.close()  # close connection to database
 
-        return result
+        #return result
 
 
 
