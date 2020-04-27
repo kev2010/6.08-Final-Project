@@ -82,11 +82,10 @@ def check_online():
     conn.commit()  # commit commands
     conn.close()  # close connection to database
 
-    return result
     to_leave = []
 
     for r in result:
-        gone_offline(r[0])
+        return gone_offline(r[0])
         to_leave.append(r[0])
 
     return to_leave
@@ -116,6 +115,7 @@ def gone_offline(username):
         c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("UPDATE games SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("DELETE FROM users WHERE username=?", (username,))
+        return "deleted" + username
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
