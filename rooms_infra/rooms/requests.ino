@@ -18,7 +18,7 @@ void logout(char* user) {
   char body[200]; //for body;
   sprintf(body, "username=%s", user); //generate body, posting to User, 1 step
   int body_len = strlen(body); //calculate body length (for header reporting)
-  sprintf(request_buffer, "POST http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/ping.py HTTP/1.1\r\n");
+  sprintf(request_buffer, "POST http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/logout.py HTTP/1.1\r\n"); //not created yet
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
   strcat(request_buffer, "Content-Type: application/x-www-form-urlencoded\r\n");
   sprintf(request_buffer + strlen(request_buffer), "Content-Length: %d\r\n", body_len); //append string formatted to end of request buffer

@@ -5,10 +5,10 @@
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
-char network[] = "BTHub6-3JRW";  //SSID for 6.08 Lab
-char password[] = "HVpPptcx3DTE"; //Password for 6.08 Lab
+char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
+char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "baptiste";
+char user[] = "giannis";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -96,7 +96,7 @@ void setup() {
   timer = millis();
 
 
-  ping_online(user); // will use same function to post online status every 10 seconds
+  // ping_online(user); // will use same function to post online status every 10 seconds
 
   state = LOGIN_PAGE;
   flag = true;
