@@ -550,24 +550,26 @@ def raise_bet(players_cursor, states_cursor, user, amount):
         raise ValueError
 
     #   Make sure raise size is legal
-    #   Must be raising BY at least twice the previous raise 
-    max_bet = 0  #   Find the largest and 2nd largest bet
-    max_bet_index = 0
-    for better in bets:
-        if better[2] > max_bet:
-            max_bet = better[2]
-            max_bet_index = bets.index(better)
-    
-    second_max_bet = 0
-    if len(bets) != 1:
-        #   TODO: Maybe don't copy? 
-        other_bets = [bets[i] for i in range(len(bets)) if i != max_bet_index]
-        for better in other_bets:
-            if better[2] > second_max_bet:
-                second_max_bet = better[2]
-    
-    if amount < 2*max_bet - second_max_bet:
-        raise ValueError
+    #   Must be raising BY at least the previous raise (except for all-in)
+    #   TODO: perhaps split the all-in case from raise?
+    if amount != player[1] + player[2]:  #  All-in
+        max_bet = 0  #   Find the largest and 2nd largest bet
+        max_bet_index = 0
+        for better in bets:
+            if better[2] > max_bet:
+                max_bet = better[2]
+                max_bet_index = bets.index(better)
+        
+        second_max_bet = 0
+        if len(bets) != 1:
+            #   TODO: Maybe don't copy? 
+            other_bets = [bets[i] for i in range(len(bets)) if i != max_bet_index]
+            for better in other_bets:
+                if better[2] > second_max_bet:
+                    second_max_bet = better[2]
+        
+        if amount < 2*max_bet - second_max_bet:
+            raise ValueError
 
     #   Update player state with the raise
     new_bal = player[1] + player[2] - amount
