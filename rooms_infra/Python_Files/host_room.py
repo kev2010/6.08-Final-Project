@@ -24,7 +24,12 @@ def request_handler(request):
         c.execute('''UPDATE users SET room_id = ? WHERE username = ?;''', (room_id, username))
 # (game_id int, room_id int, capacity int, start_time timestamp);''')
 
+
         conn.commit()  # commit commands
+
+        result = c.execute('''SELECT * FROM rooms''').fetchall()
+        return result
+
         conn.close()  # close connection to database
 
         message = "Welcome to the room!" + "@" + " You are the host." + "@"

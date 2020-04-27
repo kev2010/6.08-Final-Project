@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a5b5c8e6-7d51-4198-9a26-20bce35b69b9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/leave_room.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/leave_room.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/host_room.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/host_room.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +48,7 @@
       <updated>1587362050492</updated>
       <workItem from="1587362055520" duration="154000" />
       <workItem from="1587838024449" duration="2305000" />
-      <workItem from="1587926263831" duration="7233000" />
+      <workItem from="1587926263831" duration="7304000" />
     </task>
     <servers />
   </component>
@@ -66,5 +67,11 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="623" y="461" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1587948901751">
+      <screen x="0" y="23" width="1680" height="1027" />
+    </state>
+    <state x="623" y="461" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/-1080.23.1080.1897/0.23.1680.1027@0.23.1680.1027" timestamp="1587948901751" />
   </component>
 </project>
