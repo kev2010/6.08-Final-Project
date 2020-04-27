@@ -28,9 +28,11 @@ def request_handler(request):
         conn.commit()  # commit commands
 
         result = c.execute('''SELECT * FROM rooms''').fetchall()
+        conn.close()  # close connection to database
+        
         return result
 
-        conn.close()  # close connection to database
+
 
         message = "Welcome to the room!" + "@" + " You are the host." + "@"
         message += "Here, we play " + GAME_ID_TO_NAME[game_id] + "."
