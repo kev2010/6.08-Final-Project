@@ -110,10 +110,13 @@ def get_handler(request, players_cursor, states_cursor):
         states_cursor (SQL Cursor): cursor for the states_table
 
     Returns:
-        A JSON string representing the players and state of 
+        TODO: A JSON string representing the players and state of 
         the game as defined above
+
+        Currently returns the game state as specified by the
+        display_game function
     """
-    return ""
+    return display_game(players_cursor, states_cursor)
 
 
 def post_handler(request, players_cursor, states_cursor):
