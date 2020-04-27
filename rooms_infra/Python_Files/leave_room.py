@@ -18,8 +18,8 @@ def request_handler(request):
         result = c.execute('''SELECT * FROM users WHERE username = ?;''', (username,)).fetchall()
         room_id = result[0][1]
 
-        result = c.execute('''SELECT * FROM rooms''').fetchall()
-        return result
+        # result = c.execute('''SELECT * FROM rooms''').fetchall()
+        # return result
 
         #Get the room data. Are they the host?
         result = c.execute('''SELECT * FROM rooms WHERE room_id = ?;''', (room_id,)).fetchall()
