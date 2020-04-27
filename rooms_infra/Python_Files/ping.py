@@ -1,6 +1,6 @@
 import sqlite3
 import datetime
-
+import random
 # import importlib.util
 # spec = importlib.util.spec_from_file_location("utils", "var/jail/home/team079/team079/rooms_infra/utils/helpers.py")
 # Utils = importlib.util.module_from_spec(spec)
@@ -35,12 +35,12 @@ def request_handler(request):
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
-        # c.execute('''DELETE FROM rooms''')
-        # c.execute('''DELETE FROM games''')
-        # c.execute('''DELETE FROM users''')
-        # conn.commit()
-        # conn.close()
-        # return "ok"
+        c.execute('''DELETE FROM rooms''')
+        c.execute('''DELETE FROM games''')
+        c.execute('''DELETE FROM users''')
+        conn.commit()
+        conn.close()
+        return "ok"
 
         if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
@@ -55,9 +55,9 @@ def request_handler(request):
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
 
-        return check_online()
+        check_online()
 
-        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
+        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username+str(random.randint(0, 40))))
         conn.commit()
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
