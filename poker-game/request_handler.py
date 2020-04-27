@@ -507,7 +507,7 @@ def bet(players_cursor, states_cursor, user, amount):
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
-            found = True
+            break
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
