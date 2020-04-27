@@ -64,6 +64,7 @@ def request_handler(request):
 
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
+        room_id = result[0][1]
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
