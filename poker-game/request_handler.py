@@ -299,6 +299,13 @@ def check(players_cursor, states_cursor, user):
     goes to the next stage if checking is a legal action. Assumes the 
     board has either 3, 4, or 5 cards.
 
+    Checking is legal if:
+        1. The action is on the user
+        2. If the stage is post-flop, then there are no bets present at
+            the table.
+        3. If the stage is pre-flop, then everyone has limped to the big 
+            blind, and the current action is on the big blind.
+
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
@@ -365,6 +372,10 @@ def call(players_cursor, states_cursor, user):
     Handles a poker call request. Calls the previous bet and passes
     the turn to the next player or goes to the next stage if calling
     is a legal action. Assumes the board has either 0, 3, 4, or 5 cards.
+
+    Calling is legal if:
+        1. The action is on the user
+        2. There is at least one non-zero bet present at the table
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
@@ -448,6 +459,11 @@ def bet(players_cursor, states_cursor, user, amount):
     the turn to the next player if betting is a legal action. Assumes 
     the board has either 0, 3, 4, or 5 cards.
 
+    Betting is legal if:
+        1. The action is on the user
+        2. There are no bets present at the table
+        3. The user is betting at least the size of the big blind
+
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
@@ -516,6 +532,18 @@ def raise_bet(players_cursor, states_cursor, user, amount):
     and passes the turn to the next player if raising is legal. 
     Assumes the board has either 0, 3, 4, or 5 cards.
 
+    Raising is legal if:
+        1. The action is on the user
+        2. There is at least one non-zero bet present at the table
+        3. The user is raising by at least the previous raise,
+            unless it is an all-in. For example, if the previous
+            raise was from 2bb to 6bb, any raise >=10bb is legal.
+        4. If another player has gone all-in, this user closes
+            the action, and the all-in size is not at least the
+            previous raise size, then raising is illegal.
+    
+    Note that for now, condition 4 is not checked.
+
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
@@ -553,17 +581,16 @@ def raise_bet(players_cursor, states_cursor, user, amount):
     #   Must be raising BY at least the previous raise (except for all-in)
     #   TODO: perhaps split the all-in case from raise?
     if amount != player[1] + player[2]:  #  All-in
-        max_bet = 0  #   Find the largest and 2nd largest bet
-        max_bet_index = 0
+        #   Find the largest and 2nd largest bet
+        max_bet = 0
         for better in bets:
             if better[2] > max_bet:
                 max_bet = better[2]
-                max_bet_index = bets.index(better)
         
         second_max_bet = 0
         if len(bets) != 1:
             #   TODO: Maybe don't copy? 
-            other_bets = [bets[i] for i in range(len(bets)) if i != max_bet_index]
+            other_bets = [i for i in bets if i != max_bet]
             for better in other_bets:
                 if better[2] > second_max_bet:
                     second_max_bet = better[2]
@@ -595,6 +622,27 @@ def raise_bet(players_cursor, states_cursor, user, amount):
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
             break
+
+
+def fold(players_cursor, states_cursor, user):
+    """
+    Handles a poker fold request. Folds the user's hand and 
+    passes the turn to the next player if folding is legal.
+
+    Folding is legal if:
+        1. The action is on the user
+        2. There is at least one non-zero bet present at the table
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+    
+    Raises:
+        TODO: customize errors
+        ValueError: if action is not on the user or folding
+            is illegal
+    """
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
