@@ -154,7 +154,7 @@ def post_handler(request, players_cursor, states_cursor):
     elif action == "bet":
         bet(players_cursor, states_cursor, user, amount)
     elif action == "raise":
-        raise ValueError
+        raise_bet(players_cursor, states_cursor, user, amount)
     elif action == "fold":
         raise ValueError
     else:
@@ -510,7 +510,7 @@ def bet(players_cursor, states_cursor, user, amount):
             break
 
 
-def raise_bet(players_cursor, states_cursor, user, amount)
+def raise_bet(players_cursor, states_cursor, user, amount):
     """
     Handles a poker raise request. Raises to the specified amount 
     and passes the turn to the next player if raising is legal. 
@@ -561,7 +561,7 @@ def raise_bet(players_cursor, states_cursor, user, amount)
     second_max_bet = 0
     if len(bets) != 1:
         #   TODO: Maybe don't copy? 
-        other_bets = [bets[i] for i in range(len(bets) if i != max_bet_index)
+        other_bets = [bets[i] for i in range(len(bets)) if i != max_bet_index]
         for better in other_bets:
             if better[2] > second_max_bet:
                 second_max_bet = better[2]
