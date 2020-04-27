@@ -101,21 +101,23 @@ def gone_offline(username, room_id, game_id):
     c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
 
-    result2 = c.execute("SELECT * FROM rooms WHERE room_id=?", (room_id,)).fetchall()
 
-    host_name = result2[0][1]
-    capacity = result2[0][2]
+    if room_id != "-1":
+        result2 = c.execute("SELECT * FROM rooms WHERE room_id=?", (room_id,)).fetchall()
+
+        host_name = result2[0][1]
+        capacity = result2[0][2]
 
 
-    if host_name == username or capacity == 1:
-        delete_room(room_id)
+        if host_name == username or capacity == 1:
+            delete_room(room_id)
 
-    else:
-        c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
-        c.execute("UPDATE games SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
-        c.execute("DELETE FROM users WHERE username=?", (username,))
-        conn.commit()
-        # return "deleted" + username
+        else:
+            c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
+            c.execute("UPDATE games SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
+            c.execute("DELETE FROM users WHERE username=?", (username,))
+            conn.commit()
+            # return "deleted" + username
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
