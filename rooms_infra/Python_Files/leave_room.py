@@ -27,6 +27,9 @@ def request_handler(request):
         capacity = result[0][2]
         c.execute('''UPDATE rooms SET capacity = ? WHERE room_id = ?;''', (str(capacity-1), str(room_id)))
 
+        c.execute("UPDATE users SET room_id = -1 WHERE username =?", (username,))
+        c.execute("UPDATE users SET game_id = -1 WHERE username =?", (username,))
+
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
