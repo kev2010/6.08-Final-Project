@@ -22,6 +22,7 @@ def request_handler(request):
         c.execute('''INSERT into rooms VALUES (?,?,?,?,?);''', (room_id, username, 1, game_id, datetime.datetime.now()))
         c.execute('''INSERT into games VALUES (?,?,?,?);''', (game_id, room_id, 1, datetime.datetime.now()))
         c.execute('''UPDATE users SET room_id = ? WHERE username = ?;''', (room_id, username))
+        c.execute('''UPDATE users SET game_id = ? WHERE username = ?;''', (game_id, username))
 # (game_id int, room_id int, capacity int, start_time timestamp);''')
 
 
