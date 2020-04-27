@@ -86,25 +86,20 @@ def check_online():
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
-    return result
     to_leave = []
 
     for r in result:
-        gone_offline(r[0])
+        return gone_offline(r[0], r[1], r[2])
         to_leave.append(r[0])
 
     return to_leave
 
-def gone_offline(username):
+def gone_offline(username, room_id, game_id):
     #remove username from the server, and makes according actions
 
     conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
     c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-    result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
-
-    room_id = result[0][1]
-    game_id = result[0][2]
 
     result2 = c.execute("SELECT * FROM rooms WHERE room_id=?", (room_id,)).fetchall()
 
@@ -113,6 +108,7 @@ def gone_offline(username):
 
 
     if host_name == username or capacity == 1:
+        return "delete"
         delete_room(room_id)
 
     else:
