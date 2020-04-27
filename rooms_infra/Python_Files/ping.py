@@ -49,13 +49,15 @@ def request_handler(request):
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
 
-        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
+
 
         # Check if they need to be kicked out of a room
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
-        check_online()
+        return check_online()
 
+        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
+        conn.commit()
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
 
@@ -84,7 +86,7 @@ def check_online():
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
-
+    return result
     to_leave = []
 
     for r in result:
