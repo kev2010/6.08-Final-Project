@@ -51,7 +51,7 @@ def request_handler(request):
         # Check if they need to be kicked out of a room
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
-        return check_online()
+        check_online()
 
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
@@ -85,7 +85,7 @@ def check_online():
     to_leave = []
 
     for r in result:
-        return gone_offline(r[0])
+        gone_offline(r[0])
         to_leave.append(r[0])
 
     return to_leave
@@ -114,7 +114,7 @@ def gone_offline(username):
         c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("UPDATE games SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("DELETE FROM users WHERE username=?", (username,))
-        return "deleted" + username
+        # return "deleted" + username
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
