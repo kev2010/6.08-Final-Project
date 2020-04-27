@@ -16,7 +16,8 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 #   TODO: Make these functions take in database name string parameters
 #   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
 #   TODO: Potentially make a function for passing action? Does it relate to checking/calling/etc.
-
+#   TODO: Make a function for legal actions?
+#   TODO: Adjust "frames" for multiple step actions?
 
 def request_handler(request):
     """
@@ -643,6 +644,62 @@ def fold(players_cursor, states_cursor, user):
         ValueError: if action is not on the user or folding
             is illegal
     """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = player[4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure folding is a legal option
+    #   Folding is legal only if there are bets present
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if len(bets) == 0:
+        raise ValueError
+    
+    update_cards = ''' UPDATE players_table
+                       SET cards = ?
+                       WHERE user = ?'''
+    players_cursor.execute(update_cards, ('', user))
+
+    users_playing_query = '''SELECT * FROM players_table WHERE cards != ?;'''
+    users_playing = players_cursor.execute(users_playing_query, ('',)).fetchall()
+    #   If all but one player folded, then give the pot and start new hand
+    if len(users_playing) == 1:
+        winner_name = users_playing[0][0]
+        distribute_pots(players_cursor, states_cursor, [winner_name])
+    #   Otherwise, we just pass the action to next player (similar to calling)
+    else:
+        #   Find the max bet
+        max_bet = 0
+        for better in bets:
+            if better[2] > max_bet:
+                max_bet = better[2]
+            
+        found = False
+        for i in range(1, len(players)):
+            position = (user_position + i) % len(players)
+            next_player = players[position]
+            #  user has cards and hasn't bet the right amount condition
+            if next_player[3] != '' and next_player[2] != max_bet : 
+                update_action = ''' UPDATE states_table
+                                    SET action = ? '''
+                states_cursor.execute(update_action, (position,))
+                found = True
+                break
+
+        if not found:
+            board_cards = game_state[1].split(',')
+            if len(board_cards) == 1:   #  empty case
+                board_cards = []
+            next_stage(players_cursor, states_cursor, len(board_cards))
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
@@ -793,3 +850,49 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
 
 def showdown():
     pass
+
+
+def distribute_pots(players_cursor, states_cursor, winner):
+    """
+    Distribute all pots to the winners (this includes all side pots). Updates 
+    the player state by removing bets and cards and updating the balance if 
+    necessary. Updates the game state by removing the deck, board, and pot.
+    Afterwards, start a new hand.
+
+    NOTE: currently supports only one winner
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        winner (Array): list of winner names for each pot. The first winner 
+            is for the main pot, the second winner is for the first side pot,
+            the third winner is for the second side pot, etc. The size of
+            the winner array must be equal to the size of the side pot 
+            array + 1 (the main pot).
+    """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    pot = game_state[4]
+    #   Update each player. Remove bets + cards, & add to balance if winner
+    for player in players:
+        new_bal = (player[1] + pot) if player[0] == winner[0] else player[1]
+        new_bet = 0
+        update_user = ''' UPDATE players_table
+                            SET bal = ?,
+                                bet = ?,
+                                cards = ?
+                            WHERE user = ?'''
+        players_cursor.execute(update_user, (new_bal, new_bet, '', player[0]))
+    
+    #   Update game state. Remove deck, board, and pot
+    update_state = ''' UPDATE states_table
+                        SET deck = ?,
+                            board = ?,
+                            pot = ? '''
+    states_cursor.execute(update_state, ('', '', 0))
+
+    #   Now start a new hand
+    start_new_hand(players_cursor, states_cursor, game_state[2] + 1)
