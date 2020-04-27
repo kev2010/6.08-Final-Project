@@ -102,7 +102,7 @@ def gone_offline(username, room_id, game_id):
 
 
 
-    if room_id != "-1":
+    if room_id != -1:
         result2 = c.execute("SELECT * FROM rooms WHERE room_id=?", (room_id,)).fetchall()
 
         host_name = result2[0][1]
