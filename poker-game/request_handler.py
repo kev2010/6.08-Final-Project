@@ -403,6 +403,7 @@ def call(players_cursor, states_cursor, user):
     #   Put the bet in front of the user
     new_bet = to_call
     new_bal = player[1] + player[2] - to_call
+    bet_delta = new_bet - player[2]
     update_chips = ''' UPDATE players_table
                         SET bal = ? ,
                             bet = ?
@@ -410,7 +411,6 @@ def call(players_cursor, states_cursor, user):
     players_cursor.execute(update_chips, (new_bal, new_bet, user))
 
     #   Update the pot size
-    bet_delta = new_bet - player[2]
     update_pot = ''' UPDATE states_table
                      SET pot = ?'''
     states_cursor.execute(update_pot, (game_state[4] + bet_delta,))
@@ -500,6 +500,91 @@ def bet(players_cursor, states_cursor, user, amount):
     states_cursor.execute(update_pot, (game_state[4] + amount,))
     
     #   Update action
+    for i in range(1, len(players)):
+        position = (user_position + i) % len(players)
+        next_player = players[position]
+        if next_player[3] != '': 
+            update_action = ''' UPDATE states_table
+                                SET action = ? '''
+            states_cursor.execute(update_action, (position,))
+            break
+
+
+def raise_bet(players_cursor, states_cursor, user, amount)
+    """
+    Handles a poker raise request. Raises to the specified amount 
+    and passes the turn to the next player if raising is legal. 
+    Assumes the board has either 0, 3, 4, or 5 cards.
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+        amount (int): a non-zero amount to raise to. Must be a 
+            size that is legal in poker
+    
+    Raises:
+        TODO: customize errors
+        ValueError: if action is not on the user, raising is illegal,
+            or the size to raise to is illegal 
+    """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
+    #   TODO: perhaps make this a function?
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = player[4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure raising is a legal option
+    #   Raising is legal only if there are bets present
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if len(bets) == 0:
+        raise ValueError
+
+    #   Make sure raise size is legal
+    #   Must be raising BY at least twice the previous raise 
+    max_bet = 0  #   Find the largest and 2nd largest bet
+    max_bet_index = 0
+    for better in bets:
+        if better[2] > max_bet:
+            max_bet = better[2]
+            max_bet_index = bets.index(better)
+    
+    second_max_bet = 0
+    if len(bets) != 1:
+        #   TODO: Maybe don't copy? 
+        other_bets = [bets[i] for i in range(len(bets) if i != max_bet_index)
+        for better in other_bets:
+            if better[2] > second_max_bet:
+                second_max_bet = better[2]
+    
+    if amount < 2*max_bet - second_max_bet:
+        raise ValueError
+
+    #   Update player state with the raise
+    new_bal = player[1] + player[2] - amount
+    raise_delta = amount - player[2]
+    update_chips = ''' UPDATE players_table
+                        SET bal = ? ,
+                            bet = ?
+                        WHERE user = ?'''
+    players_cursor.execute(update_chips, (new_bal, amount, user))
+
+    #   Update the pot size
+    update_pot = ''' UPDATE states_table
+                     SET pot = ?'''
+    states_cursor.execute(update_pot, (game_state[4] + raise_delta,))
+    
+    #   Update action
+    #   TODO: perhaps combine all the "update action" code together?
     for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
