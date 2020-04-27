@@ -29,8 +29,7 @@ def request_handler(request):
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
-        return "ok"
-        
+
         if is_host:
             delete_room(room_id)
             return "Room deleted because host left."
