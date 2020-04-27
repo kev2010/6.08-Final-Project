@@ -91,7 +91,6 @@ def check_online():
     return to_leave
 
 def gone_offline(username):
-    return username
     #remove username from the server, and makes according actions
 
     conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
