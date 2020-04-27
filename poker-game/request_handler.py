@@ -403,11 +403,11 @@ def call(players_cursor, states_cursor, user):
     #   Put the bet in front of the user
     new_bet = to_call
     new_bal = player[1] + player[2] - to_call
-    update_blinds = ''' UPDATE players_table
+    update_chips = ''' UPDATE players_table
                         SET bal = ? ,
                             bet = ?
                         WHERE user = ?'''
-    players_cursor.execute(update_blinds, (new_bal, new_bet, user))
+    players_cursor.execute(update_chips, (new_bal, new_bet, user))
 
     #   Update the pot size
     bet_delta = new_bet - player[2]
@@ -456,10 +456,58 @@ def bet(players_cursor, states_cursor, user, amount):
             legal in poker
     
     Raises:
+        TODO: customize errors
         ValueError: if action is not on the user, betting is illegal,
             or the size is illegal 
     """
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
+    #   TODO: perhaps make this a function?
+    game_action = game_state[3]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    user_position = player[4]
+    if game_action != user_position:
+        raise ValueError
+
+    #   Make sure betting is a legal option
+    #   Betting is legal only if there are no bets present
+    #   Otherwise, it would be considered raising
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if bets:
+        raise ValueError
+
+    #   Make sure bet size is legal (at least the big blind)
+    if amount < BIG_BLIND:
+        raise ValueError
+
+    #   Update player state with the bet
+    new_bal = player[1] - amount
+    update_chips = ''' UPDATE players_table
+                        SET bal = ? ,
+                            bet = ?
+                        WHERE user = ?'''
+    players_cursor.execute(update_chips, (new_bal, amount, user))
+
+    #   Update the pot size
+    update_pot = ''' UPDATE states_table
+                     SET pot = ?'''
+    states_cursor.execute(update_pot, (game_state[4] + amount,))
     
+    #   Update action
+    for i in range(1, len(players)):
+        position = (user_position + i) % len(players)
+        next_player = players[position]
+        if next_player[3] != '': 
+            update_action = ''' UPDATE states_table
+                                SET action = ? '''
+            states_cursor.execute(update_action, (position,))
+            found = True
 
 
 def start_new_hand(players_cursor, states_cursor, dealer_position):
