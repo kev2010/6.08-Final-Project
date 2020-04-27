@@ -53,4 +53,3 @@ def request_handler(request):
         conn.close()  # close connection to database
 
         return result
-        
