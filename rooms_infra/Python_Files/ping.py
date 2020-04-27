@@ -56,7 +56,7 @@ def request_handler(request):
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
 
-        result = c.execute("SELECT * FROM users WHERE username=(?,)", (username,)).fetchall()
+        result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
