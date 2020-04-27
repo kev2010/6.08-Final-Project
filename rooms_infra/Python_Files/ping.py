@@ -108,13 +108,13 @@ def gone_offline(username, room_id, game_id):
 
 
     if host_name == username or capacity == 1:
-        return "delete"
-        delete_room(room_id)
+        return delete_room(room_id)
 
     else:
         c.execute("UPDATE rooms SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("UPDATE games SET capacity = ? WHERE room_id =?", (capacity-1, room_id))
         c.execute("DELETE FROM users WHERE username=?", (username,))
+        conn.commit()
         # return "deleted" + username
 
     conn.commit()  # commit commands
@@ -131,7 +131,8 @@ def delete_room(room_id):
         user = r[0]
         c.execute("UPDATE users SET game_id = ? WHERE username =?", (-1, user))
         c.execute("UPDATE users SET room_id = ? WHERE username =?", (-1, user))
-
+        conn.commit()
+    return "here"
     #delete the game and room
     c.execute("DELETE FROM games WHERE room_id=?", (room_id,))
     c.execute("DELETE FROM rooms WHERE room_id=?", (room_id,))
