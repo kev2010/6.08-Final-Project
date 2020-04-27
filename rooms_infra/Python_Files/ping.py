@@ -57,7 +57,7 @@ def request_handler(request):
 
         check_online()
 
-        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username+str(random.randint(0, 40))))
+        c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
         conn.commit()
         # for leave_user in need_to_leave:
         #     gone_offline(leave_user)
