@@ -137,7 +137,7 @@ def post_handler(request, players_cursor, states_cursor):
     #   Get the user, action, and amount from the POST request
     user = request['form']['user']
     action = request['form']['action']
-    amount = request['form']['amount']
+    amount = int(request['form']['amount'])
 
     #   Split actions based on type of request
     #   TODO: implement other actions
@@ -483,7 +483,7 @@ def bet(players_cursor, states_cursor, user, amount):
         raise ValueError
 
     #   Make sure bet size is legal (at least the big blind)
-    if int(amount) < BIG_BLIND:
+    if amount < BIG_BLIND:
         raise ValueError
 
     #   Update player state with the bet
