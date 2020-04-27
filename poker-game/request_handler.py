@@ -157,7 +157,7 @@ def post_handler(request, players_cursor, states_cursor):
     elif action == "raise":
         raise_bet(players_cursor, states_cursor, user, amount)
     elif action == "fold":
-        raise ValueError
+        fold(players_cursor, states_cursor, user)
     else:
         return "Requested action not recognized!"
 
