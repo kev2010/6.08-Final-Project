@@ -67,7 +67,6 @@ def request_handler(request):
             return "-1" # = leave room (go back to main screen)
         else:
             #this user doesn't need to leave, but some others might... they will find out when they ping.
-            return room_id
             return "1" # = everything ok
 
 
