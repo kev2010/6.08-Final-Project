@@ -31,7 +31,7 @@ def request_handler(request):
         conn.close()  # close connection to database
 
         if is_host:
-            #delete_room(room_id)
+            delete_room(room_id)
             return "Room deleted because host left."
 
         else:
