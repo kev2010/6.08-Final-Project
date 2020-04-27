@@ -483,7 +483,7 @@ def bet(players_cursor, states_cursor, user, amount):
         raise ValueError
 
     #   Make sure bet size is legal (at least the big blind)
-    if amount < BIG_BLIND:
+    if int(amount) < BIG_BLIND:
         raise ValueError
 
     #   Update player state with the bet
