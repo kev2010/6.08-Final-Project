@@ -442,6 +442,26 @@ def call(players_cursor, states_cursor, user):
         next_stage(players_cursor, states_cursor, len(board_cards))
 
 
+def bet(players_cursor, states_cursor, user, amount):
+    """
+    Handles a poker bet request. Bets the specified amount and passes
+    the turn to the next player if betting is a legal action. Assumes 
+    the board has either 0, 3, 4, or 5 cards.
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+        amount (int): a non-zero amount to bet. Must be a size that is
+            legal in poker
+    
+    Raises:
+        ValueError: if action is not on the user, betting is illegal,
+            or the size is illegal 
+    """
+    
+
+
 def start_new_hand(players_cursor, states_cursor, dealer_position):
     """
     Begins a new hand at the table. Posts blinds and deals two cards
