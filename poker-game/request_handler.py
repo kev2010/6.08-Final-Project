@@ -172,6 +172,44 @@ def post_handler(request, players_cursor, states_cursor):
     return result
 
 
+def display_game(players_cursor, states_cursor):
+    """
+    Returns the poker game state in a properly formatted string.
+    The return format is as follows:
+        
+        players:
+        (user:str, bal:int, bet:int, cards:str, position:int)
+        ...
+
+        state:
+        (deck:str, board:str, dealer:int, action:int, pot:int)
+    
+    There can be multiple players, but there is only one state
+    for the poker game. The following is an example string that
+    could be returned.
+
+        players:
+        ('kev2010', 950, 0, '2s,9s', 0)
+        ('jasonllu', 950, 0, 'Jh,8s', 1)
+        ('baptiste', 950, 0, '7d,4c', 2)
+
+        state:
+        ('Js,3s,8h, ...', 'Qd,2h,9h,3d', 0, 1, 150)
+    
+    Note that the deck in the state will have more cards, as
+    indicated by the "...".
+
+    Args:
+        players_cursor (SQL Cursor) cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+    
+    Returns:
+        A string of the state of the game, formatted as described
+        above
+    """
+
+
+
 def join_game(players_cursor, states_cursor, user):
     """
     Handles a join game request. Adds the user to the game if it
