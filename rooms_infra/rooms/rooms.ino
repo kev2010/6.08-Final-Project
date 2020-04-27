@@ -103,7 +103,7 @@ void setup() {
 
 }
 
-uint8_t update_selection(uint8_t selection, uint8_t initial_height, uint8_t no_of_selections) {
+uint8_t update_selection(uint8_t selection, uint8_t no_of_selections) {
   selection_btn = digitalRead(PIN_1);
   if (selection_btn != old_selection_btn && selection_btn == 1) {
     tft.fillScreen(TFT_BLACK); //fill background
@@ -159,6 +159,10 @@ void loop() {
     if (millis() - timer >= ping_period) {
       ping_online(user);
       timer = millis();
+      // check if server returns "1" (everything ok) or "-1" (need to leave the room)
+//      if (state == ROOM && strcmp(response_buffer, "-1") == 0){
+//        state = LOGIN_PAGE;
+//      }
     }
   }
 
@@ -190,7 +194,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_login_page(selection);
       }
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_login_page(selection);
@@ -222,7 +226,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_lobby_menu(selection);
       }
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_lobby_menu(selection);
@@ -252,7 +256,7 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         draw_host_lobby_menu(selection);
       }
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_host_lobby_menu(selection);
@@ -272,6 +276,7 @@ void loop() {
       break;
 
     case JOIN_LOBBY:
+      Serial.println("Join Lobby!");
       if (flag) {
         selection = 0;
         // no_of_selections = 4;
@@ -282,7 +287,7 @@ void loop() {
         draw_join_lobby_menu(menu_choices, selection);
       }
 
-      new_selection = update_selection(selection, 100, no_of_selections);
+      new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
         draw_join_lobby_menu(menu_choices, selection);
