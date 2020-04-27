@@ -48,14 +48,14 @@ def request_handler(request):
             c.execute('''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp);''')
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
-            return "inserted"
 
 
 
         # Check if they need to be kicked out of a room
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
-        check_online()
+
+        return check_online()
 
         c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
         conn.commit()
@@ -66,8 +66,6 @@ def request_handler(request):
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
-
-        room_id = result[0][1]
 
         if room_id == -1:
             return "-1" # = leave room (go back to main screen)
