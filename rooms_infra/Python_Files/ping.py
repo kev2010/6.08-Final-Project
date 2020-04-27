@@ -35,9 +35,12 @@ def request_handler(request):
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
-        # c.execute('''DELETE FROM rooms''')
-        # c.execute('''DELETE FROM games''')
+        c.execute('''DELETE FROM rooms''')
+        c.execute('''DELETE FROM games''')
+        c.execute('''DELETE FROM users''')
         conn.commit()
+        conn.close()
+        return "ok"
 
         if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
