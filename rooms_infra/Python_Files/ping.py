@@ -48,6 +48,7 @@ def request_handler(request):
             c.execute('''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp);''')
             c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
             conn.commit()  # commit commands
+            return "inserted"
 
 
 
