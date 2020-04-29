@@ -11,7 +11,7 @@ void ping_online(char* user) {
   strcat(request_buffer, "\r\n"); //header
   Serial.println(request_buffer);
   do_http_request("608dev-2.net", request_buffer, response_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
-  Serial.println(response_buffer);
+  //Serial.println(response_buffer);
 }
 
 void logout(char* user) {

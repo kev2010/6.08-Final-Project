@@ -154,18 +154,7 @@ void extract_room_id() {
 
 
 void loop() {
-  // only ping online if in states that require online status
-  if (state != OFF && state != LOGIN_PAGE ) {
-    if (millis() - timer >= ping_period) {
-      ping_online(user);
-      timer = millis();
-      // check if server returns "1" (everything ok) or "-1" (need to leave the room)
-//      if (state == ROOM && strcmp(response_buffer, "-1") == 0){
-//        state = LOGIN_PAGE;
-//      }
-    }
-  }
-
+  
   switch (state) {
 
     case OFF:
@@ -209,7 +198,7 @@ void loop() {
           timer = millis();
           state = MAIN_LOBBY;
 
-        // selection = 1: turn off
+          // selection = 1: turn off
         } else if (selection == 1) {
           state = OFF;
         }
@@ -219,6 +208,11 @@ void loop() {
       break;
 
     case MAIN_LOBBY:
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+      }
+
       if (flag) {
         selection = 0;
         no_of_selections = 3;
@@ -249,6 +243,11 @@ void loop() {
       break;
 
     case HOST_LOBBY:
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+      }
+
       if (flag) {
         selection = 0;
         no_of_selections = 4;
@@ -276,7 +275,11 @@ void loop() {
       break;
 
     case JOIN_LOBBY:
-      Serial.println("Join Lobby!");
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+      }
+
       if (flag) {
         selection = 0;
         // no_of_selections = 4;
@@ -313,6 +316,19 @@ void loop() {
       break;
 
     case ROOM:
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+        // check if server returns "1" (everything ok) or "-1" (need to leave the room, if inside one)
+        if (strcmp(response_buffer, "-1\n") == 0) { // SOS: needs the "\n" extension, o/w it doesn't work
+          state = MAIN_LOBBY;
+          flag = true;
+          Serial.println("Kicked out of room because host left!");
+          draw_redirect_message();
+          break;
+        }
+      }
+
       if (flag) {
         selection = 0;
         no_of_selections = 1; // CHANGE ME

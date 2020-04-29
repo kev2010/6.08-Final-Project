@@ -88,3 +88,13 @@ void draw_room_screen() {
   tft.drawString("Go back", 20, 100, 1);
   tft.drawString(">", 5, 100, 1);
 }
+
+void draw_redirect_message() {
+  tft.fillScreen(TFT_BLUE);
+  tft.setTextColor(TFT_WHITE, TFT_BLUE);
+  tft.drawString("Kicked out of room", 10, 30, 2);
+  tft.drawString("because host left!", 10, 50, 2);
+  tft.drawString("Redirecting...", 10, 70, 2);
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  delay(8000);
+}
