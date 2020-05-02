@@ -50,7 +50,8 @@ def request_handler(request):
 
         leaderboard = ""
 
-        for r in result:
+        for i in range(len(result)-1, max(0,len(result)-5), -1):
+            r = result[i]
             leaderboard += r[1] + " with score " + str(r[2]) + "\n"
 
         return leaderboard
