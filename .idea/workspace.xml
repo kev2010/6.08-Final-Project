@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a5b5c8e6-7d51-4198-9a26-20bce35b69b9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/ping.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/ping.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/push_ups.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/push_ups.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/utils/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/helpers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,6 +32,11 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/rooms_infra/Python_Files" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="lab" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -86,7 +93,8 @@
       <workItem from="1587838024449" duration="2305000" />
       <workItem from="1587926263831" duration="8192000" />
       <workItem from="1587979647525" duration="4506000" />
-      <workItem from="1588430731760" duration="835000" />
+      <workItem from="1588430731760" duration="1401000" />
+      <workItem from="1588450462325" duration="24000" />
     </task>
     <servers />
   </component>

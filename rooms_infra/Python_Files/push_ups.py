@@ -38,7 +38,7 @@ def request_handler(request):
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
         if len(result) == 0:
             return "Unrecognized user"
-        
+
         room_id = result[1]
 
         result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,))
