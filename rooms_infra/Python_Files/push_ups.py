@@ -32,7 +32,7 @@ def request_handler(request):
         return "Updated!"
 
     elif request['method'] == "GET":
-        username = request['values']['username']
+        username = request['form']['username']
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
