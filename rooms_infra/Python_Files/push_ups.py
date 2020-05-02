@@ -43,7 +43,7 @@ def request_handler(request):
 
         result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,)).fetchall()
         result.sort(key=lambda x: x[2])
-
+        return result
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
