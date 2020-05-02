@@ -43,9 +43,10 @@ def request_handler(request):
             return "Unrecognized user"
 
         room_id = result[0][1]
-        return room_id
-        
+
         result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,)).fetchall()
+
+        return result
         result.sort(key=lambda x: x[2])
 
         conn.commit()  # commit commands
