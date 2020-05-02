@@ -18,6 +18,7 @@ def request_handler(request):
         # return result
 
         if len(result) == 0: #never submitted a score for this game
+            return -5
             c.execute('''INSERT into push_ups VALUES (?,?,?);''',(roomid, username, score))
             conn.commit()  # commit commands
         else:
