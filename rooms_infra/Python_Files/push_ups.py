@@ -14,6 +14,9 @@ def request_handler(request):
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
         roomid = result[0][1]
 
+        if roomid == -1:
+            return "You are not in a room/game!"
+
         result = c.execute('''SELECT * FROM push_ups WHERE username = ? AND room_id = ?''', (username,roomid)).fetchall()
         # return result
 
