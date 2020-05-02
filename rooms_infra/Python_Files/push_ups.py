@@ -12,10 +12,9 @@ def request_handler(request):
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
-        return result
         roomid = result[0][1]
 
-        result = c.execute('''SELECT * FROM push_ups WHERE username = ?''', (username,)).fetchall()
+        result = c.execute('''SELECT * FROM push_ups WHERE username = ? AND room_id = ?''', (username,roomid)).fetchall()
         # return result
 
         if len(result) == 0: #never submitted a score for this game
