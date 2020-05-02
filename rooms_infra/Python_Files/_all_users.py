@@ -45,8 +45,13 @@ def request_handler(request):
 
     if request['method'] == "GET":
 
+
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
+
+        c.execute('''DELETE FROM push_ups''')
+        # c.execute('''DELETE FROM games''')
+        # c.execute('''DELETE FROM users''')
 
         result = c.execute('''SELECT * FROM users''').fetchall()
         conn.commit()  # commit commands
