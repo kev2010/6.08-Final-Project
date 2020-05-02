@@ -12,7 +12,7 @@ def request_handler(request):
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
-        room_id = result[1]
+        room_id = result[0][1]
 
         result = c.execute('''SELECT * FROM push_ups WHERE username = ?''', (username,)).fetchall()
 
