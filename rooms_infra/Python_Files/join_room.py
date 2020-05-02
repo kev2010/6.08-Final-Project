@@ -1,5 +1,5 @@
 import sqlite3
-import helpers.py
+import helpers
 db = '__HOME__/project.db'
 
 GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "PushUps"}
