@@ -34,8 +34,11 @@ def request_handler(request):
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
-        
+
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
+        if len(result) == 0:
+            return "Unrecognized user"
+        
         room_id = result[1]
 
         result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,))
