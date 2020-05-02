@@ -15,8 +15,8 @@ def request_handler(request):
         roomid = result[0][1]
 
         result = c.execute('''SELECT * FROM push_ups WHERE username = ? AND room_id = ?''', (username,roomid)).fetchall()
-        # return result
-
+        return result
+        
         if len(result) == 0: #never submitted a score for this game
             c.execute('''INSERT into push_ups VALUES (?,?,?);''',(roomid, username, score))
         else:
