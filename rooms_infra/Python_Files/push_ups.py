@@ -15,6 +15,7 @@ def request_handler(request):
         roomid = result[0][1]
 
         result = c.execute('''SELECT * FROM push_ups WHERE username = ?''', (username,)).fetchall()
+        return result
 
         if len(result) == 0: #never submitted a score for this game
             c.execute('''INSERT into push_ups VALUES (?,?,?);''',(roomid, username, score))
@@ -42,7 +43,6 @@ def request_handler(request):
 
         result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,)).fetchall()
         result.sort(key=lambda x: x[2])
-        return room_id
 
         conn.commit()  # commit commands
         conn.close()  # close connection to database
