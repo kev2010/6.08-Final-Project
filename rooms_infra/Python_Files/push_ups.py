@@ -18,16 +18,17 @@ def request_handler(request):
         # return result
 
         if len(result) == 0: #never submitted a score for this game
-            return -5
             c.execute('''INSERT into push_ups VALUES (?,?,?);''',(roomid, username, score))
             conn.commit()  # commit commands
+            conn.close()
+            return (room_id, username, score)
         else:
             current_score = result[0][2]
             if score > current_score:
                 c.execute('''UPDATE push_ups SET score = ? WHERE username = ?;''', (score, username))
 
-        conn.commit()  # commit commands
-        conn.close()  # close connection to database
+            conn.commit()  # commit commands
+            conn.close()  # close connection to database
 
         return "Updated!"
 
