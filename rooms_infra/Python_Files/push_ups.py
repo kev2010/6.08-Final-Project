@@ -30,14 +30,11 @@ def request_handler(request):
         return "Updated!"
 
     elif request['method'] == "GET":
+        username = request['values']['username']
+
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
-        c.execute('''CREATE TABLE IF NOT EXISTS push_ups (room_id text, username text, score int);''')
-        return request
-
-        username = ""
-
-
+        
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
         room_id = result[1]
 
