@@ -41,7 +41,7 @@ def request_handler(request):
 
         room_id = result[0][1]
 
-        result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,))
+        result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,)).fetchall()
         result.sort(key=lambda x: x[2])
 
 
