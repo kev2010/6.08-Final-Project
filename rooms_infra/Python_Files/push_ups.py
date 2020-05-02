@@ -35,7 +35,6 @@ def request_handler(request):
         return "Updated!"
 
     elif request['method'] == "GET":
-        return request
         username = request['values']['username']
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
