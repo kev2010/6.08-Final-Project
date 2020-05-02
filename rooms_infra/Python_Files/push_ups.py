@@ -21,7 +21,7 @@ def request_handler(request):
             c.execute('''INSERT into push_ups VALUES (?,?,?);''',(roomid, username, score))
             conn.commit()  # commit commands
             conn.close()
-            return (room_id, username, score)
+            return (roomid, username, score)
         else:
             current_score = result[0][2]
             if score > current_score:
