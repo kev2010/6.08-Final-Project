@@ -2,8 +2,11 @@
 #include <WiFi.h> //Connect to WiFi Network
 #include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
 #include <SPI.h> //Used in support of TFT Display
+#include <mpu6050_esp32.h>
 
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
+
+MPU6050 imu; //imu object called, appropriately, imu
 
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
@@ -39,6 +42,9 @@ uint8_t state;
 #define HOST_LOBBY 3
 #define JOIN_LOBBY 4
 #define ROOM 5
+#define PUSH_UP_GAME 6
+#define RECORD 7
+#define LEADERBOARD 8
 
 const uint8_t PIN_1 = 16; //button 1
 const uint8_t PIN_2 = 5; //button 2
@@ -47,6 +53,7 @@ uint8_t new_selection;
 uint8_t selection;
 uint8_t no_of_selections;
 boolean flag = true;
+uint8_t game_selection;
 
 uint8_t selection_btn;
 uint8_t transition_btn;
@@ -64,6 +71,7 @@ void setup() {
   tft.fillScreen(TFT_BLACK); //fill background
   tft.setTextColor(TFT_GREEN, TFT_BLACK); //set color of font to green foreground, black background
   Serial.begin(115200); //begin serial comms
+  Wire.begin();
   delay(100); //wait a bit (100 ms)
   pinMode(PIN_1, INPUT_PULLUP);
   pinMode(PIN_2, INPUT_PULLUP);
@@ -90,6 +98,14 @@ void setup() {
   } else { //if we failed to connect just Try again.
     Serial.println("Failed to Connect 😕  Going to restart");
     Serial.println(WiFi.status());
+    ESP.restart(); // restart the ESP (proper way)
+  }
+
+  if (imu.setupIMU(1)) {
+    Serial.println("IMU Connected!");
+  } else {
+    Serial.println("IMU Not Connected :/");
+    Serial.println("Restarting");
     ESP.restart(); // restart the ESP (proper way)
   }
 
@@ -154,7 +170,7 @@ void extract_room_id() {
 
 
 void loop() {
-  
+
   switch (state) {
 
     case OFF:
@@ -267,8 +283,9 @@ void loop() {
         if (selection == 3) {
           state = MAIN_LOBBY;
         } else {
-          state = ROOM;
           host_room_post_req(user, selection);
+          game_selection = selection; // to remember game played
+          state = ROOM;
         }
       }
       old_transition_btn = transition_btn;
@@ -331,21 +348,80 @@ void loop() {
 
       if (flag) {
         selection = 0;
-        no_of_selections = 1; // CHANGE ME
+        no_of_selections = 2; // CHANGE ME
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
-        draw_room_screen();
+        draw_room_screen(selection);
+      }
+
+      new_selection = update_selection(selection, no_of_selections);
+      if (new_selection != selection) {
+        selection = new_selection;
+        draw_room_screen(selection);
       }
 
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         flag = true;
         if (selection == 0) {
+          if (game_selection == 2) {
+            state = PUSH_UP_GAME;
+          }
+        } else if (selection == 1) {
           leave_room_post_req(user); // notify that user left room
           state = MAIN_LOBBY;
         }
       }
       old_transition_btn = transition_btn;
+
+      break;
+
+    case PUSH_UP_GAME:
+
+      if (flag) {
+        selection = 0;
+        no_of_selections = 3; // CHANGE ME
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        draw_push_up_screen(selection);
+        //        initialize();
+      }
+
+      new_selection = update_selection(selection, no_of_selections);
+      if (new_selection != selection) {
+        Serial.println("new selection!");
+        selection = new_selection;
+        draw_push_up_screen(selection);
+      }
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        Serial.println("clicked on selection!");
+        flag = true;
+        if (selection == 0) {
+          state = RECORD;
+        } else if (selection == 1) {
+          //state = LEADERBOARD;
+          Serial.println("Leaderboard!");
+        } else if (selection == 2) {
+          state = ROOM;
+        }
+      }
+      old_transition_btn = transition_btn;
+
+      break;
+      
+
+    case RECORD:
+      if (flag) {
+        selection = 0;
+        no_of_selections = 1; // CHANGE ME
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        initialize();
+      }
+
+      push_up_game();
 
       break;
   }

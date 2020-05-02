@@ -20,7 +20,7 @@ void draw_host_lobby_menu(uint8_t selection) {
   tft.drawString("-----------------------", 0, 30, 2);
   tft.drawString("Poker", 40, 50, 2);
   tft.drawString("Blackjack", 40, 70, 2);
-  tft.drawString("Tichu", 40, 90, 2);
+  tft.drawString("PushUps", 40, 90, 2);
   tft.drawString("Go back", 40, 110, 2);
   tft.drawString(">", 25, 50 + (selection * 20), 2);
 }
@@ -68,7 +68,7 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) { // can only s
 
 }
 
-void draw_room_screen() {
+void draw_room_screen(uint8_t selection) {
   char s[] = "@";
   char *token;
   uint8_t counter = 0;
@@ -85,9 +85,21 @@ void draw_room_screen() {
     counter ++ ;
   }
   tft.drawString("-----------------------", 0, 90, 1);
-  tft.drawString("Go back", 20, 100, 1);
-  tft.drawString(">", 5, 100, 1);
+  tft.drawString("Enter game", 20, 100, 1);
+  tft.drawString("Go back", 20, 110, 1);
+  tft.drawString(">", 5, 100 + 10*selection, 1);
 }
+
+
+void draw_push_up_screen(uint8_t selection) {
+  tft.drawString("PUSH UPS", 20, 10, 2);
+  tft.drawString("-----------------------", 0, 30, 2);
+  tft.drawString("Record", 40, 50, 2);
+  tft.drawString("Leaderboard", 40, 70, 2);
+  tft.drawString("Go back", 40, 90, 2);
+  tft.drawString(">", 25, 50 + (selection * 20), 2);
+}
+
 
 void draw_redirect_message() {
   tft.fillScreen(TFT_BLUE);

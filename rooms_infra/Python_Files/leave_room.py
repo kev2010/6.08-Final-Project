@@ -3,7 +3,7 @@ import sqlite3
 
 db = '__HOME__/project.db'
 
-GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "Tichu"}
+GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "PushUps"}
 
 
 def request_handler(request):
