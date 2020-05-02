@@ -54,10 +54,10 @@ def request_handler(request):
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
-        leaderboard = "The leaderboard:\n"
+        leaderboard = ""
 
         for i in range(len(result)-1, max(-1,len(result)-5), -1):
             r = result[i]
-            leaderboard += r[1] + " with score " + str(r[2]) + "\n"
+            leaderboard += r[1] + "," + str(r[2]) + "&"
 
         return leaderboard
