@@ -39,7 +39,7 @@ def request_handler(request):
         if len(result) == 0:
             return "Unrecognized user"
 
-        room_id = result[1]
+        room_id = result[0][1]
 
         result = c.execute('''SELECT * FROM push_ups WHERE room_id = ?''', (room_id,))
         result.sort(key=lambda x: x[2])
