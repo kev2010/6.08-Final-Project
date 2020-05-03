@@ -1,13 +1,4 @@
 import sqlite3
-
-import sys, os
-sys.path.append(os.path.dirname('__HOME__'))
-sys.path.append('/var/jail/home/team079')
-sys.path.append('/home/team079')
-sys.path.append('../home/team079')
-sys.path.append('/')
-
-import helpers
 db = '__HOME__/project.db'
 
 GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "PushUps"}

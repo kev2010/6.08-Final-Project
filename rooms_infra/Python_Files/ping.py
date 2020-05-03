@@ -138,6 +138,7 @@ def delete_room(room_id):
     #delete the game and room
     c.execute("DELETE FROM games WHERE game_id=?", (game_id,))
     c.execute("DELETE FROM rooms WHERE room_id=?", (room_id,))
+    c.execute("DELETE FROM push_ups WHERE room_id=?", (room_id,))
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
