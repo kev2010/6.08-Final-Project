@@ -68,7 +68,7 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) { // can only s
 
 }
 
-void draw_room_screen(uint8_t selection) {
+void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response buffer)
   char s[] = "@";
   char *token;
   uint8_t counter = 0;
@@ -87,7 +87,7 @@ void draw_room_screen(uint8_t selection) {
   tft.drawString("-----------------------", 0, 90, 1);
   tft.drawString("Enter game", 20, 100, 1);
   tft.drawString("Go back", 20, 110, 1);
-  tft.drawString(">", 5, 100 + 10*selection, 1);
+  tft.drawString(">", 5, 100 + 10 * selection, 1);
 }
 
 
@@ -98,6 +98,30 @@ void draw_push_up_screen(uint8_t selection) {
   tft.drawString("Leaderboard", 40, 70, 2);
   tft.drawString("Go back", 40, 90, 2);
   tft.drawString(">", 25, 50 + (selection * 20), 2);
+}
+
+void draw_poker_screen(char* possible_actions, uint8_t selection) {
+  tft.drawString("POKER", 20, 10, 2);
+  tft.drawString("-----------------------", 0, 30, 2);
+
+  char s[] = "@";
+  char *token;
+  uint8_t counter = 0;
+  char actions_copy[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
+  memset(actions_copy, 0, strlen(actions_copy));
+  sprintf(actions_copy, possible_actions);
+  /* get the first token */
+  token = strtok(actions_copy, s);
+  /* walk through other tokens */
+
+  while ( token != NULL ) {
+    tft.drawString(token, 20, 35 + 15 * counter, 1);
+    counter ++ ;
+    token = strtok(NULL, s);
+  }
+
+  tft.drawString(">", 20, 35 + (selection * 15), 1);
+
 }
 
 
