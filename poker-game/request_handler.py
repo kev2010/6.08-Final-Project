@@ -658,7 +658,7 @@ def fold(players_cursor, states_cursor, user):
         2. There is at least one non-zero bet present at the table
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
     
@@ -731,7 +731,7 @@ def start_new_hand(players_cursor, states_cursor, dealer_position):
     to each player. Updates player and game states.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         dealer_position (int): the dealer position ranging [0, # players)
     """
@@ -749,7 +749,7 @@ def post_blinds(players_cursor, states_cursor, dealer_position):
     pot size and dealer position.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         dealer_position (int): the dealer position ranging [0, # players)
     """
@@ -790,7 +790,7 @@ def deal_table(players_cursor, states_cursor):
     deck of cards is stored in state_table.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
     """
     deck = {c for c in cards}
@@ -821,7 +821,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
     previous street and updates the pot size.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         num_board_cards (int): 0, 3, 4, or 5 for the # of cards on the board
     """
@@ -871,10 +871,6 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
 
 
-def showdown():
-    pass
-
-
 def distribute_pots(players_cursor, states_cursor, winner):
     """
     Distribute all pots to the winners (this includes all side pots). Updates 
@@ -919,3 +915,167 @@ def distribute_pots(players_cursor, states_cursor, winner):
 
     #   Now start a new hand
     start_new_hand(players_cursor, states_cursor, (game_state[2] + 1) % len(players))
+
+
+def showdown():
+    pass
+
+
+#   Functions to check if a certain type of hand exists
+def check_straight_flush(hand, board):
+    """
+    Checks if the player's hand and board make a straight flush.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+            e.g. ['Ah', 'Ks']
+        board (list of str): length 5 list of the board's cards
+            e.g. ['Qs', '3h', '4h', 'Js', 'Tc']
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a straight flush is present, and the
+        second entry is a list of str of the best straight flush
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+
+def check_four_of_a_kind(hand, board):
+    """
+    Checks if the player's hand and board make a four of a kind.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a four of a kind is present, and the
+        second entry is a list of str of the best four of a kind
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+
+def check_full_house(hand, board):
+    """
+    Checks if the player's hand and board make a full house.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a full house is present, and the
+        second entry is a list of str of the best full house
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+def check_flush(hand, board):
+    """
+    Checks if the player's hand and board make a flush.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a flush is present, and the
+        second entry is a list of str of the best flush
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+def check_straight(hand, board):
+    """
+    Checks if the player's hand and board make a straight.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a straight is present, and the
+        second entry is a list of str of the best straight
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+def check_three_of_a_kind(hand, board):
+    """
+    Checks if the player's hand and board make a three of a kind.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a three of a kind is present, and the
+        second entry is a list of str of the best three of a kind
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+def check_two_pair(hand, board):
+    """
+    Checks if the player's hand and board make a two pair.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a two pair is present, and the
+        second entry is a list of str of the best two pair
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+def check_one_pair(hand, board):
+    """
+    Checks if the player's hand and board make a pair.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a pair is present, and the
+        second entry is a list of str of the best pair
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+
+
+def check_high_card(hand, board):
+    """
+    Returns the hand with high card. IMPORTANT: Assumes that no 
+    better hand can be made.
+
+    Args:
+        hand (list of str): length 2 list of the player's cards
+        board (list of str): length 5 list of the board's cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is true (since
+        high card is the worst possible poker hand), and the
+        second entry is a list of str of the best high card
+        hand made. The hand is organized from most to least 
+        important card.
+    """
