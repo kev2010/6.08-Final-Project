@@ -1,4 +1,3 @@
-
 #include <WiFi.h> //Connect to WiFi Network
 #include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
 #include <SPI.h> //Used in support of TFT Display
@@ -8,10 +7,10 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
 MPU6050 imu; //imu object called, appropriately, imu
 
-char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
-char password[] = "vastbug510"; //Password for 6.08 Lab
+char network[] = "Harris";  //SSID for 6.08 Lab
+char password[] = "sofia7511"; //Password for 6.08 Lab
 
-char user[] = "giannis";
+char user[] = "obama";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -27,9 +26,11 @@ char response_buffer[OUT_BUFFER_SIZE]; //char array buffer to hold HTTP response
 
 char response_buffer_2[OUT_BUFFER_SIZE]; // may need multiple char array buffers to hold HTTP response (not used now)
 
+char room_descr[OUT_BUFFER_SIZE];
 char menu_choices[OUT_BUFFER_SIZE];
 char all_room_ids[5000];
 char room_id[500]; // room_id to join
+char leaderboard [200];
 
 char host[] = "Host room";
 char join[] = "Join room";
@@ -447,7 +448,7 @@ void loop() {
         if (selection == 0) {
           state = RECORD;
         } else if (selection == 1) {
-          //state = LEADERBOARD;
+          state = LEADERBOARD;
           Serial.println("Leaderboard!");
         } else if (selection == 2) {
           state = ROOM;
@@ -457,7 +458,33 @@ void loop() {
 
       break;
 
+    case LEADERBOARD:
+      if (flag) {
+        selection = 0;
+        no_of_selections = 1; // CHANGE ME
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        get_leaders();
+        draw_leaderboard_screen(selection);
+      }
 
+      new_selection = update_selection(selection, no_of_selections);
+      if (new_selection != selection) {
+        Serial.println("new selection!");
+        selection = new_selection;
+
+      }
+
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        Serial.println("clicked on selection!");
+        flag = true;
+        state = PUSH_UP_GAME;
+      }
+      old_transition_btn = transition_btn;
+
+      break;
     case RECORD:
       if (millis() - timer >= ping_period) {
         ping_online(user);
@@ -486,12 +513,14 @@ void loop() {
 
       if (flag) {
         selection = 0;
-        no_of_selections = 1; // CHANGE ME
+        //no_of_selections = 1; // CHANGE ME
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
-        //handle_action_post_req(user, "join"); // only time needed to hardcode action
+        char join[] = "join";
+        handle_action_post_req(user, join, 0); // only time needed to hardcode action
         get_poker_actions_req(user);
         extract_actions_buffer(response_buffer);
+        Serial.println(possible_actions);
         get_actions_timer = millis();
 
         // intitialize previous actions <- current actions when first entering game
@@ -502,6 +531,7 @@ void loop() {
       if (millis() - get_actions_timer > 5000) {
         get_poker_actions_req(user);
         extract_actions_buffer(response_buffer); // only now are possible_actions updated
+        Serial.println(possible_actions);
         get_actions_timer = millis();
         
         // if there is any game update (new actions), draw game screen again, otherwise do nothing

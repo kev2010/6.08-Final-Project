@@ -38,10 +38,6 @@ void initialize() {
   prev_push_ups = 10;
 }
 
-
-
-
-
 void push_up_game() {
   record_btn = digitalRead(PIN_1);
   if (record_btn != old_record_btn && record_btn == 1) {
@@ -67,6 +63,8 @@ void push_up_game() {
 
       if (millis() - rep_timer > 2000 and started == true) {
         Serial.println("Finished recording");
+        post_push_ups();
+        
         push_ups = 0;
         started = false;
         record = false;
@@ -96,7 +94,7 @@ void push_up_game() {
   } else {
     if (first == true) {
       tft.fillScreen(TFT_BLACK);
-      tft.drawString("Press button on pin 5 to", 0, 40, 1);
+      tft.drawString("Press button on pin 16 to", 0, 40, 1);
       tft.drawString("start recording", 30, 50, 1);
       tft.drawString("You will have 5 seconds to", 0, 70, 1);
       tft.drawString("begin recording", 30, 80, 1);

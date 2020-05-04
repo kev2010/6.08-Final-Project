@@ -6,6 +6,53 @@ void draw_login_page(uint8_t selection) {
   tft.drawString(">", 25, 50 + (selection * 20), 2);
 }
 
+void draw_leaderboard_screen(uint8_t selection) {
+
+  char s[] = "&";
+  char *token;
+  uint8_t counter = 0;
+  char leader[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
+  memset(leader, 0, strlen(leader));
+  sprintf(leader, response_buffer);
+  /* get the first token */
+  token = strtok(leader, s);
+  /* walk through other tokens */
+  uint8_t cnt = 0;
+
+  while (token != NULL and token != "") {
+    
+    char *player;
+    char *score;
+    
+    player = strtok(token, ",");
+    score = strtok(NULL, ",");
+    
+    char a[3] = "";
+    sprintf(a, "%d.", cnt + 1);
+
+    Serial.print("player=");
+    Serial.println(player);
+
+    Serial.print("score=");
+    Serial.println(score);
+    
+    tft.drawString(a, 10, 10 + 15 * cnt, 1);
+    tft.drawString(player, 30, 10 + 15 * cnt, 1);
+    tft.drawString(score, 130, 10 + 15 * cnt, 1);
+
+
+
+    token = strtok(NULL, s);
+    cnt ++ ;
+
+
+  }
+
+
+  tft.drawString("Go back", 20, 110, 1);
+  tft.drawString(">", 5, 110 + 10 * selection, 1);
+}
+
 void draw_lobby_menu(uint8_t selection) {
   tft.drawString("MAIN LOBBY", 20, 10, 2);
   tft.drawString("-----------------------", 0, 30, 2);
@@ -75,7 +122,7 @@ void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response b
   char room_message[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
   memset(room_message, 0, strlen(room_message));
   Serial.println(response_buffer);
-  sprintf(room_message, response_buffer);
+  sprintf(room_message, room_descr);
   /* get the first token */
   token = strtok(room_message, s);
   /* walk through other tokens */
