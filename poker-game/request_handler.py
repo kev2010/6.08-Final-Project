@@ -918,4 +918,4 @@ def distribute_pots(players_cursor, states_cursor, winner):
     states_cursor.execute(update_state, ('', '', 0))
 
     #   Now start a new hand
-    start_new_hand(players_cursor, states_cursor, game_state[2] + 1)
+    start_new_hand(players_cursor, states_cursor, (game_state[2] + 1) % len(players))
