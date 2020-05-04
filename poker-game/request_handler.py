@@ -1013,6 +1013,19 @@ def check_flush(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    suits = [i[1] for i in hand]
+    suit_dict = {}
+    for s in suits:
+        if s in suit_dict:
+            suit_dict[s] += 1
+        else:
+            suit_dict[s] = 1
+    
+    if max(suit_dict.values()) >= 5:
+        max_suit = [k for k, v in suit_dict if v == max(suit_dict.values())][0]
+        suited_cards = [k for k in hand if k[1] == max_suit]
+        highest_cards = check_high_card(suited_cards)[1]
+        return (True, highest_cards[:5])
 
 def check_straight(hand):
     """
