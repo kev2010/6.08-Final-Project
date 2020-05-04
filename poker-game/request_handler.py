@@ -940,6 +940,10 @@ def check_straight_flush(hand, board):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    if check_flush(hand, board)[0] and check_straight(hand, board)[0]:
+        return (True, check_flush(hand, board)[1])
+    else:
+        return (False,)
 
 
 def check_four_of_a_kind(hand, board):
