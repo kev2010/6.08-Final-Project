@@ -922,16 +922,14 @@ def showdown():
 
 
 #   Functions to check if a certain type of hand exists
-def check_straight_flush(hand, board):
+def check_straight_flush(hand):
     """
     Checks if the player's hand and board make a straight flush.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-            e.g. ['Ah', 'Ks']
-        board (list of str): length 5 list of the board's cards
-            e.g. ['Qs', '3h', '4h', 'Js', 'Tc']
+        hand (list of str): non-empty list of cards
+            e.g. ['Ah', 'Ks', 'Qs', '3h', '4h', 'Js', 'Tc']
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -940,20 +938,19 @@ def check_straight_flush(hand, board):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
-    if check_flush(hand, board)[0] and check_straight(hand, board)[0]:
-        return (True, check_flush(hand, board)[1])
+    if check_flush(hand)[0] and check_straight(hand)[0]:
+        return (True, check_flush(hand)[1])
     else:
         return (False,)
 
 
-def check_four_of_a_kind(hand, board):
+def check_four_of_a_kind(hand):
     """
     Checks if the player's hand and board make a four of a kind.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -962,16 +959,28 @@ def check_four_of_a_kind(hand, board):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    #   TODO: default dict?
+    cards_dict = {}
+    for card in hand:
+        if card in cards_dict:
+            cards_dict[card] += 1
+        else:
+            cards_dict[card] = 1
+    
+    if max(cards_dict.values()) == 4:
+        mode = [k for k, v in cards_dict if v == 4][0]
+        remaining = [k for k, v in cards_dict if v != 4]
+        highest_card = check_high_card(remaining)[1][0]
+        return (True, [mode]*4 + highest_card)
 
 
-def check_full_house(hand, board):
+def check_full_house(hand):
     """
     Checks if the player's hand and board make a full house.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -980,15 +989,22 @@ def check_full_house(hand, board):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    if check_three_of_a_kind(hand)[0]:
+        three_kind = check_three_of_a_kind(hand)[1][0]
+        remaining = [k for k in hand if k != three_kind]
+        if check_two_pair(hand)[0]:
+            two_kind = check_two_pair(remaining)[1][0]
+            return (True, [three_kind]*3 + [two_kind]*2)
+    return (False,)
 
-def check_flush(hand, board):
+
+def check_flush(hand):
     """
     Checks if the player's hand and board make a flush.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -998,14 +1014,13 @@ def check_flush(hand, board):
         The hand is organized from most to least important card.
     """
 
-def check_straight(hand, board):
+def check_straight(hand):
     """
     Checks if the player's hand and board make a straight.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -1015,14 +1030,13 @@ def check_straight(hand, board):
         The hand is organized from most to least important card.
     """
 
-def check_three_of_a_kind(hand, board):
+def check_three_of_a_kind(hand):
     """
     Checks if the player's hand and board make a three of a kind.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -1032,14 +1046,13 @@ def check_three_of_a_kind(hand, board):
         The hand is organized from most to least important card.
     """
 
-def check_two_pair(hand, board):
+def check_two_pair(hand):
     """
     Checks if the player's hand and board make a two pair.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -1049,14 +1062,13 @@ def check_two_pair(hand, board):
         The hand is organized from most to least important card.
     """
 
-def check_one_pair(hand, board):
+def check_one_pair(hand):
     """
     Checks if the player's hand and board make a pair.
     IMPORTANT: Assumes that no better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is a boolean,
@@ -1067,14 +1079,13 @@ def check_one_pair(hand, board):
     """
 
 
-def check_high_card(hand, board):
+def check_high_card(hand):
     """
     Returns the hand with high card. IMPORTANT: Assumes that no 
     better hand can be made.
 
     Args:
-        hand (list of str): length 2 list of the player's cards
-        board (list of str): length 5 list of the board's cards
+        hand (list of str): non-empty list of cards
     
     Returns:
         A tuple of length 2 where the first entry is true (since
