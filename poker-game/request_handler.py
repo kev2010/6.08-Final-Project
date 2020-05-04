@@ -87,7 +87,8 @@ def request_handler(request):
 
     game_state = ""
     if request['method'] == 'GET':
-        game_state = get_handler(request, c_player, c_state)
+        user = request["values"]["user"]
+        game_state = get_handler(user, request, c_player, c_state)
     elif request['method'] == 'POST':
         game_state = post_handler(request, c_player, c_state)
 
@@ -99,7 +100,7 @@ def request_handler(request):
     return game_state
 
 
-def get_handler(request, players_cursor, states_cursor):
+def get_handler(user, request, players_cursor, states_cursor):
     """
     Handles a GET request as defined in the request_handler function.
     Returns a string representing the game state as defined in
@@ -117,7 +118,29 @@ def get_handler(request, players_cursor, states_cursor):
         Currently returns the game state as specified by the
         display_game function
     """
-    return display_game(players_cursor, states_cursor)
+    
+    users_query = '''SELECT * FROM players_table;'''
+    users = players_cursor.execute(users_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()
+    if users[0][0] == user and game_state:
+      possible_actions = ["start"]
+      
+      return str(len(possible_actions)) + "$" + "@".join(possible_actions)
+    else:
+      game_action = game_state[3]
+      user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+      user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+      if game_action == user_position:
+        possible_actions = ["leave", "check", "call", "bet", "raise", "fold"]
+        return str(len(possible_actions)) + "$" + "@".join(possible_actions)
+      else:
+        possible_actions = ["leave"]
+        return str(len(possible_actions)) + "$" + "@".join(possible_actions)       
+ 
+      
+
+    #return display_game(players_cursor, states_cursor)
 
 
 def post_handler(request, players_cursor, states_cursor):
