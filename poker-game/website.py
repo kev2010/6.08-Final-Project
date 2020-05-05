@@ -53,7 +53,7 @@ def request_handler(request):
         <th>''' + sp[1] + '''</th>
         <th>''' + sp[2] + '''</th>'''
 
-        if i == 1:
+        if user == sp[0]:
             x += '''<th>''' + sp[3] + " " + sp[4] + '''<th>'''
         else:
             x += '''<th> ** ** <th>'''
