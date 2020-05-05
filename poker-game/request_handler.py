@@ -268,6 +268,7 @@ def render_frames():
     for frame in FRAMES:
         result += "FRAME " + str(counter) + ":\n"
         result += frame + "\n"
+        counter += 1
     return result
 
 
@@ -337,7 +338,6 @@ def start_game(players_cursor, states_cursor, user):
         start_new_hand(players_cursor, states_cursor, dealer)
     else:
         raise ValueError
-    FRAMES.append(display_game(players_cursor, states_cursor))
 
 
 def leave_game(players_cursor, states_cursor, user):
