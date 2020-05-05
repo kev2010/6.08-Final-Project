@@ -53,7 +53,7 @@ def display_game(players_cursor, states_cursor, user):
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
     for s in state:
-        result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(p[POT]) + ")"
+        result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(s[POT]) + ")"
         # result += str(s) + "\n"
     
     return result
