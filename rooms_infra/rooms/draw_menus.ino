@@ -23,7 +23,7 @@ void draw_leaderboard_screen(uint8_t selection) {
   uint8_t cnt = 0;
   uint8_t i = 0;
 
-  while ( token != NULL and token != " " and i < users ) {
+  while ( token != NULL and token != " " and i < 2*users ) {
     char a[3] = "";
     sprintf(a, "%d.", cnt + 1);
     if (i % 2 == 0) {
