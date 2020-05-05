@@ -26,6 +26,8 @@ def request_handler(request):
         ret = display_game(c_player, c_state, user)
         return ret
 
+    ret = ret.split("(")
+
     #   TODO: Figure out if this is the right order of commit/close
     conn_players.close()
     conn_state.close()
@@ -42,11 +44,12 @@ def request_handler(request):
     '''
     x += '''
         <table style="width:100%">'''
-    for r in ret['players']:
+    for i in range(1,4):
+        sp = ret[i].split(",")
         x += '''<tr>
-        <th> <strong>'''+r[0] + '''</strong> </th>
-        <th>''' + r[1] + '''</th>
-        <th>''' + r[2] + '''</th>
+        <th> <strong>'''+sp[0] + '''</strong> </th>
+        <th>''' + sp[1] + '''</th>
+        <th>''' + sp[2] + '''</th>
         </tr>'''
 
     x+= "</table>"
