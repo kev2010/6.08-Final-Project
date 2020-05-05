@@ -24,7 +24,7 @@ def request_handler(request):
     if request['method'] == 'GET':
         user = request["values"]["user"]
         ret = display_game(c_player, c_state, user)
-
+        return ret
 
     #   TODO: Figure out if this is the right order of commit/close
     conn_players.close()
