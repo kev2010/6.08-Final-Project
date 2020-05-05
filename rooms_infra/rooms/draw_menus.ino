@@ -17,13 +17,14 @@ void draw_leaderboard_screen(uint8_t selection) {
   /* get the first token */
   token = strtok(leader, s);
   users = atoi(token);
-  token = strtok(leader, s);  
+  token = strtok(NULL, s);
+  Serial.println(users);  
   
   /* walk through other tokens */
   uint8_t cnt = 0;
   uint8_t i = 0;
 
-  while ( token != NULL and token != " " and i < 2*users ) {
+  while ( token != NULL and i < 2*users ) {
     char a[3] = "";
     sprintf(a, "%d.", cnt + 1);
     if (i % 2 == 0) {
