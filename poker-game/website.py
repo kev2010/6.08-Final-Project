@@ -20,49 +20,50 @@ def request_handler(request):
     c_state = conn_state.cursor()
     c_player = conn_players.cursor()
 
-    ret = None
-    if request['method'] == 'GET':
-        user = request["values"]["user"]
-        ret = display_game(c_player, c_state, user)
+    # ret = None
+    # if request['method'] == 'GET':
+    #     user = request["values"]["user"]
+    #     ret = display_game(c_player, c_state, user)
 
-    ret = ret.split("(")
+    # ret = ret.split("(")
 
-    #   TODO: Figure out if this is the right order of commit/close
-    conn_players.close()
-    conn_state.close()
+    # #   TODO: Figure out if this is the right order of commit/close
+    # conn_players.close()
+    # conn_state.close()
 
-    x = "<meta http-equiv=\"refresh\" content=\"3\" ><h1> WELCOME TO POKER! </h1> <br><br> <h2> by team079 </h2> <br><br> A game is in progress... <br><br>"
+    # x = "<h1> WELCOME TO POKER! </h1> <br><br> <h2> by team079 </h2> <br><br> A game is in progress... <br><br>"
 
-    x += '''
-        <table style="width:100%">'''
+    # x += '''
+    #     <table style="width:100%">'''
 
-    x += '''
-              <tr>
-            <th>Name</th>
-            <th>Balance</th> 
-            <th>Bet</th>
-            <th> Cards </th>
-          </tr>
+    # x += '''
+    #           <tr>
+    #         <th>Name</th>
+    #         <th>Balance</th> 
+    #         <th>Bet</th>
+    #         <th> Cards </th>
+    #       </tr>
     
-    '''
+    # '''
 
-    for i in range(1,4):
-        sp = ret[i].split(",")
-        x += '''<tr>
-        <th>'''+sp[0] + '''</th>
-        <th>''' + sp[1] + '''</th>
-        <th>''' + sp[2] + '''</th>'''
+    # for i in range(1,4):
+    #     sp = ret[i].split(",")
+    #     x += '''<tr>
+    #     <th>'''+sp[0] + '''</th>
+    #     <th>''' + sp[1] + '''</th>
+    #     <th>''' + sp[2] + '''</th>'''
 
-        if user == sp[0]:
-            x += '''<th>''' + sp[3] + " " + sp[4] + '''<th>'''
-        else:
-            x += '''<th> ** ** <th>'''
-        x += '''</tr>'''
+    #     if user == sp[0]:
+    #         x += '''<th>''' + sp[3] + " " + sp[4] + '''<th>'''
+    #     else:
+    #         x += '''<th> ** ** <th>'''
+    #     x += '''</tr>'''
 
-    x+= "</table>"
+    # x+= "</table>"
 
-    x+= "<br><br><br> copyright team079!"
+    # x+= "<br><br><br> copyright team079!"
 
-    return x
+    # return x
+    return "<meta http-equiv=\"refresh\" content=\"3\" ><h1> HI </h1>"
     
 
