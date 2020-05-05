@@ -84,7 +84,7 @@ def deal_table(players_cursor, states_cursor, user):
     players = players_cursor.execute('''SELECT * FROM players_table''').fetchall()
 
     for seat in players:
-        user = seat[USERNAME]
+        name = seat[USERNAME]
         #   Draw two cards, update the current deck, and update player
         two_cards = random.sample(deck, 2)
         deck.remove(two_cards[0])
@@ -93,7 +93,7 @@ def deal_table(players_cursor, states_cursor, user):
         update_cards = ''' UPDATE players_table
                            SET cards = ?
                            WHERE user = ? '''
-        players_cursor.execute(update_cards, (hand, user))
+        players_cursor.execute(update_cards, (hand, name))
 
     #   Update the deck with remaining cards
     update_deck = ''' UPDATE states_table

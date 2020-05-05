@@ -1,4 +1,3 @@
-import sqlite3
 import sys
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
@@ -68,6 +67,6 @@ def render_frames():
     result = ""
     for frame in FRAMES:
         result += "FRAME " + str(counter) + ":\n"
-        result += frame + "\n"
+        result += frame + "\n\n"
         counter += 1
     return result

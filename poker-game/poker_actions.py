@@ -1,4 +1,3 @@
-import sqlite3
 import sys
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
