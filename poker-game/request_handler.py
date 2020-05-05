@@ -2,7 +2,7 @@ import sqlite3
 import random
 import sys
 sys.path.append('__HOME__/team079/poker-game')
-from settings import *
+from settings import players_db
 from poker_actions import *
 from room_actions import *
 
