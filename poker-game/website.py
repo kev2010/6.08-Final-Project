@@ -30,4 +30,29 @@ def request_handler(request):
     conn_players.close()
     conn_state.close()
 
-    return "<h1> HELLO! </h1>" + str(ret)
+    x = "<h1> WELCOME TO POKER! </h1> <br><br> <h2> by team079 </h2> <br><br> A game is in progress... <br><br>"
+
+    x += '''
+              <tr>
+            <th>Name</th>
+            <th>Balance</th> 
+            <th>Bet</th>
+          </tr>
+    
+    '''
+    x += '''
+        <table style="width:100%">'''
+    for r in ret['players']:
+        x += '''<tr>
+        <th> <strong>'''+r[0] + '''</strong> </th>
+        <th>''' + r[1] + '''</th>
+        <th>''' + r[2] + '''</th>
+        </tr>'''
+
+    x+= "</table>"
+
+    x+= "<br><br><br> copyright team079!"
+
+    return x
+    
+
