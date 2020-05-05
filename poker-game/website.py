@@ -54,7 +54,7 @@ def request_handler(request):
         <th>''' + sp[2] + '''</th>'''
 
         if i == 1:
-            x += '''<th>''' + sp[3] + '''<th>'''
+            x += '''<th>''' + sp[3] + " " + sp[4] + '''<th>'''
         x += '''</tr>'''
 
     x+= "</table>"
