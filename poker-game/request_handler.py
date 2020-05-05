@@ -868,7 +868,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
 
     #   Update game state for the next street
     if num_board_cards == 5:  #  River
-        showdown(players_cursor, states_cursor)
+        distribute_pots(players_cursor, states_cursor)
     else:
         #   Draw the next card(s) for the board based on street
         to_deal = 3 if num_board_cards == 0 else 1
@@ -897,14 +897,12 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
 
 
-def distribute_pots(players_cursor, states_cursor, winner):
+def distribute_pots(players_cursor, states_cursor):
     """
     Distribute all pots to the winners (this includes all side pots). Updates 
     the player state by removing bets and cards and updating the balance if 
     necessary. Updates the game state by removing the deck, board, and pot.
     Afterwards, start a new hand.
-
-    NOTE: currently supports only one winner
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
@@ -920,10 +918,30 @@ def distribute_pots(players_cursor, states_cursor, winner):
     query = '''SELECT * FROM states_table;'''
     game_state = states_cursor.execute(query).fetchall()[0]
 
-    pot = game_state[POT]
-    #   Update each player. Remove bets, invested, + cards, & add to balance if winner
+    all_playing = {p[USERNAME]: [p[INVESTED], 0] for p in players if p[CARDS] != ''}
+    to_handle = [p for p in all_playing.keys()]
+    while len(to_handle) > 1:
+        min_stack = min([all_playing[k][0] for k in to_handle])
+        pot = min_stack * len(to_handle)
+        for p in to_handle:
+            all_playing[p][0] -= min_stack
+        
+        player_card_list = [(p[USERNAME], p[CARDS].split(',')) for p in players]
+        board_cards = game_state[BOARD]
+        winners = find_winners(player_card_list, board_cards)
+        for p in winners:
+            all_playing[p][1] += pot / len(winners)
+        
+        to_handle = [p for p, v in all_playing.items() if v[0] > 0]
+    
+    if len(to_handle) == 1:
+        p = to_handle[0]
+        all_playing[p][1] += all_playing[p][0]
+        all_playing[p][0] = 0
+
     for player in players:
-        new_bal = (player[BALANCE] + pot) if player[USERNAME] == winner[0] else player[BALANCE]
+        delta = all_playing[player[USERNAME]][1]
+        new_bal = player[BALANCE] + delta
         new_bet = 0
         new_invested = 0
         update_user = ''' UPDATE players_table
@@ -945,35 +963,31 @@ def distribute_pots(players_cursor, states_cursor, winner):
     start_new_hand(players_cursor, states_cursor, (game_state[DEALER] + 1) % len(players))
 
 
-def showdown(players_cursor, states_cursor):
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-
+def find_winners(players, board_cards):
+    """
+    players = (username, cards -> ['Ah', 'Kh'])
+    board = ['Ah', ...]
+    """
     #   TODO: fix magic #
     best_hand = 0
     best_hand_players = []
-    board_cards = game_state[BOARD].split(',')
     for player in players:
-        hole_cards = player[CARDS].split(',')
+        hole_cards = player[1]
         hand_rank, hand = find_best_hand(hole_cards, board_cards)
 
         if hand_rank > best_hand:
             best_hand = hand_rank
-            best_hand_players = [(player[USERNAME], hand)]
+            best_hand_players = [(player[0], hand)]
         elif hand_rank == best_hand:
-            best_hand_players.append((player[USERNAME], hand))
+            best_hand_players.append((player[0], hand))
     
-    winner = best_hand_players[0][0]
+    winners = [best_hand_players[0][0]]
     if len(best_hand_players) > 1:
         #   Convert hand to list of numbers
         hands = [(k[0], [card_order_dict[j[0]] for j in k[1]]) for k in best_hand_players]
         hands.sort(key=lambda x: [x[1][0], x[1][1], x[1][2], x[1][3], x[1][4]], reverse=True)
-        winner, _ = hands[0]
-        #   TODO: handle split spots later
-
-    distribute_pots(players_cursor, states_cursor, winner)
+        winners = [hands[0][0]] + [i[0] for i in hands if i[1] == hands[0][1]]
+    return winners
 
 
 def find_best_hand(hole_cards, board):
