@@ -58,6 +58,6 @@ def request_handler(request):
 
         for i in range(len(result)-1, max(-1,len(result)-5), -1):
             r = result[i]
-            leaderboard += r[1] + "," + str(r[2]) + "&"
+            leaderboard += r[1] + "&" + str(r[2]) + "&"
 
         return leaderboard
