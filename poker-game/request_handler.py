@@ -4,6 +4,7 @@ import random
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
+#   Constants
 MAX_PLAYERS = 3
 SMALL_BLIND = 25
 BIG_BLIND = 50
@@ -14,6 +15,20 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 card_order_dict = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, 
                    "T":10, "J":11, "Q":12, "K":13, "A":14}
 
+#   Player SQL DB indicies
+USERNAME = 0
+BALANCE = 1
+BET = 2
+INVESTED = 3
+CARDS = 4
+POSITION = 5
+
+#   Game State SQL DB indicies
+DECK = 0
+BOARD = 1
+DEALER = 2
+ACTION = 3
+POT = 4
 
 #   TODO: Make these functions take in database name string parameters
 #   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
@@ -39,6 +54,7 @@ def request_handler(request):
                         "user": kev2010, 
                         "bal": 850,
                         "bet": 150,
+                        "invested": 150,
                         "cards": "Ah,Kd"
                         "position": 0
                     },
@@ -79,8 +95,8 @@ def request_handler(request):
     conn_players = sqlite3.connect(players_db)
     c_player = conn_players.cursor()
     c_player.execute('''CREATE TABLE IF NOT EXISTS players_table 
-                        (user text, bal int, bet int, cards text, 
-                        position int);''')
+                        (user text, bal int, bet int, invested int, 
+                        cards text, position int);''')
     conn_state = sqlite3.connect(state_db)
     c_state = conn_state.cursor()
     c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
@@ -126,14 +142,14 @@ def get_handler(user, request, players_cursor, states_cursor):
     return users
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()
-    if users[0][0] == user and game_state:
+    if users[0][USERNAME] == user and game_state:
       possible_actions = ["start"]
       
       return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
     else:
-      game_action = game_state[3]
+      game_action = game_state[ACTION]
       user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-      user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+      user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
       if game_action == user_position:
         possible_actions = ["leave", "check", "call", "bet", "raise", "fold"]
         return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
@@ -271,9 +287,9 @@ def join_game(players_cursor, states_cursor, user):
         raise ValueError
 
     #   Since the game is not full, add the player to the game
-    insert_player = '''INSERT into players_table VALUES (?,?,?,?,?);'''
+    insert_player = '''INSERT into players_table VALUES (?,?,?,?,?,?);'''
     players_cursor.execute(insert_player,
-                           (user, STARTING_STACK, 0, "", len(players)))
+                           (user, STARTING_STACK, 0, 0, "", len(players)))
 
 
 def start_game(players_cursor, states_cursor, user):
@@ -291,7 +307,7 @@ def start_game(players_cursor, states_cursor, user):
     """
     users_query = '''SELECT * FROM players_table;'''
     users = players_cursor.execute(users_query).fetchall()
-    if users[0][0] == user:
+    if users[0][USERNAME] == user:
         #   Insert a game state entry into the states_table
         deck = ",".join(cards)
         board = ""
@@ -347,9 +363,9 @@ def check(players_cursor, states_cursor, user):
     game_state  = states_cursor.execute(query).fetchall()[0]
 
     #   Make sure action is on the user
-    game_action = game_state[3]
+    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][4]
+    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
     if game_action != user_position:
         raise ValueError
 
@@ -360,11 +376,11 @@ def check(players_cursor, states_cursor, user):
     #   Find max bet
     max_bet = 0
     for better in bets:
-        if better[2] > max_bet:
-            max_bet = better[2]
+        if better[BET] > max_bet:
+            max_bet = better[BET]
     #   See if it's big blind special case
-    preflop = len(game_state[1]) == 0
-    big_blind_pos = (game_state[2] + 2) % len(players)
+    preflop = len(game_state[BOARD]) == 0
+    big_blind_pos = (game_state[DEALER] + 2) % len(players)
     big_blind_special = preflop and user_position == big_blind_pos and max_bet == BIG_BLIND
     if bets and not big_blind_special:
         raise ValueError
@@ -379,15 +395,15 @@ def check(players_cursor, states_cursor, user):
             position = (user_position + i) % len(players)
             #   If this user is the small blind, then the original 
             #   user has ended the action
-            if position == (game_state[2] + 1) % len(players):
-                board_cards = game_state[1].split(',')
+            if position == (game_state[DEALER] + 1) % len(players):
+                board_cards = game_state[BOARD].split(',')
                 if len(board_cards) == 1:   #  empty case
                     board_cards = []
                 next_stage(players_cursor, states_cursor, len(board_cards))
                 break
             elif i != 0:
                 next_player = players[position]
-                if next_player[3] != '':  #  If the user has cards
+                if next_player[CARDS] != '':  #  If the user has cards
                     update_action = ''' UPDATE states_table
                                         SET action = ? '''
                     states_cursor.execute(update_action, (position,))
@@ -418,10 +434,10 @@ def call(players_cursor, states_cursor, user):
     game_state  = states_cursor.execute(query).fetchall()[0]
 
     #   Make sure action is on the user
-    game_action = game_state[3]
+    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[4]
+    user_position = player[POSITION]
     if game_action != user_position:
         raise ValueError
 
@@ -435,23 +451,25 @@ def call(players_cursor, states_cursor, user):
     #   Find the max bet that user has to call
     max_bet = 0
     for better in bets:
-        if better[2] > max_bet:
-            max_bet = better[2]
-    to_call = min(max_bet, player[1])  #  Min of bet and the user's chip stack
+        if better[BET] > max_bet:
+            max_bet = better[BET]
+    to_call = min(max_bet, player[BALANCE])  #  Min of bet and the user's chip stack
     #   Put the bet in front of the user
     new_bet = to_call
-    new_bal = player[1] + player[2] - to_call
-    bet_delta = new_bet - player[2]
+    new_bal = player[BALANCE] + player[BET] - to_call
+    bet_delta = new_bet - player[BET]
+    new_invested = player[INVESTED] + bet_delta
     update_chips = ''' UPDATE players_table
-                        SET bal = ? ,
-                            bet = ?
+                        SET bal = ?,
+                            bet = ?,
+                            invested = ?
                         WHERE user = ?'''
-    players_cursor.execute(update_chips, (new_bal, new_bet, user))
+    players_cursor.execute(update_chips, (new_bal, new_bet, new_invested, user))
 
     #   Update the pot size
     update_pot = ''' UPDATE states_table
                      SET pot = ?'''
-    states_cursor.execute(update_pot, (game_state[4] + bet_delta,))
+    states_cursor.execute(update_pot, (game_state[POT] + bet_delta,))
     
     #   Update action
     found = False
@@ -459,12 +477,12 @@ def call(players_cursor, states_cursor, user):
         position = (user_position + i) % len(players)
         next_player = players[position]
         #  user has cards and hasn't bet the right amount condition
-        has_cards_wrong_bet = next_player[3] != '' and next_player[2] != max_bet 
+        has_cards_wrong_bet = next_player[CARDS] != '' and next_player[BET] != max_bet 
         #  NOTE: special case where everyone limps preflop
         #  TODO: perhaps this actually isn't a special case?
-        preflop = len(game_state[1]) == 0
-        big_blind_pos = (game_state[2] + 2) % len(players)
-        big_blind_special = preflop and next_player[4] == big_blind_pos and max_bet == BIG_BLIND 
+        preflop = len(game_state[BOARD]) == 0
+        big_blind_pos = (game_state[DEALER] + 2) % len(players)
+        big_blind_special = preflop and next_player[POSITION] == big_blind_pos and max_bet == BIG_BLIND 
 
         if has_cards_wrong_bet or big_blind_special: 
             update_action = ''' UPDATE states_table
@@ -474,7 +492,7 @@ def call(players_cursor, states_cursor, user):
             break
     
     if not found:
-        board_cards = game_state[1].split(',')
+        board_cards = game_state[BOARD].split(',')
         if len(board_cards) == 1:   #  empty case
             board_cards = []
         next_stage(players_cursor, states_cursor, len(board_cards))
@@ -510,10 +528,10 @@ def bet(players_cursor, states_cursor, user, amount):
 
     #   Make sure action is on the user
     #   TODO: perhaps make this a function?
-    game_action = game_state[3]
+    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[4]
+    user_position = player[POSITION]
     if game_action != user_position:
         raise ValueError
 
@@ -530,23 +548,25 @@ def bet(players_cursor, states_cursor, user, amount):
         raise ValueError
 
     #   Update player state with the bet
-    new_bal = player[1] - amount
+    new_bal = player[BALANCE] - amount
+    new_invested = player[INVESTED] + amount
     update_chips = ''' UPDATE players_table
-                        SET bal = ? ,
-                            bet = ?
+                        SET bal = ?,
+                            bet = ?,
+                            invested = ?
                         WHERE user = ?'''
-    players_cursor.execute(update_chips, (new_bal, amount, user))
+    players_cursor.execute(update_chips, (new_bal, amount, new_invested, user))
 
     #   Update the pot size
     update_pot = ''' UPDATE states_table
                      SET pot = ?'''
-    states_cursor.execute(update_pot, (game_state[4] + amount,))
+    states_cursor.execute(update_pot, (game_state[POT] + amount,))
     
     #   Update action
     for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
-        if next_player[3] != '': 
+        if next_player[CARDS] != '': 
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
@@ -590,10 +610,10 @@ def raise_bet(players_cursor, states_cursor, user, amount):
 
     #   Make sure action is on the user
     #   TODO: perhaps make this a function?
-    game_action = game_state[3]
+    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[4]
+    user_position = player[POSITION]
     if game_action != user_position:
         raise ValueError
 
@@ -607,44 +627,46 @@ def raise_bet(players_cursor, states_cursor, user, amount):
     #   Make sure raise size is legal
     #   Must be raising BY at least the previous raise (except for all-in)
     #   TODO: perhaps split the all-in case from raise?
-    if amount != player[1] + player[2]:  #  All-in
+    if amount != player[BALANCE] + player[BET]:  #  All-in
         #   Find the largest and 2nd largest bet
         max_bet = 0
         for better in bets:
-            if better[2] > max_bet:
-                max_bet = better[2]
+            if better[BET] > max_bet:
+                max_bet = better[BET]
         
         second_max_bet = 0
         if len(bets) != 1:
             #   TODO: Maybe don't copy? 
             other_bets = [i for i in bets if i != max_bet]
             for better in other_bets:
-                if better[2] > second_max_bet:
-                    second_max_bet = better[2]
+                if better[BET] > second_max_bet:
+                    second_max_bet = better[BET]
         
         if amount < 2*max_bet - second_max_bet:
             raise ValueError
 
     #   Update player state with the raise
-    new_bal = player[1] + player[2] - amount
-    raise_delta = amount - player[2]
+    new_bal = player[BALANCE] + player[BET] - amount
+    raise_delta = amount - player[BET]
+    new_invested = player[INVESTED] + raise_delta
     update_chips = ''' UPDATE players_table
-                        SET bal = ? ,
-                            bet = ?
+                        SET bal = ?,
+                            bet = ?,
+                            invested = ?
                         WHERE user = ?'''
-    players_cursor.execute(update_chips, (new_bal, amount, user))
+    players_cursor.execute(update_chips, (new_bal, amount, new_invested, user))
 
     #   Update the pot size
     update_pot = ''' UPDATE states_table
                      SET pot = ?'''
-    states_cursor.execute(update_pot, (game_state[4] + raise_delta,))
+    states_cursor.execute(update_pot, (game_state[POT] + raise_delta,))
     
     #   Update action
     #   TODO: perhaps combine all the "update action" code together?
     for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
-        if next_player[3] != '': 
+        if next_player[CARDS] != '': 
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
@@ -676,10 +698,10 @@ def fold(players_cursor, states_cursor, user):
     game_state  = states_cursor.execute(query).fetchall()[0]
 
     #   Make sure action is on the user
-    game_action = game_state[3]
+    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[4]
+    user_position = player[POSITION]
     if game_action != user_position:
         raise ValueError
 
@@ -699,22 +721,22 @@ def fold(players_cursor, states_cursor, user):
     users_playing = players_cursor.execute(users_playing_query, ('',)).fetchall()
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
-        winner_name = users_playing[0][0]
+        winner_name = users_playing[0][USERNAME]
         distribute_pots(players_cursor, states_cursor, [winner_name])
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
         #   Find the max bet
         max_bet = 0
         for better in bets:
-            if better[2] > max_bet:
-                max_bet = better[2]
+            if better[BET] > max_bet:
+                max_bet = better[BET]
             
         found = False
         for i in range(1, len(players)):
             position = (user_position + i) % len(players)
             next_player = players[position]
             #  user has cards and hasn't bet the right amount condition
-            if next_player[3] != '' and next_player[2] != max_bet : 
+            if next_player[CARDS] != '' and next_player[BET] != max_bet : 
                 update_action = ''' UPDATE states_table
                                     SET action = ? '''
                 states_cursor.execute(update_action, (position,))
@@ -722,7 +744,7 @@ def fold(players_cursor, states_cursor, user):
                 break
 
         if not found:
-            board_cards = game_state[1].split(',')
+            board_cards = game_state[BOARD].split(',')
             if len(board_cards) == 1:   #  empty case
                 board_cards = []
             next_stage(players_cursor, states_cursor, len(board_cards))
@@ -762,19 +784,21 @@ def post_blinds(players_cursor, states_cursor, dealer_position):
     big = (dealer_position + 2) % len(players)
 
     for seat in players:
-        user = seat[0]
-        bal = seat[1]
-        position = seat[4]
+        user = seat[USERNAME]
+        bal = seat[BALANCE]
+        position = seat[POSITION]
         #   Update player's balance and bet if they are small/big blind
         if position == small or position == big:
             blind = SMALL_BLIND if (position == small) else BIG_BLIND
             bet = blind if (bal >= blind) else bal
             bal = (bal - blind) if (bal >= blind) else 0
+            invested = bet
             update_blinds = ''' UPDATE players_table
-                                SET bal = ? ,
-                                    bet = ?
+                                SET bal = ?,
+                                    bet = ?,
+                                    invested = ?
                                 WHERE user = ?'''
-            players_cursor.execute(update_blinds, (bal, bet, user))
+            players_cursor.execute(update_blinds, (bal, bet, invested, user))
     
     #   Update the pot size, dealer position, who's action it is
     state_update = ''' UPDATE states_table
@@ -800,7 +824,7 @@ def deal_table(players_cursor, states_cursor):
     players = players_cursor.execute('''SELECT * FROM players_table''').fetchall()
 
     for seat in players:
-        user = seat[0]
+        user = seat[USERNAME]
         #   Draw two cards, update the current deck, and update player
         two_cards = random.sample(deck, 2)
         deck.remove(two_cards[0])
@@ -841,15 +865,15 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         update_bet = ''' UPDATE players_table
                             SET bet = ?
                             WHERE user = ?'''
-        players_cursor.execute(update_bet, (0, user[0]))
+        players_cursor.execute(update_bet, (0, user[USERNAME]))
 
     #   Update game state for the next street
     if num_board_cards == 5:  #  River
-        showdown()
+        showdown(players_cursor, states_cursor)
     else:
         #   Draw the next card(s) for the board based on street
         to_deal = 3 if num_board_cards == 0 else 1
-        deck = {c for c in game_state[0].split(',')}
+        deck = {c for c in game_state[DECK].split(',')}
         new_cards = random.sample(deck, to_deal)
         deck.difference_update(new_cards)
 
@@ -857,16 +881,16 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         #   This should be the first user with cards after the dealer
         next_action = 0
         for i in range(1, len(players) + 1):
-            position = (game_state[2] + i) % len(players)
+            position = (game_state[DEALER] + i) % len(players)
             user = players[position]
-            if user[3] != '':  #  If the user has cards
+            if user[CARDS] != '':  #  If the user has cards
                 next_action = position
                 break
         
         #   Update game state
         new_deck = ",".join(deck)
         comma = "," if to_deal != 3 else ""
-        new_board = game_state[1] + comma + ",".join(new_cards)
+        new_board = game_state[BOARD] + comma + ",".join(new_cards)
         update_cards = ''' UPDATE states_table
                            SET deck = ?,
                                board = ?,
@@ -895,19 +919,21 @@ def distribute_pots(players_cursor, states_cursor, winner):
     players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
     players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
+    game_state = states_cursor.execute(query).fetchall()[0]
 
-    pot = game_state[4]
-    #   Update each player. Remove bets + cards, & add to balance if winner
+    pot = game_state[POT]
+    #   Update each player. Remove bets, invested, + cards, & add to balance if winner
     for player in players:
-        new_bal = (player[1] + pot) if player[0] == winner[0] else player[1]
+        new_bal = (player[BALANCE] + pot) if player[USERNAME] == winner[0] else player[BALANCE]
         new_bet = 0
+        new_invested = 0
         update_user = ''' UPDATE players_table
                             SET bal = ?,
                                 bet = ?,
+                                invested = ?,
                                 cards = ?
                             WHERE user = ?'''
-        players_cursor.execute(update_user, (new_bal, new_bet, '', player[0]))
+        players_cursor.execute(update_user, (new_bal, new_bet, new_invested, '', player[USERNAME]))
     
     #   Update game state. Remove deck, board, and pot
     update_state = ''' UPDATE states_table
@@ -917,7 +943,7 @@ def distribute_pots(players_cursor, states_cursor, winner):
     states_cursor.execute(update_state, ('', '', 0))
 
     #   Now start a new hand
-    start_new_hand(players_cursor, states_cursor, (game_state[2] + 1) % len(players))
+    start_new_hand(players_cursor, states_cursor, (game_state[DEALER] + 1) % len(players))
 
 
 def showdown(players_cursor, states_cursor):
@@ -929,16 +955,16 @@ def showdown(players_cursor, states_cursor):
     #   TODO: fix magic #
     best_hand = 0
     best_hand_players = []
-    board_cards = game_state[1].split(',')
+    board_cards = game_state[BOARD].split(',')
     for player in players:
-        hole_cards = player[3].split(',')
+        hole_cards = player[CARDS].split(',')
         hand_rank, hand = find_best_hand(hole_cards, board_cards)
 
         if hand_rank > best_hand:
             best_hand = hand_rank
-            best_hand_players = [(player[0], hand)]
+            best_hand_players = [(player[USERNAME], hand)]
         elif hand_rank == best_hand:
-            best_hand_players.append((player[0], hand))
+            best_hand_players.append((player[USERNAME], hand))
     
     winner = best_hand_players[0][0]
     if len(best_hand_players) > 1:
@@ -1026,6 +1052,7 @@ def check_four_of_a_kind(hand):
         highest_card = sort_cards(remaining)[0]
         return (True, [mode]*4 + highest_card)
     return (False,)
+
 
 def check_full_house(hand):
     """
