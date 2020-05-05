@@ -287,7 +287,7 @@ def join_game(players_cursor, states_cursor, user):
         raise ValueError
 
     #   Since the game is not full, add the player to the game
-    insert_player = '''INSERT into players_table VALUES (?,?,?,?,?, ?);'''
+    insert_player = '''INSERT into players_table VALUES (?,?,?,?,?,?);'''
     players_cursor.execute(insert_player,
                            (user, STARTING_STACK, 0, 0, "", len(players)))
 
