@@ -879,11 +879,13 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         #   Find the next action to go to
         #   This should be the first user with cards after the dealer
         next_action = 0
+        found = False
         for i in range(1, len(players) + 1):
             position = (game_state[DEALER] + i) % len(players)
             user = players[position]
-            if user[CARDS] != '':  #  If the user has cards
+            if user[CARDS] != '' and user[BALANCE] > 0:  #  If the user has cards
                 next_action = position
+                found = True
                 break
         
         #   Update game state
@@ -895,6 +897,10 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
                                board = ?,
                                action = ?'''
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
+
+        #   Everyone is all-in case
+        if not found:
+            next_stage(players_cursor, states_cursor, len(new_board.split(',')))
 
 
 def distribute_pots(players_cursor, states_cursor):
