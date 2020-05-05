@@ -43,18 +43,18 @@ def display_game(players_cursor, states_cursor, user):
     players = players_cursor.execute(players_query).fetchall()
     result = "players:\n"
     for p in players:
-        cards = str(p[CARDS]) if p[USERNAME] == user else ""
-        player_info = "(" + str(p[USERNAME]) + ", " + str(p[BALANCE]) + ", " + str(p[BET]) + ", " + cards + ", " + str(p[POSITION]) + ")"
-        result += player_info + "\n"
-        # result += str(p) + "\n"
+        # cards = str(p[CARDS]) if p[USERNAME] == user else ""
+        # player_info = "(" + str(p[USERNAME]) + ", " + str(p[BALANCE]) + ", " + str(p[BET]) + ", " + cards + ", " + str(p[POSITION]) + ")"
+        # result += player_info + "\n"
+        result += str(p) + "\n"
         
 
     result += "\nstate:\n"
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
     for s in state:
-        result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(p[POT]) + ")"
-        # result += str(s) + "\n"
+        # result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(p[POT]) + ")"
+        result += str(s) + "\n"
     
     return result
 
