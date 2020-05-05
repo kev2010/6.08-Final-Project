@@ -1,7 +1,7 @@
 import sqlite3
 import random
 import sys
-sys.path.append('var/jail/home/team079/team079/poker-game')
+sys.path.append('_HOME_/team079/poker-game')
 from poker_actions import *
 
 # from databaseFuncs import *
