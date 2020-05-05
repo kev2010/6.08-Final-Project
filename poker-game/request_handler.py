@@ -452,7 +452,7 @@ def call(players_cursor, states_cursor, user):
     for better in bets:
         if better[BET] > max_bet:
             max_bet = better[BET]
-    to_call = min(max_bet, player[BALANCE])  #  Min of bet and the user's chip stack
+    to_call = min(max_bet, player[BALANCE] + player[BET])  #  Min of bet and the user's chip stack
     #   Put the bet in front of the user
     new_bet = to_call
     new_bal = player[BALANCE] + player[BET] - to_call
