@@ -35,7 +35,7 @@ def request_handler(request):
 
     x += '''
         <table style="width:100%">'''
-    
+
     x += '''
               <tr>
             <th>Name</th>
@@ -48,7 +48,7 @@ def request_handler(request):
     for i in range(1,4):
         sp = ret[i].split(",")
         x += '''<tr>
-        <th> <strong>'''+sp[0] + '''</strong> </th>
+        <th>'''+sp[0] + '''</th>
         <th>''' + sp[1] + '''</th>
         <th>''' + sp[2] + '''</th>
         </tr>'''
