@@ -1,3 +1,11 @@
+import sqlite3
+import sys
+sys.path.append('__HOME__/team079/poker-game')
+from settings import *
+from render_game import *
+from game_logic import *
+
+
 #   TODO: TEST THIS
 def check(players_cursor, states_cursor, user):
     """
