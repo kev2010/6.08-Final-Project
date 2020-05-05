@@ -941,7 +941,8 @@ def distribute_pots(players_cursor, states_cursor):
         all_playing[p][0] = 0
 
     for player in players:
-        delta = all_playing[player[USERNAME]][1]
+        name = player[USERNAME]
+        delta = all_playing[name][1] if name in all_playing else 0
         new_bal = player[BALANCE] + delta
         new_bet = 0
         new_invested = 0
