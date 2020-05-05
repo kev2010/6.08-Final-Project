@@ -124,7 +124,7 @@ def get_handler(user, request, players_cursor, states_cursor):
       
       return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
     else:
-      game_action = game_state[ACTION]
+      game_action = game_state[0][ACTION]
       user_query = '''SELECT * FROM players_table WHERE user = ?;'''
       user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
       if game_action == user_position:
