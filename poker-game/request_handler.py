@@ -15,6 +15,9 @@ cards = {rank + suit for rank in all_ranks for suit in all_suits}
 card_order_dict = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, 
                    "T":10, "J":11, "Q":12, "K":13, "A":14}
 
+#   Global Frames
+FRAMES = []
+
 #   Player SQL DB indicies
 USERNAME = 0
 BALANCE = 1
@@ -202,7 +205,7 @@ def post_handler(request, players_cursor, states_cursor):
     else:
         return "Requested action not recognized!"
 
-    return display_game(players_cursor, states_cursor)
+    return render_frames()
 
 
 def display_game(players_cursor, states_cursor):
@@ -256,6 +259,18 @@ def display_game(players_cursor, states_cursor):
     return result
 
 
+def render_frames():
+    """
+    Renders the frames of the game state.
+    """
+    counter = 1
+    result = ""
+    for frame in FRAMES:
+        result += "FRAME " + str(counter) + ":\n"
+        result += frame + "\n"
+    return result
+
+
 def join_game(players_cursor, states_cursor, user):
     """
     Handles a join game request. Adds the user to the game if it
@@ -289,6 +304,8 @@ def join_game(players_cursor, states_cursor, user):
     insert_player = '''INSERT into players_table VALUES (?,?,?,?,?,?);'''
     players_cursor.execute(insert_player,
                            (user, STARTING_STACK, 0, 0, "", len(players)))
+    
+    FRAMES.append(display_game(players_cursor, states_cursor))
 
 
 def start_game(players_cursor, states_cursor, user):
@@ -320,6 +337,7 @@ def start_game(players_cursor, states_cursor, user):
         start_new_hand(players_cursor, states_cursor, dealer)
     else:
         raise ValueError
+    FRAMES.append(display_game(players_cursor, states_cursor))
 
 
 def leave_game(players_cursor, states_cursor, user):
@@ -333,6 +351,7 @@ def leave_game(players_cursor, states_cursor, user):
     """
     leave_query = '''DELETE FROM players_table WHERE user = ?'''
     players_cursor.execute(leave_query, (user,))
+    FRAMES.append(display_game(players_cursor, states_cursor))
 
 #   TODO: TEST THIS
 def check(players_cursor, states_cursor, user):
@@ -406,6 +425,7 @@ def check(players_cursor, states_cursor, user):
                     update_action = ''' UPDATE states_table
                                         SET action = ? '''
                     states_cursor.execute(update_action, (position,))
+                    FRAMES.append(display_game(players_cursor, states_cursor))
                     break
 
 #   TODO: TEST THIS
@@ -488,12 +508,14 @@ def call(players_cursor, states_cursor, user):
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
             found = True
+            FRAMES.append(display_game(players_cursor, states_cursor))
             break
     
     if not found:
         board_cards = game_state[BOARD].split(',')
         if len(board_cards) == 1:   #  empty case
             board_cards = []
+        FRAMES.append(display_game(players_cursor, states_cursor))
         next_stage(players_cursor, states_cursor, len(board_cards))
 
 
@@ -569,6 +591,7 @@ def bet(players_cursor, states_cursor, user, amount):
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
+            FRAMES.append(display_game(players_cursor, states_cursor))
             break
 
 
@@ -669,6 +692,7 @@ def raise_bet(players_cursor, states_cursor, user, amount):
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
+            FRAMES.append(display_game(players_cursor, states_cursor))
             break
 
 
@@ -721,6 +745,7 @@ def fold(players_cursor, states_cursor, user):
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
         winner_name = users_playing[0][USERNAME]
+        FRAMES.append(display_game(players_cursor, states_cursor))
         distribute_pots(players_cursor, states_cursor)
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
@@ -740,12 +765,14 @@ def fold(players_cursor, states_cursor, user):
                                     SET action = ? '''
                 states_cursor.execute(update_action, (position,))
                 found = True
+                FRAMES.append(display_game(players_cursor, states_cursor))
                 break
 
         if not found:
             board_cards = game_state[BOARD].split(',')
             if len(board_cards) == 1:   #  empty case
                 board_cards = []
+            FRAMES.append(display_game(players_cursor, states_cursor))
             next_stage(players_cursor, states_cursor, len(board_cards))
 
 
@@ -808,6 +835,8 @@ def post_blinds(players_cursor, states_cursor, dealer_position):
                     (dealer_position + 3) % len(players))
     states_cursor.execute(state_update, update_values)
 
+    FRAMES.append(display_game(players_cursor, states_cursor))
+
 
 def deal_table(players_cursor, states_cursor):
     """
@@ -839,6 +868,8 @@ def deal_table(players_cursor, states_cursor):
                       SET deck = ? '''
     states_cursor.execute(update_deck, (",".join(deck),))
 
+    FRAMES.append(display_game(players_cursor, states_cursor))
+
 #   TODO: TEST THIS
 def next_stage(players_cursor, states_cursor, num_board_cards):
     """
@@ -868,6 +899,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
 
     #   Update game state for the next street
     if num_board_cards == 5:  #  River
+        FRAMES.append(display_game(players_cursor, states_cursor))
         distribute_pots(players_cursor, states_cursor)
     else:
         #   Draw the next card(s) for the board based on street
@@ -897,6 +929,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
                                board = ?,
                                action = ?'''
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
+        FRAMES.append(display_game(players_cursor, states_cursor))
 
         #   Everyone is all-in case
         if not found:
@@ -967,6 +1000,8 @@ def distribute_pots(players_cursor, states_cursor):
                             board = ?,
                             pot = ? '''
     states_cursor.execute(update_state, ('', '', 0))
+
+    FRAMES.append(display_game(players_cursor, states_cursor))
 
     #   Now start a new hand
     start_new_hand(players_cursor, states_cursor, (game_state[DEALER] + 1) % len(players))
@@ -1267,7 +1302,7 @@ def count_cards(cards):
     return cards_dict
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     #   Side pot tests
 
     #   Even split
