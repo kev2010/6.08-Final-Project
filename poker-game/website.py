@@ -31,7 +31,7 @@ def request_handler(request):
     conn_players.close()
     conn_state.close()
 
-    x = "<h1> WELCOME TO POKER! </h1> <br><br> <h2> by team079 </h2> <br><br> A game is in progress... <br><br>"
+    x = "<meta http-equiv=\"refresh\" content=\"3\" ><h1> WELCOME TO POKER! </h1> <br><br> <h2> by team079 </h2> <br><br> A game is in progress... <br><br>"
 
     x += '''
         <table style="width:100%">'''
