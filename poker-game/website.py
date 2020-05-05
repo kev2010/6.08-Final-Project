@@ -24,7 +24,6 @@ def request_handler(request):
     if request['method'] == 'GET':
         user = request["values"]["user"]
         ret = display_game(c_player, c_state, user)
-        return ret
 
     ret = ret.split("(")
 
