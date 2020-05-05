@@ -41,6 +41,7 @@ def request_handler(request):
             <th>Name</th>
             <th>Balance</th> 
             <th>Bet</th>
+            <th> Cards </th>
           </tr>
     
     '''
@@ -50,8 +51,11 @@ def request_handler(request):
         x += '''<tr>
         <th>'''+sp[0] + '''</th>
         <th>''' + sp[1] + '''</th>
-        <th>''' + sp[2] + '''</th>
-        </tr>'''
+        <th>''' + sp[2] + '''</th>'''
+
+        if i == 1:
+            x += '''<th>''' + sp[3] + '''<th>'''
+        x += '''</tr>'''
 
     x+= "</table>"
 
