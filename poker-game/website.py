@@ -34,6 +34,9 @@ def request_handler(request):
     x = "<h1> WELCOME TO POKER! </h1> <br><br> <h2> by team079 </h2> <br><br> A game is in progress... <br><br>"
 
     x += '''
+        <table style="width:100%">'''
+    
+    x += '''
               <tr>
             <th>Name</th>
             <th>Balance</th> 
@@ -41,8 +44,7 @@ def request_handler(request):
           </tr>
     
     '''
-    x += '''
-        <table style="width:100%">'''
+
     for i in range(1,4):
         sp = ret[i].split(",")
         x += '''<tr>
