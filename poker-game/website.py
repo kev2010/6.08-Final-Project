@@ -29,4 +29,5 @@ def request_handler(request):
     #   TODO: Figure out if this is the right order of commit/close
     conn_players.close()
     conn_state.close()
-    return ret
+
+    return "<h1> HELLO! </h1>" + str(ret)
