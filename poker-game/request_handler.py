@@ -920,8 +920,35 @@ def distribute_pots(players_cursor, states_cursor, winner):
 
 
 def showdown(players_cursor, states_cursor):
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+
+    #   TODO: fix magic #
+    best_hand = 0
+    best_hand_players = []
+    board_cards = game_state[1].split(',')
+    for player in players:
+        hole_cards = player[3].split(',')
+        hand_rank, hand = find_best_hand(hole_cards, board_cards)
+
+        if hand_rank > best_hand:
+            best_hand = hand_rank
+            best_hand_players = [(player[0], hand)]
+        elif hand_rank == best_hand:
+            best_hand_players.append((player[0], hand))
     
-    
+    winner = best_hand_players[0][0]
+    if len(best_hand_players) > 1:
+        #   Convert hand to list of numbers
+        hands = [(k[0], [card_order_dict[j[0]] for j in k[1]]) for k in best_hand_players]
+        hands.sort(key=lambda x: [x[1][0], x[1][1], x[1][2], x[1][3], x[1][4]], reverse=True)
+        winner, _ = hands[0]
+        #   TODO: handle split spots later
+
+    distribute_pots(players_cursor, states_cursor, winner)
+
 
 def find_best_hand(hole_cards, board):
     cards = hole_cards + board
@@ -942,8 +969,7 @@ def find_best_hand(hole_cards, board):
         return (3, check_two_pair(cards)[1])
     elif check_one_pair(cards)[0]:
         return (2, check_one_pair(cards)[1])
-    else:
-        return (1, check_high_card(cards)[1])
+    return (1, check_high_card(cards)[1])
 
 
 #   Functions to check if a certain type of hand exists
@@ -994,11 +1020,11 @@ def check_four_of_a_kind(hand):
             cards_dict[card] = 1
     
     if max(cards_dict.values()) == 4:
-        mode = [k for k, v in cards_dict if v == 4][0]
-        remaining = [k for k, v in cards_dict if v != 4]
+        mode = [k for k, v in cards_dict.items() if v == 4][0]
+        remaining = [k for k, v in cards_dict.items() if v != 4]
         highest_card = sort_cards(remaining)[0]
         return (True, [mode]*4 + highest_card)
-
+    return (False,)
 
 def check_full_house(hand):
     """
@@ -1048,10 +1074,11 @@ def check_flush(hand):
             suit_dict[s] = 1
     
     if max(suit_dict.values()) >= 5:
-        max_suit = [k for k, v in suit_dict if v == max(suit_dict.values())][0]
+        max_suit = [k for k, v in suit_dict.items() if v == max(suit_dict.values())][0]
         suited_cards = [k for k in hand if k[1] == max_suit]
         highest_cards = sort_cards(suited_cards)[1]
         return (True, highest_cards[:5])
+    return (False,)
 
 
 def check_straight(hand):
@@ -1069,7 +1096,7 @@ def check_straight(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
-
+    return (False,)
 
 
 def check_three_of_a_kind(hand):
@@ -1087,6 +1114,8 @@ def check_three_of_a_kind(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    return (False,)
+
 
 def check_two_pair(hand):
     """
@@ -1104,7 +1133,7 @@ def check_two_pair(hand):
         The hand is organized from most to least important card.
     """
     cards_dict = count_cards(hand)
-    pairs = [k for k, v in cards_dict if v == 2]
+    pairs = [k for k, v in cards_dict.items() if v == 2]
     if len(pairs) == 2:
         sorted_cards = sort_cards(pairs)
         first_pair = sorted_cards[0]
@@ -1112,8 +1141,7 @@ def check_two_pair(hand):
         remaining_cards = [k for k in hand if k != first_pair and k != second_pair]
         highest = sort_cards(remaining_cards)[0]
         return (True, [first_pair]*2 + [second_pair]*2 + highest)
-    else:
-        return (False,)
+    return (False,)
 
 
 def check_one_pair(hand):
@@ -1132,14 +1160,13 @@ def check_one_pair(hand):
         The hand is organized from most to least important card.
     """
     cards_dict = count_cards(hand)
-    pairs = [k for k, v in cards_dict if v == 2]
-    if max(cards_dict.values()) == 1:
+    pairs = [k for k, v in cards_dict.items() if v == 2]
+    if len(pairs) == 1:
         highest_pair_card = sort_cards(pairs)[0]
-        remaining_cards = [k for k, v in cards_dict if k != highest_pair_card]
+        remaining_cards = [k for k, v in cards_dict.items() if k != highest_pair_card]
         sort_remaining = sort_cards(remaining_cards)
         return (True, [highest_pair_card]*2 + sort_remaining[:3])
-    else:
-        return (False,)
+    return (False,)
 
 
 def check_high_card(hand):
@@ -1182,12 +1209,37 @@ def count_cards(cards):
     #   TODO: default dict?
     cards_dict = {}
     for card in cards:
-        if card in cards_dict:
-            cards_dict[card] += 1
+        if card[0] in cards_dict:
+            cards_dict[card[0]] += 1
         else:
-            cards_dict[card] = 1
+            cards_dict[card[0]] = 1
     return cards_dict
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
+#     players = [('kev2010', 650, 25, '2d,8c', 0),
+#                 ('jasonllu', 1350, 50, '3c,Qc', 1),
+#                 ('baptiste', 725, 50, 'Kd,7s', 2)]
+#     game_state = ('','4c,5h,6d,Qh,8s', 2, 0, 125)
+
+# #   TODO: fix magic #
+#     best_hand = 0
+#     best_hand_players = []
+#     board_cards = game_state[1].split(',')
+#     for player in players:
+#         hole_cards = player[3].split(',')
+#         hand_rank, hand = find_best_hand(hole_cards, board_cards)
+
+#         if hand_rank > best_hand:
+#             best_hand = hand_rank
+#             best_hand_players = [(player[0], hand)]
+#         elif hand_rank == best_hand:
+#             best_hand_players.append((player[0], hand))
     
+#     winner = best_hand_players[0][0]
+#     if len(best_hand_players) > 1:
+#         #   Convert hand to list of numbers
+#         hands = [(k[0], [card_order_dict[j[0]] for j in k[1]]) for k in best_hand_players]
+#         hands.sort(key=lambda x: [x[1][0], x[1][1], x[1][2], x[1][3], x[1][4]], reverse=True)
+#         winner, _ = hands[0]
+#         #   TODO: handle split spots later
