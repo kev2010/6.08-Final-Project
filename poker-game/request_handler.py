@@ -899,7 +899,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
 
         #   Everyone is all-in case
-        if not found:
+        if not found and len(new_board.split(',')) < 4:
             next_stage(players_cursor, states_cursor, len(new_board.split(',')))
 
 
