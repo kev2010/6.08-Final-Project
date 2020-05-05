@@ -899,7 +899,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
 
         #   Everyone is all-in case
-        if not found and len(new_board.split(',')) < 5:
+        if not found:
             next_stage(players_cursor, states_cursor, len(new_board.split(',')))
 
 
@@ -924,7 +924,7 @@ def distribute_pots(players_cursor, states_cursor):
     query = '''SELECT * FROM states_table;'''
     game_state = states_cursor.execute(query).fetchall()[0]
     
-        #   Maps username to [chips invested, chips to add to bal, still live]
+    #   Maps username to [chips invested, chips to add to bal, still live]
     all_playing = {p[USERNAME]: [p[INVESTED], 0, p[CARDS] != ''] for p in players if p[INVESTED] > 0}
     to_handle = [p for p in all_playing.keys()]
     while len(to_handle) > 1:
@@ -1267,7 +1267,7 @@ def count_cards(cards):
     return cards_dict
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     #   Side pot tests
 
     #   Even split
@@ -1306,6 +1306,12 @@ def count_cards(cards):
     #             ('baptiste', 975, 25, 25, '', 2)]
     # game_state = ('','', 2, 0, 0)
 
+    #   all-in and split
+    # players = [('kev2010', 25, 0, 975, '2h,Ks', 0),
+    #             ('jasonllu', 0, 0, 975, '2s,Kh', 1),
+    #             ('baptiste', 975, 0, 25, '', 2)]
+    # game_state = ('','Ah,Qh,Js,3c,4c', 2, 0, 0)
+
     # #   Maps username to [chips invested, chips to add to bal, still live]
     # all_playing = {p[USERNAME]: [p[INVESTED], 0, p[CARDS] != ''] for p in players if p[INVESTED] > 0}
     # to_handle = [p for p in all_playing.keys()]
@@ -1319,6 +1325,7 @@ def count_cards(cards):
     #                         if (p[USERNAME] in to_handle) and all_playing[p[USERNAME]][2]]
     #     board_cards = game_state[BOARD].split(',')
     #     winners = find_winners(player_card_list, board_cards)
+    #     print(winners)
     #     for p in winners:
     #         all_playing[p][1] += pot / len(winners)
         
