@@ -141,7 +141,7 @@ def get_handler(user, request, players_cursor, states_cursor):
     users = players_cursor.execute(users_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()
-    if users[0][USERNAME] == user and game_state:
+    if users[0][USERNAME] == user and len(game_state) == 0:
       possible_actions = ["start"]
       
       return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
