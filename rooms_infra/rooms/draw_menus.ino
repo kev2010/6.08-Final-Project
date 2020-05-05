@@ -24,7 +24,7 @@ void draw_leaderboard_screen(uint8_t selection) {
     sprintf(a, "%d.", cnt + 1);
     tft.drawString(a, 10, 10 + 15 * cnt, 1);
     tft.drawString(token, 30, 10 + 15 * cnt, 1);
-    token = strtok(NULL, ",");
+    token = strtok(NULL, s);
     tft.drawString(token, 130, 10 + 15 * cnt, 1);
     token = strtok(NULL, s);
     cnt ++ ;
