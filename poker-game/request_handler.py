@@ -1261,7 +1261,7 @@ def count_cards(cards):
     return cards_dict
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     #   Side pot tests
 
     #   Even split
