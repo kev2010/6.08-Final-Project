@@ -18,46 +18,50 @@ void draw_leaderboard_screen(uint8_t selection) {
   token = strtok(leader, s);
   /* walk through other tokens */
   uint8_t cnt = 0;
+  uint8_t i = 0;
 
-  while ( token != NULL ) {
+  while ( token != NULL and token != "" ) {
     char a[3] = "";
     sprintf(a, "%d.", cnt + 1);
-    tft.drawString(a, 10, 10 + 15 * cnt, 1);
-    tft.drawString(token, 30, 10 + 15 * cnt, 1);
+    if (i % 2 == 0) {
+      tft.drawString(a, 10, 10 + 15 * cnt, 1);
+      tft.drawString(token, 30, 10 + 15 * cnt, 1);
+    } else if (i % 2 == 1) {
+      tft.drawString(token, 130, 10 + 15 * cnt, 1);
+      cnt ++ ;
+    }
     token = strtok(NULL, s);
-    tft.drawString(token, 130, 10 + 15 * cnt, 1);
-    token = strtok(NULL, s);
-    cnt ++ ;
+    i ++ ;
   }
 
-//  while (token != NULL) {
-//
-//    char *player;
-//    char *score;
-//
-//    player = strtok(token, ",");
-//    score = strtok(NULL, ",");
-//
-//    char a[3] = "";
-//    sprintf(a, "%d.", cnt + 1);
-//
-//    Serial.print("player=");
-//    Serial.println(player);
-//
-//    Serial.print("score=");
-//    Serial.println(score);
-//
-//    tft.drawString(a, 10, 10 + 15 * cnt, 1);
-//    tft.drawString(player, 30, 10 + 15 * cnt, 1);
-//    tft.drawString(score, 130, 10 + 15 * cnt, 1);
-//
-//
-//
-//    token = strtok(NULL, s);
-//    cnt ++ ;
-//
-//
-//  }
+  //  while (token != NULL) {
+  //
+  //    char *player;
+  //    char *score;
+  //
+  //    player = strtok(token, ",");
+  //    score = strtok(NULL, ",");
+  //
+  //    char a[3] = "";
+  //    sprintf(a, "%d.", cnt + 1);
+  //
+  //    Serial.print("player=");
+  //    Serial.println(player);
+  //
+  //    Serial.print("score=");
+  //    Serial.println(score);
+  //
+  //    tft.drawString(a, 10, 10 + 15 * cnt, 1);
+  //    tft.drawString(player, 30, 10 + 15 * cnt, 1);
+  //    tft.drawString(score, 130, 10 + 15 * cnt, 1);
+  //
+  //
+  //
+  //    token = strtok(NULL, s);
+  //    cnt ++ ;
+  //
+  //
+  //  }
 
 
   tft.drawString("Go back", 20, 110, 1);
