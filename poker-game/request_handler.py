@@ -918,7 +918,8 @@ def distribute_pots(players_cursor, states_cursor):
     query = '''SELECT * FROM states_table;'''
     game_state = states_cursor.execute(query).fetchall()[0]
     
-    all_playing = {p[USERNAME]: [p[INVESTED], 0] for p in players if p[CARDS] != ''}
+        #   Maps username to [chips invested, chips to add to bal, still live]
+    all_playing = {p[USERNAME]: [p[INVESTED], 0, p[CARDS] != ''] for p in players if p[INVESTED] > 0}
     to_handle = [p for p in all_playing.keys()]
     while len(to_handle) > 1:
         min_stack = min([all_playing[k][0] for k in to_handle])
@@ -927,7 +928,7 @@ def distribute_pots(players_cursor, states_cursor):
             all_playing[p][0] -= min_stack
         
         player_card_list = [(p[USERNAME], p[CARDS].split(',')) for p in players 
-                            if p[USERNAME] in to_handle]
+                            if (p[USERNAME] in to_handle) and all_playing[p[USERNAME]][2]]
         board_cards = game_state[BOARD].split(',')
         winners = find_winners(player_card_list, board_cards)
         for p in winners:
@@ -993,7 +994,7 @@ def find_winners(players, board_cards):
 
 
 def find_best_hand(hole_cards, board):
-    cards = hole_cards + board
+    cards = hole_cards + (board if len(board) == 5 else [])
     #   TODO: don't call funcitons twice? performance optimization?
     if check_straight_flush(cards)[0]:
         return (9, check_straight_flush(cards)[1])
@@ -1260,7 +1261,7 @@ def count_cards(cards):
     return cards_dict
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     #   Side pot tests
 
     #   Even split
@@ -1293,7 +1294,14 @@ def count_cards(cards):
     #             ('baptiste', 725, 0, 600, '2d,3s', 2)]
     # game_state = ('','Ac,Th,Ad,Jh,Ks', 2, 0, 0)
 
-    # all_playing = {p[USERNAME]: [p[INVESTED], 0] for p in players if p[CARDS] != ''}
+    #   Folding
+    # players = [('kev2010', 950, 50, 50, '2h,Ks', 0),
+    #             ('jasonllu', 975, 0, 0, '', 1),
+    #             ('baptiste', 975, 25, 25, '', 2)]
+    # game_state = ('','', 2, 0, 0)
+
+    # #   Maps username to [chips invested, chips to add to bal, still live]
+    # all_playing = {p[USERNAME]: [p[INVESTED], 0, p[CARDS] != ''] for p in players if p[INVESTED] > 0}
     # to_handle = [p for p in all_playing.keys()]
     # while len(to_handle) > 1:
     #     min_stack = min([all_playing[k][0] for k in to_handle])
@@ -1302,7 +1310,7 @@ def count_cards(cards):
     #         all_playing[p][0] -= min_stack
         
     #     player_card_list = [(p[USERNAME], p[CARDS].split(',')) for p in players 
-    #                         if p[USERNAME] in to_handle]
+    #                         if (p[USERNAME] in to_handle) and all_playing[p[USERNAME]][2]]
     #     board_cards = game_state[BOARD].split(',')
     #     winners = find_winners(player_card_list, board_cards)
     #     for p in winners:
@@ -1314,3 +1322,5 @@ def count_cards(cards):
     #     p = to_handle[0]
     #     all_playing[p][1] += all_playing[p][0]
     #     all_playing[p][0] = 0
+    
+    # print(all_playing)
