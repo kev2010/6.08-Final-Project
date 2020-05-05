@@ -139,7 +139,6 @@ def get_handler(user, request, players_cursor, states_cursor):
     
     users_query = '''SELECT * FROM players_table;'''
     users = players_cursor.execute(users_query).fetchall()
-    return users
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()
     if users[0][USERNAME] == user and game_state:
