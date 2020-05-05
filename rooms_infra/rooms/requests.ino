@@ -75,8 +75,8 @@ void join_room_post_req(char* user, char* room_id) { // changed
   strcat(request_buffer, body); //body
   strcat(request_buffer, "\r\n"); //header
   Serial.println(request_buffer);
-  do_http_request("608dev-2.net", request_buffer, room_descr, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
-  Serial.println(room_descr);
+  do_http_request("608dev-2.net", request_buffer, response_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true); 
+  Serial.println(response_buffer);
 }
 
 

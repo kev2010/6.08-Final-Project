@@ -7,10 +7,10 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
 MPU6050 imu; //imu object called, appropriately, imu
 
-char network[] = "Harris";  //SSID for 6.08 Lab
-char password[] = "sofia7511"; //Password for 6.08 Lab
+char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
+char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "obama";
+char user[] = "giannaros";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -364,6 +364,26 @@ void loop() {
         else {
           extract_room_id();
           join_room_post_req(user, room_id);
+//          memset(room_descr, 0, strlen(room_descr));
+//          char delimiter[] = "$";
+//          char *token;
+//          char temp[5];
+//          sprintf(temp, strtok(response_buffer, delimiter));
+//          game_selection = atoi(temp);
+//          sprintf(room_descr, strtok(NULL, delimiter));          
+
+          char delimiter[] = "$";
+          char* ptr;
+          ptr = strtok(response_buffer, delimiter);
+          game_selection = atoi(ptr); // update numbers of selections
+
+          ptr = strtok(NULL, delimiter);
+          memset(room_descr, 0, strlen(room_descr));
+          sprintf(room_descr, ptr);
+          Serial.println(game_selection);
+
+
+
           state = ROOM;
 
         }
@@ -406,7 +426,7 @@ void loop() {
         flag = true;
         if (selection == 0) {
           if (game_selection == 0) {
-//            state = POKER_GAME;
+            state = POKER_GAME;
           } else if (game_selection == 2) {
             state = PUSH_UP_GAME;
           }
@@ -533,7 +553,7 @@ void loop() {
         extract_actions_buffer(response_buffer); // only now are possible_actions updated
         Serial.println(possible_actions);
         get_actions_timer = millis();
-        
+
         // if there is any game update (new actions), draw game screen again, otherwise do nothing
         if (strcmp(previous_possible_actions, possible_actions) != 0) {
           draw_poker_screen(possible_actions, selection); // may need to reset selection (?)

@@ -122,7 +122,7 @@ void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response b
   char room_message[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
   memset(room_message, 0, strlen(room_message));
   Serial.println(response_buffer);
-  sprintf(room_message, room_descr);
+  sprintf(room_message, room_descr); // changed
   /* get the first token */
   token = strtok(room_message, s);
   /* walk through other tokens */
