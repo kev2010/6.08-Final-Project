@@ -208,7 +208,7 @@ def post_handler(request, players_cursor, states_cursor):
     return render_frames()
 
 
-def display_game(players_cursor, states_cursor):
+def display_game(players_cursor, states_cursor, user):
     """
     Returns the poker game state in a properly formatted string.
     The return format is as follows:
@@ -238,6 +238,7 @@ def display_game(players_cursor, states_cursor):
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
+        user (str): user who sent the request
     
     Returns:
         A string of the state of the game, formatted as described
@@ -248,13 +249,18 @@ def display_game(players_cursor, states_cursor):
     players = players_cursor.execute(players_query).fetchall()
     result = "players:\n"
     for p in players:
-        result += str(p) + "\n"
+        cards = str(p[CARDS]) if p[USERNAME] == user else ""
+        player_info = "(" + str(p[USERNAME]) + ", " + str(p[BALANCE]) + ", " + str(p[BET]) + ", " + cards + ", " + str(p[POSITION]) + ")"
+        result += player_info + "\n"
+        # result += str(p) + "\n"
+        
 
     result += "\nstate:\n"
     current_state_query = '''SELECT * FROM states_table;'''
     state = states_cursor.execute(current_state_query).fetchall()
     for s in state:
-        result += str(s) + "\n"
+        result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(p[POT]) + ")"
+        # result += str(s) + "\n"
     
     return result
 
@@ -306,7 +312,7 @@ def join_game(players_cursor, states_cursor, user):
     players_cursor.execute(insert_player,
                            (user, STARTING_STACK, 0, 0, "", len(players)))
     
-    FRAMES.append(display_game(players_cursor, states_cursor))
+    FRAMES.append(display_game(players_cursor, states_cursor, user))
 
 
 def start_game(players_cursor, states_cursor, user):
@@ -335,7 +341,7 @@ def start_game(players_cursor, states_cursor, user):
         new_state = '''INSERT into states_table 
                     VALUES (?,?,?,?,?);'''
         states_cursor.execute(new_state, (deck, board, dealer, action, pot))
-        start_new_hand(players_cursor, states_cursor, dealer)
+        start_new_hand(players_cursor, states_cursor, dealer, user)
     else:
         raise ValueError
 
@@ -351,7 +357,7 @@ def leave_game(players_cursor, states_cursor, user):
     """
     leave_query = '''DELETE FROM players_table WHERE user = ?'''
     players_cursor.execute(leave_query, (user,))
-    FRAMES.append(display_game(players_cursor, states_cursor))
+    FRAMES.append(display_game(players_cursor, states_cursor, user))
 
 #   TODO: TEST THIS
 def check(players_cursor, states_cursor, user):
@@ -405,7 +411,7 @@ def check(players_cursor, states_cursor, user):
     
     #   Take care of BB special case if necessary
     if big_blind_special:
-        next_stage(players_cursor, states_cursor, 0)
+        next_stage(players_cursor, states_cursor, 0, user)
     else:
         #   Otherwise, we pass the action to the next player
         #   that has cards and isn't all-in, or end the action
@@ -417,7 +423,7 @@ def check(players_cursor, states_cursor, user):
                 board_cards = game_state[BOARD].split(',')
                 if len(board_cards) == 1:   #  empty case
                     board_cards = []
-                next_stage(players_cursor, states_cursor, len(board_cards))
+                next_stage(players_cursor, states_cursor, len(board_cards), user)
                 break
             elif i != 0:
                 next_player = players[position]
@@ -425,7 +431,7 @@ def check(players_cursor, states_cursor, user):
                     update_action = ''' UPDATE states_table
                                         SET action = ? '''
                     states_cursor.execute(update_action, (position,))
-                    FRAMES.append(display_game(players_cursor, states_cursor))
+                    FRAMES.append(display_game(players_cursor, states_cursor, user))
                     break
 
 #   TODO: TEST THIS
@@ -508,15 +514,15 @@ def call(players_cursor, states_cursor, user):
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
             found = True
-            FRAMES.append(display_game(players_cursor, states_cursor))
+            FRAMES.append(display_game(players_cursor, states_cursor, user))
             break
     
     if not found:
         board_cards = game_state[BOARD].split(',')
         if len(board_cards) == 1:   #  empty case
             board_cards = []
-        FRAMES.append(display_game(players_cursor, states_cursor))
-        next_stage(players_cursor, states_cursor, len(board_cards))
+        FRAMES.append(display_game(players_cursor, states_cursor, user))
+        next_stage(players_cursor, states_cursor, len(board_cards), user)
 
 
 def bet(players_cursor, states_cursor, user, amount):
@@ -591,7 +597,7 @@ def bet(players_cursor, states_cursor, user, amount):
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
-            FRAMES.append(display_game(players_cursor, states_cursor))
+            FRAMES.append(display_game(players_cursor, states_cursor, user))
             break
 
 
@@ -692,7 +698,7 @@ def raise_bet(players_cursor, states_cursor, user, amount):
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
-            FRAMES.append(display_game(players_cursor, states_cursor))
+            FRAMES.append(display_game(players_cursor, states_cursor, user))
             break
 
 
@@ -745,8 +751,8 @@ def fold(players_cursor, states_cursor, user):
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
         winner_name = users_playing[0][USERNAME]
-        FRAMES.append(display_game(players_cursor, states_cursor))
-        distribute_pots(players_cursor, states_cursor)
+        FRAMES.append(display_game(players_cursor, states_cursor, user))
+        distribute_pots(players_cursor, states_cursor, user)
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
         #   Find the max bet
@@ -765,18 +771,18 @@ def fold(players_cursor, states_cursor, user):
                                     SET action = ? '''
                 states_cursor.execute(update_action, (position,))
                 found = True
-                FRAMES.append(display_game(players_cursor, states_cursor))
+                FRAMES.append(display_game(players_cursor, states_cursor, user))
                 break
 
         if not found:
             board_cards = game_state[BOARD].split(',')
             if len(board_cards) == 1:   #  empty case
                 board_cards = []
-            FRAMES.append(display_game(players_cursor, states_cursor))
-            next_stage(players_cursor, states_cursor, len(board_cards))
+            FRAMES.append(display_game(players_cursor, states_cursor, user))
+            next_stage(players_cursor, states_cursor, len(board_cards), user)
 
 
-def start_new_hand(players_cursor, states_cursor, dealer_position):
+def start_new_hand(players_cursor, states_cursor, dealer_position, user):
     """
     Begins a new hand at the table. Posts blinds and deals two cards
     to each player. Updates player and game states.
@@ -785,15 +791,16 @@ def start_new_hand(players_cursor, states_cursor, dealer_position):
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         dealer_position (int): the dealer position ranging [0, # players)
+        user (str): the user who sent the request
     """
     #   Post blinds
-    post_blinds(players_cursor, states_cursor, dealer_position)
+    post_blinds(players_cursor, states_cursor, dealer_position, user)
 
     #   Deal cards
-    deal_table(players_cursor, states_cursor)
+    deal_table(players_cursor, states_cursor, user)
 
 
-def post_blinds(players_cursor, states_cursor, dealer_position):
+def post_blinds(players_cursor, states_cursor, dealer_position, user):
     """
     Post blinds for the small blind and big blind positions.
     Assumes that there are at least three players. Updates the
@@ -803,6 +810,7 @@ def post_blinds(players_cursor, states_cursor, dealer_position):
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         dealer_position (int): the dealer position ranging [0, # players)
+        user (str): the user who sent the request
     """
     query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(query).fetchall()
@@ -835,10 +843,10 @@ def post_blinds(players_cursor, states_cursor, dealer_position):
                     (dealer_position + 3) % len(players))
     states_cursor.execute(state_update, update_values)
 
-    FRAMES.append(display_game(players_cursor, states_cursor))
+    FRAMES.append(display_game(players_cursor, states_cursor, user))
 
 
-def deal_table(players_cursor, states_cursor):
+def deal_table(players_cursor, states_cursor, user):
     """
     Deals two random cards to each player without replacement. 
     These two cards are updated in the players_table. The remaining 
@@ -847,6 +855,7 @@ def deal_table(players_cursor, states_cursor):
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
+        user (str): user who sent the request
     """
     deck = {c for c in cards}
     players = players_cursor.execute('''SELECT * FROM players_table''').fetchall()
@@ -868,10 +877,10 @@ def deal_table(players_cursor, states_cursor):
                       SET deck = ? '''
     states_cursor.execute(update_deck, (",".join(deck),))
 
-    FRAMES.append(display_game(players_cursor, states_cursor))
+    FRAMES.append(display_game(players_cursor, states_cursor, user))
 
 #   TODO: TEST THIS
-def next_stage(players_cursor, states_cursor, num_board_cards):
+def next_stage(players_cursor, states_cursor, num_board_cards, user):
     """
     Updates the game state by going into the next stage (e.g. Preflop to Flop,
     Flop to Turn, Turn to River, or River to Showdown). Collects all bets on
@@ -881,6 +890,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         num_board_cards (int): 0, 3, 4, or 5 for the # of cards on the board
+        user (str): user who sent the request
     """
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
@@ -899,7 +909,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
 
     #   Update game state for the next street
     if num_board_cards == 5:  #  River
-        FRAMES.append(display_game(players_cursor, states_cursor))
+        FRAMES.append(display_game(players_cursor, states_cursor, user))
         distribute_pots(players_cursor, states_cursor)
     else:
         #   Draw the next card(s) for the board based on street
@@ -929,14 +939,14 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
                                board = ?,
                                action = ?'''
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
-        FRAMES.append(display_game(players_cursor, states_cursor))
+        FRAMES.append(display_game(players_cursor, states_cursor, user))
 
         #   Everyone is all-in case
         if not found:
-            next_stage(players_cursor, states_cursor, len(new_board.split(',')))
+            next_stage(players_cursor, states_cursor, len(new_board.split(',')), user)
 
 
-def distribute_pots(players_cursor, states_cursor):
+def distribute_pots(players_cursor, states_cursor, user):
     """
     Distribute all pots to the winners (this includes all side pots). Updates 
     the player state by removing bets and cards and updating the balance if 
@@ -946,11 +956,7 @@ def distribute_pots(players_cursor, states_cursor):
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
-        winner (Array): list of winner names for each pot. The first winner 
-            is for the main pot, the second winner is for the first side pot,
-            the third winner is for the second side pot, etc. The size of
-            the winner array must be equal to the size of the side pot 
-            array + 1 (the main pot).
+        user (str): the user who sent the request
     """
     players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
     players = players_cursor.execute(players_query).fetchall()
@@ -1001,10 +1007,10 @@ def distribute_pots(players_cursor, states_cursor):
                             pot = ? '''
     states_cursor.execute(update_state, ('', '', 0))
 
-    FRAMES.append(display_game(players_cursor, states_cursor))
+    FRAMES.append(display_game(players_cursor, states_cursor, user))
 
     #   Now start a new hand
-    start_new_hand(players_cursor, states_cursor, (game_state[DEALER] + 1) % len(players))
+    start_new_hand(players_cursor, states_cursor, (game_state[DEALER] + 1) % len(players), user)
 
 
 def find_winners(players, board_cards):
