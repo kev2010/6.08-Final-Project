@@ -919,8 +919,31 @@ def distribute_pots(players_cursor, states_cursor, winner):
     start_new_hand(players_cursor, states_cursor, (game_state[2] + 1) % len(players))
 
 
-def showdown():
-    pass
+def showdown(players_cursor, states_cursor):
+    
+    
+
+def find_best_hand(hole_cards, board):
+    cards = hole_cards + board
+    #   TODO: don't call funcitons twice? performance optimization?
+    if check_straight_flush(cards)[0]:
+        return (9, check_straight_flush(cards)[1])
+    elif check_four_of_a_kind(cards)[0]:
+        return (8, check_four_of_a_kind(cards)[1])
+    elif check_full_house(cards)[0]:
+        return (7, check_full_house(cards)[1])
+    elif check_flush(cards)[0]:
+        return (6, check_flush(cards)[1])
+    elif check_straight(cards)[0]:
+        return (5, check_straight(cards)[1])
+    elif check_three_of_a_kind(cards)[0]:
+        return (4, check_three_of_a_kind(cards)[1])
+    elif check_two_pair(cards)[0]:
+        return (3, check_two_pair(cards)[1])
+    elif check_one_pair(cards)[0]:
+        return (2, check_one_pair(cards)[1])
+    else:
+        return (1, check_high_card(cards)[1])
 
 
 #   Functions to check if a certain type of hand exists
@@ -973,7 +996,7 @@ def check_four_of_a_kind(hand):
     if max(cards_dict.values()) == 4:
         mode = [k for k, v in cards_dict if v == 4][0]
         remaining = [k for k, v in cards_dict if v != 4]
-        highest_card = check_high_card(remaining)[1][0]
+        highest_card = sort_cards(remaining)[0]
         return (True, [mode]*4 + highest_card)
 
 
@@ -1027,7 +1050,7 @@ def check_flush(hand):
     if max(suit_dict.values()) >= 5:
         max_suit = [k for k, v in suit_dict if v == max(suit_dict.values())][0]
         suited_cards = [k for k in hand if k[1] == max_suit]
-        highest_cards = check_high_card(suited_cards)[1]
+        highest_cards = sort_cards(suited_cards)[1]
         return (True, highest_cards[:5])
 
 
@@ -1080,6 +1103,18 @@ def check_two_pair(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    cards_dict = count_cards(hand)
+    pairs = [k for k, v in cards_dict if v == 2]
+    if len(pairs) == 2:
+        sorted_cards = sort_cards(pairs)
+        first_pair = sorted_cards[0]
+        second_pair = sorted_cards[2]
+        remaining_cards = [k for k in hand if k != first_pair and k != second_pair]
+        highest = sort_cards(remaining_cards)[0]
+        return (True, [first_pair]*2 + [second_pair]*2 + highest)
+    else:
+        return (False,)
+
 
 def check_one_pair(hand):
     """
@@ -1096,6 +1131,15 @@ def check_one_pair(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    cards_dict = count_cards(hand)
+    pairs = [k for k, v in cards_dict if v == 2]
+    if max(cards_dict.values()) == 1:
+        highest_pair_card = sort_cards(pairs)[0]
+        remaining_cards = [k for k, v in cards_dict if k != highest_pair_card]
+        sort_remaining = sort_cards(remaining_cards)
+        return (True, [highest_pair_card]*2 + sort_remaining[:3])
+    else:
+        return (False,)
 
 
 def check_high_card(hand):
@@ -1113,7 +1157,7 @@ def check_high_card(hand):
         hand made. The hand is organized from most to least 
         important card.
     """
-    return sort_cards(hand)[:5]
+    return (True, sort_cards(hand)[:5])
 
 
 def sort_cards(cards):
@@ -1129,3 +1173,21 @@ def sort_cards(cards):
     ranked_cards = [(k, card_order_dict[k[0]]) for k in cards]
     ranked_cards.sort(key=lambda x: x[1], reverse=True)
     return [k[0] for k in ranked_cards]
+
+
+def count_cards(cards):
+    """
+    Counts the cards
+    """
+    #   TODO: default dict?
+    cards_dict = {}
+    for card in cards:
+        if card in cards_dict:
+            cards_dict[card] += 1
+        else:
+            cards_dict[card] = 1
+    return cards_dict
+
+
+if __name__ == "__main__":
+    
