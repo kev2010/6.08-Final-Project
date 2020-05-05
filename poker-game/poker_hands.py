@@ -189,7 +189,7 @@ def check_two_pair(hand):
     if len(pairs) >= 2:
         sorted_cards = sort_cards(pairs)
         first_pair = sorted_cards[0]
-        second_pair = sorted_cards[2]
+        second_pair = sorted_cards[1]
         remaining_cards = [k for k in hand if k != first_pair and k != second_pair]
         highest = sort_cards(remaining_cards)[0]
         return (True, [first_pair]*2 + [second_pair]*2 + [highest])
