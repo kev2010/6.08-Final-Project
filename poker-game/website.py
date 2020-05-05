@@ -23,7 +23,7 @@ def request_handler(request):
     ret = None
     if request['method'] == 'GET':
         user = request["values"]["user"]
-        ret = render_game(c_player, c_state, user)
+        ret = display_game(c_player, c_state, user)
 
 
     #   TODO: Figure out if this is the right order of commit/close
