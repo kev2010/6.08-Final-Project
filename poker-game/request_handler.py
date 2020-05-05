@@ -389,7 +389,7 @@ def check(players_cursor, states_cursor, user):
         next_stage(players_cursor, states_cursor, 0)
     else:
         #   Otherwise, we pass the action to the next player
-        #   that has cards, or end the action
+        #   that has cards and isn't all-in, or end the action
         for i in range(1, len(players)):
             position = (user_position + i) % len(players)
             #   If this user is the small blind, then the original 
@@ -402,7 +402,7 @@ def check(players_cursor, states_cursor, user):
                 break
             elif i != 0:
                 next_player = players[position]
-                if next_player[CARDS] != '':  #  If the user has cards
+                if next_player[CARDS] != '' and next_player[BALANCE] > 0:
                     update_action = ''' UPDATE states_table
                                         SET action = ? '''
                     states_cursor.execute(update_action, (position,))
@@ -475,8 +475,8 @@ def call(players_cursor, states_cursor, user):
     for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
-        #  user has cards and hasn't bet the right amount condition
-        has_cards_wrong_bet = next_player[CARDS] != '' and next_player[BET] != max_bet 
+        #  user has cards, hasn't bet the right amount condition, and isn't all-in
+        has_cards_wrong_bet = next_player[CARDS] != '' and next_player[BET] != max_bet and next_player[BALANCE] > 0
         #  NOTE: special case where everyone limps preflop
         #  TODO: perhaps this actually isn't a special case?
         preflop = len(game_state[BOARD]) == 0
@@ -565,7 +565,7 @@ def bet(players_cursor, states_cursor, user, amount):
     for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
-        if next_player[CARDS] != '': 
+        if next_player[CARDS] != '' and next_player[BALANCE] > 0: 
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
@@ -665,7 +665,7 @@ def raise_bet(players_cursor, states_cursor, user, amount):
     for i in range(1, len(players)):
         position = (user_position + i) % len(players)
         next_player = players[position]
-        if next_player[CARDS] != '': 
+        if next_player[CARDS] != '' and next_player[BALANCE] > 0: 
             update_action = ''' UPDATE states_table
                                 SET action = ? '''
             states_cursor.execute(update_action, (position,))
@@ -721,7 +721,7 @@ def fold(players_cursor, states_cursor, user):
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
         winner_name = users_playing[0][USERNAME]
-        distribute_pots(players_cursor, states_cursor, [winner_name])
+        distribute_pots(players_cursor, states_cursor)
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
         #   Find the max bet
@@ -734,8 +734,8 @@ def fold(players_cursor, states_cursor, user):
         for i in range(1, len(players)):
             position = (user_position + i) % len(players)
             next_player = players[position]
-            #  user has cards and hasn't bet the right amount condition
-            if next_player[CARDS] != '' and next_player[BET] != max_bet : 
+            #  user has cards, isn't all-in, and hasn't bet the right amount condition
+            if next_player[CARDS] != '' and next_player[BET] != max_bet and next_player[BALANCE] > 0: 
                 update_action = ''' UPDATE states_table
                                     SET action = ? '''
                 states_cursor.execute(update_action, (position,))
