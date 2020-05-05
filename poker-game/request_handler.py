@@ -11,6 +11,8 @@ STARTING_STACK = 1000
 all_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 all_suits = ['s', 'c', 'd', 'h']
 cards = {rank + suit for rank in all_ranks for suit in all_suits}
+card_order_dict = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, 
+                   "T":10, "J":11, "Q":12, "K":13, "A":14}
 
 
 #   TODO: Make these functions take in database name string parameters
@@ -659,7 +661,7 @@ def fold(players_cursor, states_cursor, user):
         2. There is at least one non-zero bet present at the table
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
     
@@ -732,7 +734,7 @@ def start_new_hand(players_cursor, states_cursor, dealer_position):
     to each player. Updates player and game states.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         dealer_position (int): the dealer position ranging [0, # players)
     """
@@ -750,7 +752,7 @@ def post_blinds(players_cursor, states_cursor, dealer_position):
     pot size and dealer position.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         dealer_position (int): the dealer position ranging [0, # players)
     """
@@ -791,7 +793,7 @@ def deal_table(players_cursor, states_cursor):
     deck of cards is stored in state_table.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
     """
     deck = {c for c in cards}
@@ -822,7 +824,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
     previous street and updates the pot size.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         num_board_cards (int): 0, 3, 4, or 5 for the # of cards on the board
     """
@@ -872,10 +874,6 @@ def next_stage(players_cursor, states_cursor, num_board_cards):
         states_cursor.execute(update_cards, (new_deck, new_board, next_action))
 
 
-def showdown():
-    pass
-
-
 def distribute_pots(players_cursor, states_cursor, winner):
     """
     Distribute all pots to the winners (this includes all side pots). Updates 
@@ -920,3 +918,329 @@ def distribute_pots(players_cursor, states_cursor, winner):
 
     #   Now start a new hand
     start_new_hand(players_cursor, states_cursor, (game_state[2] + 1) % len(players))
+
+
+def showdown(players_cursor, states_cursor):
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+
+    #   TODO: fix magic #
+    best_hand = 0
+    best_hand_players = []
+    board_cards = game_state[1].split(',')
+    for player in players:
+        hole_cards = player[3].split(',')
+        hand_rank, hand = find_best_hand(hole_cards, board_cards)
+
+        if hand_rank > best_hand:
+            best_hand = hand_rank
+            best_hand_players = [(player[0], hand)]
+        elif hand_rank == best_hand:
+            best_hand_players.append((player[0], hand))
+    
+    winner = best_hand_players[0][0]
+    if len(best_hand_players) > 1:
+        #   Convert hand to list of numbers
+        hands = [(k[0], [card_order_dict[j[0]] for j in k[1]]) for k in best_hand_players]
+        hands.sort(key=lambda x: [x[1][0], x[1][1], x[1][2], x[1][3], x[1][4]], reverse=True)
+        winner, _ = hands[0]
+        #   TODO: handle split spots later
+
+    distribute_pots(players_cursor, states_cursor, winner)
+
+
+def find_best_hand(hole_cards, board):
+    cards = hole_cards + board
+    #   TODO: don't call funcitons twice? performance optimization?
+    if check_straight_flush(cards)[0]:
+        return (9, check_straight_flush(cards)[1])
+    elif check_four_of_a_kind(cards)[0]:
+        return (8, check_four_of_a_kind(cards)[1])
+    elif check_full_house(cards)[0]:
+        return (7, check_full_house(cards)[1])
+    elif check_flush(cards)[0]:
+        return (6, check_flush(cards)[1])
+    elif check_straight(cards)[0]:
+        return (5, check_straight(cards)[1])
+    elif check_three_of_a_kind(cards)[0]:
+        return (4, check_three_of_a_kind(cards)[1])
+    elif check_two_pair(cards)[0]:
+        return (3, check_two_pair(cards)[1])
+    elif check_one_pair(cards)[0]:
+        return (2, check_one_pair(cards)[1])
+    return (1, check_high_card(cards)[1])
+
+
+#   Functions to check if a certain type of hand exists
+def check_straight_flush(hand):
+    """
+    Checks if the player's hand and board make a straight flush.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+            e.g. ['Ah', 'Ks', 'Qs', '3h', '4h', 'Js', 'Tc']
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a straight flush is present, and the
+        second entry is a list of str of the best straight flush
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    #   Not actually right, flush and straight can be different cards
+    if check_flush(hand)[0] and check_straight(hand)[0]:
+        return (True, check_flush(hand)[1])
+    else:
+        return (False,)
+
+
+def check_four_of_a_kind(hand):
+    """
+    Checks if the player's hand and board make a four of a kind.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a four of a kind is present, and the
+        second entry is a list of str of the best four of a kind
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    #   TODO: default dict?
+    cards_dict = {}
+    for card in hand:
+        if card in cards_dict:
+            cards_dict[card] += 1
+        else:
+            cards_dict[card] = 1
+    
+    if max(cards_dict.values()) == 4:
+        mode = [k for k, v in cards_dict.items() if v == 4][0]
+        remaining = [k for k, v in cards_dict.items() if v != 4]
+        highest_card = sort_cards(remaining)[0]
+        return (True, [mode]*4 + highest_card)
+    return (False,)
+
+def check_full_house(hand):
+    """
+    Checks if the player's hand and board make a full house.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a full house is present, and the
+        second entry is a list of str of the best full house
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    if check_three_of_a_kind(hand)[0]:
+        three_kind = check_three_of_a_kind(hand)[1][0]
+        remaining = [k for k in hand if k != three_kind]
+        if check_two_pair(hand)[0]:
+            two_kind = check_two_pair(remaining)[1][0]
+            return (True, [three_kind]*3 + [two_kind]*2)
+    return (False,)
+
+
+def check_flush(hand):
+    """
+    Checks if the player's hand and board make a flush.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a flush is present, and the
+        second entry is a list of str of the best flush
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    suits = [i[1] for i in hand]
+    suit_dict = {}
+    for s in suits:
+        if s in suit_dict:
+            suit_dict[s] += 1
+        else:
+            suit_dict[s] = 1
+    
+    if max(suit_dict.values()) >= 5:
+        max_suit = [k for k, v in suit_dict.items() if v == max(suit_dict.values())][0]
+        suited_cards = [k for k in hand if k[1] == max_suit]
+        highest_cards = sort_cards(suited_cards)[1]
+        return (True, highest_cards[:5])
+    return (False,)
+
+
+def check_straight(hand):
+    """
+    Checks if the player's hand and board make a straight.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a straight is present, and the
+        second entry is a list of str of the best straight
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    return (False,)
+
+
+def check_three_of_a_kind(hand):
+    """
+    Checks if the player's hand and board make a three of a kind.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a three of a kind is present, and the
+        second entry is a list of str of the best three of a kind
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    return (False,)
+
+
+def check_two_pair(hand):
+    """
+    Checks if the player's hand and board make a two pair.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a two pair is present, and the
+        second entry is a list of str of the best two pair
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    cards_dict = count_cards(hand)
+    pairs = [k for k, v in cards_dict.items() if v == 2]
+    if len(pairs) == 2:
+        sorted_cards = sort_cards(pairs)
+        first_pair = sorted_cards[0]
+        second_pair = sorted_cards[2]
+        remaining_cards = [k for k in hand if k != first_pair and k != second_pair]
+        highest = sort_cards(remaining_cards)[0]
+        return (True, [first_pair]*2 + [second_pair]*2 + highest)
+    return (False,)
+
+
+def check_one_pair(hand):
+    """
+    Checks if the player's hand and board make a pair.
+    IMPORTANT: Assumes that no better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is a boolean,
+        indicating whether a pair is present, and the
+        second entry is a list of str of the best pair
+        hand made (if there is none, then there is no second entry).
+        The hand is organized from most to least important card.
+    """
+    cards_dict = count_cards(hand)
+    pairs = [k for k, v in cards_dict.items() if v == 2]
+    if len(pairs) == 1:
+        highest_pair_card = sort_cards(pairs)[0]
+        remaining_cards = [k for k, v in cards_dict.items() if k != highest_pair_card]
+        sort_remaining = sort_cards(remaining_cards)
+        return (True, [highest_pair_card]*2 + sort_remaining[:3])
+    return (False,)
+
+
+def check_high_card(hand):
+    """
+    Returns the hand with high card. IMPORTANT: Assumes that no 
+    better hand can be made.
+
+    Args:
+        hand (list of str): non-empty list of cards
+    
+    Returns:
+        A tuple of length 2 where the first entry is true (since
+        high card is the worst possible poker hand), and the
+        second entry is a list of str of the best high card
+        hand made. The hand is organized from most to least 
+        important card.
+    """
+    return (True, sort_cards(hand)[:5])
+
+
+def sort_cards(cards):
+    """
+    Sorts the cards from highest to lowest.
+
+    Args:
+        cards (list of str): non-empty list of cards
+    
+    Returns:
+        a non-empty list of cards from highest to lowest ranking.
+    """
+    ranked_cards = [(k, card_order_dict[k[0]]) for k in cards]
+    ranked_cards.sort(key=lambda x: x[1], reverse=True)
+    return [k[0] for k in ranked_cards]
+
+
+def count_cards(cards):
+    """
+    Counts the cards
+    """
+    #   TODO: default dict?
+    cards_dict = {}
+    for card in cards:
+        if card[0] in cards_dict:
+            cards_dict[card[0]] += 1
+        else:
+            cards_dict[card[0]] = 1
+    return cards_dict
+
+
+# if __name__ == "__main__":
+#     players = [('kev2010', 650, 25, '2d,8c', 0),
+#                 ('jasonllu', 1350, 50, '3c,Qc', 1),
+#                 ('baptiste', 725, 50, 'Kd,7s', 2)]
+#     game_state = ('','4c,5h,6d,Qh,8s', 2, 0, 125)
+
+# #   TODO: fix magic #
+#     best_hand = 0
+#     best_hand_players = []
+#     board_cards = game_state[1].split(',')
+#     for player in players:
+#         hole_cards = player[3].split(',')
+#         hand_rank, hand = find_best_hand(hole_cards, board_cards)
+
+#         if hand_rank > best_hand:
+#             best_hand = hand_rank
+#             best_hand_players = [(player[0], hand)]
+#         elif hand_rank == best_hand:
+#             best_hand_players.append((player[0], hand))
+    
+#     winner = best_hand_players[0][0]
+#     if len(best_hand_players) > 1:
+#         #   Convert hand to list of numbers
+#         hands = [(k[0], [card_order_dict[j[0]] for j in k[1]]) for k in best_hand_players]
+#         hands.sort(key=lambda x: [x[1][0], x[1][1], x[1][2], x[1][3], x[1][4]], reverse=True)
+#         winner, _ = hands[0]
+#         #   TODO: handle split spots later
