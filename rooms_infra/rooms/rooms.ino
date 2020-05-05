@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "giannaros";
+char user[] = "calathes";
 
 char user2[] = "petros";
 char user3[] = "christos";
