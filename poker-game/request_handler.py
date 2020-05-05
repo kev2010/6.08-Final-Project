@@ -2,9 +2,11 @@ import sqlite3
 import random
 import sys
 sys.path.append('__HOME__/team079/poker-game')
-from settings import players_db
 from poker_actions import *
 from room_actions import *
+
+players_db = '__HOME__/team079/poker-game/players.db'
+state_db = '__HOME__/team079/poker-game/state.db'
 
 #   TODO: Make these functions take in database name string parameters
 #   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
