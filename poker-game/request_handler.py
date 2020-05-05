@@ -11,6 +11,8 @@ STARTING_STACK = 1000
 all_ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
 all_suits = ['s', 'c', 'd', 'h']
 cards = {rank + suit for rank in all_ranks for suit in all_suits}
+card_order_dict = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, 
+                   "T":10, "J":11, "Q":12, "K":13, "A":14}
 
 
 #   TODO: Make these functions take in database name string parameters
@@ -938,6 +940,7 @@ def check_straight_flush(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    #   Not actually right, flush and straight can be different cards
     if check_flush(hand)[0] and check_straight(hand)[0]:
         return (True, check_flush(hand)[1])
     else:
@@ -1027,6 +1030,7 @@ def check_flush(hand):
         highest_cards = check_high_card(suited_cards)[1]
         return (True, highest_cards[:5])
 
+
 def check_straight(hand):
     """
     Checks if the player's hand and board make a straight.
@@ -1042,6 +1046,8 @@ def check_straight(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+
+
 
 def check_three_of_a_kind(hand):
     """
@@ -1107,3 +1113,19 @@ def check_high_card(hand):
         hand made. The hand is organized from most to least 
         important card.
     """
+    return sort_cards(hand)[:5]
+
+
+def sort_cards(cards):
+    """
+    Sorts the cards from highest to lowest.
+
+    Args:
+        cards (list of str): non-empty list of cards
+    
+    Returns:
+        a non-empty list of cards from highest to lowest ranking.
+    """
+    ranked_cards = [(k, card_order_dict[k[0]]) for k in cards]
+    ranked_cards.sort(key=lambda x: x[1], reverse=True)
+    return [k[0] for k in ranked_cards]
