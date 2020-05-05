@@ -263,6 +263,7 @@ def join_game(players_cursor, states_cursor, user):
     #   Check if the game is already full
     players_query = '''SELECT * FROM players_table;'''
     players = players_cursor.execute(players_query).fetchall()
+    return players
     if len(players) == MAX_PLAYERS:
         #   TODO: Return proper message for joining full game
         raise ValueError
