@@ -65,41 +65,46 @@ def request_handler(request):
     # return x
     # return "<meta http-equiv=\"refresh\" content=\"3\" ><h1> HI </h1>"
     return '''
-    <head>
-        <title>AJAX Example</title>
-    </head>
+            <head>
+                <title>AJAX Example</title>
+            </head>
 
-    <body>
-        <div id="instructor-answer"></div>
-    </body>
+            <body>
+                <div id="instructor-answer"></div>
+            </body>
 
-    <script>
-        window.onload = function() {
-            let xhttp = new XMLHttpRequest();
-            let url = "https://api.jokes.one/jod";
+            <script>
+                function joke() {
+                    let xhttp = new XMLHttpRequest();
+                    let url = "https://api.jokes.one/jod";
 
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    // XMLHttp will provide the servers response as text, we need to parse to turn it into JSON
-                    let response = JSON.parse(this.response);
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            // XMLHttp will provide the servers response as text, we need to parse to turn it into JSON
+                            let response = JSON.parse(this.response);
 
-                    // Press f12 to see the console.log and see the full response body from the jokes api, there
-                    //  is a lot of other information we can use, for this example, I just care about the text of
-                    //  the joke!
-                    console.log(response);
-                    let jokeText = response.contents.jokes[0].joke.text;
-                    
-                    // Now, target the DIV in question, and set the innerHTML to the jokeText
-                    let targetDiv = document.getElementById("instructor-answer");
-                    targetDiv.innerHTML = jokeText;
+                            // Press f12 to see the console.log and see the full response body from the jokes api, there
+                            //  is a lot of other information we can use, for this example, I just care about the text of
+                            //  the joke!
+                            console.log(response);
+                            let jokeText = response.contents.jokes[0].joke.text;
+                            
+                            // Now, target the DIV in question, and set the innerHTML to the jokeText
+                            let targetDiv = document.getElementById("instructor-answer");
+                            targetDiv.innerHTML = jokeText;
+                        }
+                    }
+
+                    xhttp.open("GET", url, true);
+                    xhttp.send();
                 }
-            }
 
-            xhttp.open("GET", url, true);
-            xhttp.send();
-        }
-    </script>
+                window.onload = joke;
 
-    '''
+                setInterval(function(){
+                    joke();
+                },1000);
+            </script>
+        '''
     
 
