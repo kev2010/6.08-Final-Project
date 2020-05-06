@@ -1,3 +1,10 @@
+const suitHTML = {
+    "s": "&spades;",
+    "h": "&hearts;",
+    "d": "&diams;",
+    "c": "&clubs;"
+}
+
 const display = () => {
     let xhttp = new XMLHttpRequest();
     var params = "type=spectate";
@@ -41,10 +48,19 @@ const displayBoard = (gameState) => {
         card = streets[i]
         var elt = document.getElementById(card);
         var eltRank = document.getElementById(card + '-rank');
-        // var eltSuit = document.getElementById(card + '-suit');
+        var eltSuit = document.getElementById(card + '-suit');
         elt.hidden = !showCard;
         if (showCard) {
             eltRank.innerHTML = board[i][0];
+            eltSuit.innerHTML = suitHTML[board[i][1]];
+
+            if (board[i][1] === 's' || board[i][1] === 'c') {
+                eltRank.className = 'card-text black';
+                eltSuit.className = 'card-img black';
+            } else {
+                eltRank.className = 'card-text red';
+                eltSuit.className = 'card-img red';
+            }
         }
     }
 }
