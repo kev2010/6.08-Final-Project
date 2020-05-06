@@ -175,7 +175,6 @@ def request_handler(request):
 
                             //  If there is a game going on
                             if (gameState.length != 0) {
-                                let gameState = response[0];
                                 let board = gameState.board.split(",");
 
                                 // FLOP
