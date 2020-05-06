@@ -39,11 +39,13 @@ def check_straight_flush(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
-    #   Not actually right, flush and straight can be different cards
-    if check_flush(hand)[0] and check_straight(hand)[0]:
-        return (True, check_flush(hand)[1])
-    else:
-        return (False,)
+    if check_flush(hand)[0]:
+        highest_flush = check_flush(hand)[1]
+        suit = highest_flush[0][1]
+        cards_with_suit = [c for c in hand if c[1] == suit]
+        if check_straight(cards_with_suit)[0]:
+            return (True, check_straight(cards_with_suit)[1])
+    return (False,)
 
 
 def check_four_of_a_kind(hand):
@@ -340,7 +342,7 @@ if __name__ == "__main__":
     # #   no flush
     # hand5 = ["3h", "4d", "6d", "7s", "9d", "Qd", "8h"]
 
-    # print(check_flush(hand5))
+    # print(check_flush(hand1))
 
     # # Full house tests
     # #   Kings over 3
@@ -365,3 +367,39 @@ if __name__ == "__main__":
     # hand7 = ["Kh", "Kd", "Td", "3s", "3d", "Qd", "Ts"]
 
     # print(check_full_house(hand1))
+
+    # #   4 of a kind tests
+    # #   4 K
+    # hand1 = ["Kh", "Kd", "Td", "3s", "3d", "Kc", "Ks"]
+
+    # #   4 4
+    # hand2 = ["4h", "4c", "Tc", "4s", "Ks", "Qd", "4d"]
+
+    # #   4 3, 3 6
+    # hand3 = ["3s", "3c", "6c", "6h", "6s", "3d", "3h"]
+
+    # #   3 pairs, no 4 of a kind
+    # hand4 = ["Kh", "Kd", "Td", "3s", "3d", "Qd", "Ts"]
+
+    # #   2 3 of a kind
+    # hand5 = ["Kh", "Ks", "Td", "3h", "3d", "Kd", "3s"]
+
+    # print(check_four_of_a_kind(hand5))
+
+    # #   Straight flush tests
+    # #   royal
+    # hand1 = ["Ad", "Kd", "Td", "4s", "3d", "Qd", "Jd"]
+
+    # #   T high
+    # hand2 = ["9h", "3d", "Th", "4s", "6h", "7h", "8h"]
+
+    # #   Q straight flush with an A high flush
+    # hand3 = ["Ts", "9s", "As", "4c", "Js", "Qs", "8s"]
+
+    # #   K straight flush with an A high straight
+    # hand4 = ["Jh", "9h", "Th", "As", "9d", "Qh", "Kh"]
+
+    # #   straight + flush present, but no straight flush
+    # hand5 = ["2h", "3d", "6h", "4h", "5h", "Qd", "Kh"]
+
+    # print(check_straight_flush(hand5))
