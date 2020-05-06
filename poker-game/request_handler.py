@@ -83,7 +83,6 @@ def request_handler(request):
 
     game_state = ""
     if request['method'] == 'GET':
-        return request
         get_type = request["values"]["type"]
         if get_type == "actions":
             user = request["values"]["user"]
