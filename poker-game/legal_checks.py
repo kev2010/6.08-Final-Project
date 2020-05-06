@@ -167,7 +167,8 @@ def is_fold_legal(players_cursor, states_cursor, user):
     Returns:
         True if folding is legal.
     """
-    pass
+    #   Same case as calling
+    return is_call_legal(players_cursor, states_cursor, user)
 
 
 def is_on_user(players_cursor, states_cursor, user):

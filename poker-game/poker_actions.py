@@ -272,21 +272,8 @@ def fold(players_cursor, states_cursor, user):
     players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
-
-    #   Make sure action is on the user
-    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[POSITION]
-    if game_action != user_position:
-        raise ValueError
-
-    #   Make sure folding is a legal option
-    #   Folding is legal only if there are bets present
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
-    if len(bets) == 0:
-        raise ValueError
     
     update_cards = ''' UPDATE players_table
                        SET cards = ?
@@ -297,11 +284,12 @@ def fold(players_cursor, states_cursor, user):
     users_playing = players_cursor.execute(users_playing_query, ('',)).fetchall()
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
-        winner_name = users_playing[0][USERNAME]
         FRAMES.append(display_game(players_cursor, states_cursor, user))
         distribute_pots(players_cursor, states_cursor, user)
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
+        bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+        bets = players_cursor.execute(bets_query, (0,)).fetchall()
         #   Find the max bet
         max_bet = 0
         for better in bets:
@@ -310,7 +298,7 @@ def fold(players_cursor, states_cursor, user):
             
         found = False
         for i in range(1, len(players)):
-            position = (user_position + i) % len(players)
+            position = (player[POSITION] + i) % len(players)
             next_player = players[position]
             #  user has cards, isn't all-in, and hasn't bet the right amount condition
             if next_player[CARDS] != '' and next_player[BET] != max_bet and next_player[BALANCE] > 0: 
