@@ -10,32 +10,18 @@ from legal_checks import *
 def check(players_cursor, states_cursor, user):
     """
     Handles a poker check request. Passes the turn to the next player or
-    goes to the next stage if checking is a legal action. Assumes the 
+    goes to the next stage. Assumes that checking is a legal action and
     board has either 3, 4, or 5 cards.
-
-    Checking is legal if:
-        1. The action is on the user
-        2. If the stage is post-flop, then there are no bets present at
-            the table.
-        3. If the stage is pre-flop, then everyone has limped to the big 
-            blind, and the current action is on the big blind.
 
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
-    
-    Raises:
-        ValueError: if action is not on the user or checking is illegal
     """
     players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
     players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
-
-    #   Make sure checking is a legal option
-    if not is_check_legal(players_cursor, states_cursor, user):
-        raise ValueError
 
     #   See if it's big blind special case
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
@@ -81,41 +67,24 @@ def call(players_cursor, states_cursor, user):
     """
     Handles a poker call request. Calls the previous bet and passes
     the turn to the next player or goes to the next stage if calling
-    is a legal action. Assumes the board has either 0, 3, 4, or 5 cards.
-
-    Calling is legal if:
-        1. The action is on the user
-        2. There is at least one non-zero bet present at the table
+    is a legal action. Assumes that calling is legal and the board 
+    has either 0, 3, 4, or 5 cards.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
-    
-    Raises:
-        ValueError: if action is not on the user or calling is illegal 
     """
     players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
     players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
-
-    #   Make sure action is on the user
-    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[POSITION]
-    if game_action != user_position:
-        raise ValueError
-
-    #   Make sure calling is a legal option
-    #   Calling is legal only if there are bets present
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
-    if len(bets) == 0:
-        raise ValueError
     
     #   Find the max bet that user has to call
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
     max_bet = 0
     for better in bets:
         if better[BET] > max_bet:
@@ -141,7 +110,7 @@ def call(players_cursor, states_cursor, user):
     #   Update action
     found = False
     for i in range(1, len(players)):
-        position = (user_position + i) % len(players)
+        position = (player[POSITION] + i) % len(players)
         next_player = players[position]
         #  user has cards, hasn't bet the right amount condition, and isn't all-in
         has_cards_wrong_bet = next_player[CARDS] != '' and next_player[BET] != max_bet and next_player[BALANCE] > 0
@@ -171,12 +140,7 @@ def bet(players_cursor, states_cursor, user, amount):
     """
     Handles a poker bet request. Bets the specified amount and passes
     the turn to the next player if betting is a legal action. Assumes 
-    the board has either 0, 3, 4, or 5 cards.
-
-    Betting is legal if:
-        1. The action is on the user
-        2. There are no bets present at the table
-        3. The user is betting at least the size of the big blind
+    betting is legal, and the board has either 0, 3, 4, or 5 cards.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
@@ -184,37 +148,13 @@ def bet(players_cursor, states_cursor, user, amount):
         user (str): non-empty username
         amount (int): a non-zero amount to bet. Must be a size that is
             legal in poker
-    
-    Raises:
-        TODO: customize errors
-        ValueError: if action is not on the user, betting is illegal,
-            or the size is illegal 
     """
     players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
     players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
-
-    #   Make sure action is on the user
-    #   TODO: perhaps make this a function?
-    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[POSITION]
-    if game_action != user_position:
-        raise ValueError
-
-    #   Make sure betting is a legal option
-    #   Betting is legal only if there are no bets present
-    #   Otherwise, it would be considered raising
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
-    if bets:
-        raise ValueError
-
-    #   Make sure bet size is legal (at least the big blind)
-    if amount < BIG_BLIND:
-        raise ValueError
 
     #   Update player state with the bet
     new_bal = player[BALANCE] - amount
@@ -233,7 +173,7 @@ def bet(players_cursor, states_cursor, user, amount):
     
     #   Update action
     for i in range(1, len(players)):
-        position = (user_position + i) % len(players)
+        position = (player[POSITION] + i) % len(players)
         next_player = players[position]
         if next_player[CARDS] != '' and next_player[BALANCE] > 0: 
             update_action = ''' UPDATE states_table

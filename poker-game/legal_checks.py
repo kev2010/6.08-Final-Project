@@ -62,8 +62,7 @@ def is_call_legal(players_cursor, states_cursor, user):
     #   Calling is legal only if there are bets present
     bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
     bets = players_cursor.execute(bets_query, (0,)).fetchall()
-    if len(bets) == 0:
-        raise ValueError
+    return len(bets) > 0
 
 
 def is_bet_legal(players_cursor, states_cursor, user):
@@ -76,13 +75,34 @@ def is_bet_legal(players_cursor, states_cursor, user):
         user (str): non-empty username
     
     Returns:
-        A length three tuple where the first entry is a boolean
-        indicating if betting is legal, and the second and third
+        A length four tuple where the first entry is a boolean
+        indicating if betting is legal, and the second and fourth
         entries are the min bet and max bet allowed, respectively.
-        Note that the second and third entries are 0 if first entry
-        is false.
+        The third entry is the 2nd max bet allowed since players
+        are not allowed to have a stack size of less than a big 
+        blind left after betting. Note that the second, third and
+        fourth entries are 0 if first entry is false.
+
+        E.g. the blinds are 25/50, betting is legal, and user has
+            a stack size of 1000. The return would be 
+            (True, 50, 950, 1000). The user is not allowed to bet
+            between 950 and 1000 since that would leave less than
+            a BB left.
     """
-    pass
+    if not is_on_user(players_cursor, states_cursor, user):
+        return (False, 0, 0)
+    
+    #   Betting is legal only if there are no bets present
+    #   Otherwise, it would be considered raising
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if bets:
+        return (False, 0, 0)
+    else:
+        user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+        player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+        return (True, 
+                BIG_BLIND, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
 def is_raise_legal(players_cursor, states_cursor, user):
