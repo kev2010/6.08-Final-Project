@@ -121,7 +121,7 @@ def check_flush(hand):
     if max(suit_dict.values()) >= 5:
         max_suit = [k for k, v in suit_dict.items() if v == max(suit_dict.values())][0]
         suited_cards = [k for k in hand if k[1] == max_suit]
-        highest_cards = sort_cards(suited_cards)[1]
+        highest_cards = sort_cards(suited_cards)
         return (True, highest_cards[:5])
     return (False,)
 
@@ -300,17 +300,35 @@ def count_cards(cards):
 
 
 # if __name__ == "__main__":
-#     #   Straight tests
-#     #   A to T
-#     hand1 = ["Ah", "Kd", "Td", "4s", "3d", "Qd", "Jh"]
+    # #   Straight tests
+    # #   A to T
+    # hand1 = ["Ah", "Kd", "Td", "4s", "3d", "Qd", "Jh"]
 
-#     #   9 to 5
-#     hand2 = ["5h", "4d", "6d", "7s", "9d", "Qd", "8h"]
+    # #   9 to 5
+    # hand2 = ["5h", "4d", "6d", "7s", "9d", "Qd", "8h"]
 
-#     #   A to 5
-#     hand3 = ["5h", "4d", "2d", "3s", "9d", "Qd", "Ah"]
+    # #   A to 5
+    # hand3 = ["5h", "4d", "2d", "3s", "9d", "Qd", "Ah"]
 
-#     #   No straight
-#     hand4 = ["3h", "4d", "6d", "7s", "9d", "Qd", "8h"]
+    # #   No straight
+    # hand4 = ["3h", "4d", "6d", "7s", "9d", "Qd", "8h"]
 
-#     print(check_straight(hand4))
+    # print(check_straight(hand4))
+
+    # #   Flush tests
+    # #   K high d
+    # hand1 = ["Ah", "Kd", "Td", "4s", "3d", "Qd", "Jd"]
+
+    # #   A high h
+    # hand2 = ["Ah", "3d", "Th", "4h", "3h", "Qd", "Jh"]
+
+    # #   7 high h
+    # hand3 = ["2h", "3d", "7h", "4h", "3h", "Qd", "6h"]
+
+    # #   more than 5 spades, Q high s
+    # hand4 = ["7s", "3s", "Ah", "4s", "Js", "Qs", "6s"]
+
+    # #   no flush
+    # hand5 = ["3h", "4d", "6d", "7s", "9d", "Qd", "8h"]
+
+    # print(check_flush(hand5))
