@@ -87,9 +87,18 @@ def check_full_house(hand):
         The hand is organized from most to least important card.
     """
     if check_three_of_a_kind(hand)[0]:
-        three_kind = check_three_of_a_kind(hand)[1][0]
+        #   Find biggest 3 of a kind
+        cards_dict = count_cards(hand)
+        three_peats = [k for k, v in cards_dict.items() if v == 3]
+        three_kind_val = 0
+        three_kind = ''
+        for three in three_peats:
+            if card_order_dict[three] > three_kind_val:
+                three_kind_val = card_order_dict[three]
+                three_kind = three
+
         remaining = [k for k in hand if k[0] != three_kind]
-        if check_one_pair(hand)[0]:
+        if check_one_pair(remaining)[0]:
             pair = check_one_pair(remaining)[1][0]
             return (True, [three_kind]*3 + [pair]*2)
     return (False,)
@@ -236,8 +245,8 @@ def check_one_pair(hand):
         The hand is organized from most to least important card.
     """
     cards_dict = count_cards(hand)
-    pairs = [k for k, v in cards_dict.items() if v == 2]
-    if len(pairs) == 1:
+    pairs = [k for k, v in cards_dict.items() if v >= 2]
+    if len(pairs) >= 1:
         highest_pair_card = sort_cards(pairs)[0]
         remaining_cards = [k for k, v in cards_dict.items() if k != highest_pair_card]
         sort_remaining = sort_cards(remaining_cards)
@@ -299,7 +308,7 @@ def count_cards(cards):
     return cards_dict
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     # #   Straight tests
     # #   A to T
     # hand1 = ["Ah", "Kd", "Td", "4s", "3d", "Qd", "Jh"]
@@ -332,3 +341,27 @@ def count_cards(cards):
     # hand5 = ["3h", "4d", "6d", "7s", "9d", "Qd", "8h"]
 
     # print(check_flush(hand5))
+
+    # # Full house tests
+    # #   Kings over 3
+    # hand1 = ["Kh", "Kd", "Td", "3s", "3d", "Qd", "Ks"]
+
+    # #   4s over Ts
+    # hand2 = ["Th", "4c", "Tc", "4h", "Ks", "Qd", "4h"]
+
+    # #   8s over 6s (3 6s and 3 8s)
+    # hand3 = ["6h", "8d", "6s", "8c", "8h", "Qd", "6c"]
+
+    # #   9s over 7s (with 2 6s)
+    # hand4 = ["9s", "6s", "6h", "9d", "7s", "7c", "9c"]
+
+    # #   A over 6s (with 3 K)
+    # hand5 = ["Kh", "Kd", "Kc", "As", "Ad", "Qd", "Ah"]
+
+    # #   3 of a kind, no full house
+    # hand6 = ["Kh", "Kd", "Td", "3s", "7d", "Qd", "Ks"]
+
+    # #   3 pairs, no full house
+    # hand7 = ["Kh", "Kd", "Td", "3s", "3d", "Qd", "Ts"]
+
+    # print(check_full_house(hand1))
