@@ -158,7 +158,7 @@ def request_handler(request):
                             //  is a lot of other information we can use, for this example, I just care about the text of
                             //  the joke!
                             console.log(response);
-                            let jokeText = response;
+                            let to_display = JSON.stringify(response);
                             
                             // Now, target the DIV in question, and set the innerHTML to the jokeText
                             let targetDiv = document.getElementById("instructor-answer");
