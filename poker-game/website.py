@@ -194,6 +194,7 @@ def request_handler(request):
                                 console.log(board[0][0]);
                                 console.log(board[0][1]);
                             }
+                            console.log(document.getElementById("flop1-rank"));
 
                             let flop2 = document.getElementById("flop2");
                             let flop2rank = document.getElementById("flop2-rank");
