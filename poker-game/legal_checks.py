@@ -16,8 +16,31 @@ def is_check_legal(players_cursor, states_cursor, user):
     Returns:
         True if checking is legal.
     """
-    pass
+    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query).fetchall()
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
 
+    #   Make sure action is on the user
+    if not is_on_user(players_cursor, states_cursor, user):
+        return False
+    
+    #   Checking is legal only if there are no bets yet or in the big blind special case
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    #   Find max bet
+    max_bet = 0
+    for better in bets:
+        if better[BET] > max_bet:
+            max_bet = better[BET]
+    #   See if it's big blind special case
+    preflop = len(game_state[BOARD]) == 0
+    big_blind_pos = (game_state[DEALER] + 2) % len(players)
+    big_blind_special = preflop and user_position == big_blind_pos and max_bet == BIG_BLIND
+    return not bets or big_blind_special
+    
 
 def is_call_legal(players_cursor, states_cursor, user):
     """
