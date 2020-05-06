@@ -68,7 +68,7 @@ def request_handler(request):
             <head>
                 <title>Poker!</title>
                 <style>
-                    <link rel="stylesheet" href="styles.css">     
+                    <link rel="stylesheet" href="__HOME__/team079/poker-game/styles.css">     
                 </style>
             </head>
 
