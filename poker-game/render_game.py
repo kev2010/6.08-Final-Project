@@ -1,3 +1,4 @@
+import json
 import sys
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
@@ -38,25 +39,32 @@ def display_game(players_cursor, states_cursor, user):
         A string of the state of the game, formatted as described
         above
     """
-    #   TODO: Return proper JSON message of the state of the game
-    players_query = '''SELECT * FROM players_table;'''
-    players = players_cursor.execute(players_query).fetchall()
-    result = "players:\n"
-    for p in players:
-        cards = str(p[CARDS]) if p[USERNAME] == user else ""
-        player_info = "(" + str(p[USERNAME]) + ", " + str(p[BALANCE]) + ", " + str(p[BET]) + ", " + cards + ", " + str(p[POSITION]) + ")"
-        result += player_info + "\n"
-        # result += str(p) + "\n"
+    # #   TODO: Return proper JSON message of the state of the game
+    # players_query = '''SELECT * FROM players_table;'''
+    # players = players_cursor.execute(players_query).fetchall()
+    # result = "players:\n"
+    # for p in players:
+    #     cards = str(p[CARDS]) if p[USERNAME] == user else ""
+    #     player_info = "(" + str(p[USERNAME]) + ", " + str(p[BALANCE]) + ", " + str(p[BET]) + ", " + cards + ", " + str(p[POSITION]) + ")"
+    #     result += player_info + "\n"
+    #     # result += str(p) + "\n"
         
 
-    result += "\nstate:\n"
-    current_state_query = '''SELECT * FROM states_table;'''
-    state = states_cursor.execute(current_state_query).fetchall()
-    for s in state:
-        result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(s[POT]) + ")"
-        # result += str(s) + "\n"
+    # result += "\nstate:\n"
+    # current_state_query = '''SELECT * FROM states_table;'''
+    # state = states_cursor.execute(current_state_query).fetchall()
+    # for s in state:
+    #     result += "(" + str(s[BOARD]) + ", " + str(s[DEALER]) + ", " + str(s[ACTION]) + ", " + str(s[POT]) + ")"
+    #     # result += str(s) + "\n"
     
-    return result
+    # return result
+
+    players_query = '''SELECT * FROM players_table;'''
+    players_cursor.execute(players_query).fetchall()
+    r = [dict((players_cursor.description[i][0], value) \
+               for i, value in enumerate(row)) for row in players_cursor.fetchall()]
+    json_output = json.dumps(r)
+    return json_output
 
 
 def render_frames():

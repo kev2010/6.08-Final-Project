@@ -83,8 +83,12 @@ def request_handler(request):
 
     game_state = ""
     if request['method'] == 'GET':
-        user = request["values"]["user"]
-        game_state = get_handler(user, request, c_player, c_state)
+        get_type = request["values"]["type"]
+        if get_type == "actions":
+            user = request["values"]["user"]
+            game_state = get_actions_handler(user, request, c_player, c_state)
+        elif get_type == "spectate":
+            game_state = get_spectate_handler(request, c_player, c_state)
     elif request['method'] == 'POST':
         game_state = post_handler(request, c_player, c_state)
 
@@ -96,7 +100,7 @@ def request_handler(request):
     return game_state
 
 
-def get_handler(user, request, players_cursor, states_cursor):
+def get_actions_handler(user, request, players_cursor, states_cursor):
     """
     Handles a GET request as defined in the request_handler function.
     Returns a string representing the possible actions the user
@@ -157,6 +161,10 @@ def get_handler(user, request, players_cursor, states_cursor):
     #   else:
     #     possible_actions = ["leave"]
     #     return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
+
+
+def get_spectate_handler(request, players_cursor, states_cursor):
+    return display_game(players_cursor, states_cursor, "")
 
 
 def post_handler(request, players_cursor, states_cursor):
