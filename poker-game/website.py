@@ -181,6 +181,7 @@ def request_handler(request):
                             if (board.length === 3) {
                                 showFlop = true;
                             }
+                            console.log(showFlop);
 
                             let flop1 = document.getElementById("flop1");
                             let flop1rank = document.getElementById("flop1-rank");
@@ -189,6 +190,9 @@ def request_handler(request):
                             if (showFlop) {
                                 flop1rank.innerHTML = board[0][0];
                                 flop1suit.innerHTML = board[0][1];
+                                console.log(board[0]);
+                                console.log(board[0][0]);
+                                console.log(board[0][1]);
                             }
 
                             let flop2 = document.getElementById("flop2");
