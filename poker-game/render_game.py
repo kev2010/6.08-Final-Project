@@ -68,7 +68,6 @@ def display_game(players_cursor, states_cursor, user):
     users = {"players": dict((players_cursor.description[i][0], value) \
                for i, value in enumerate(row)) for row in players_cursor.fetchall()}
     r.update(users)
-    return r
     json_output = json.dumps(r)
     return json_output
 
