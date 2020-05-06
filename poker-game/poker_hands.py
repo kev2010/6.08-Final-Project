@@ -141,6 +141,30 @@ def check_straight(hand):
         hand made (if there is none, then there is no second entry).
         The hand is organized from most to least important card.
     """
+    cards_dict = count_cards(hand)
+    ranks_sorted = sort_cards(cards_dict.keys())  #  Gets rid of suits
+
+    #   Keep track of a counter to count consecutive ranks
+    counter = 0
+    prev_rank = 0
+    prev_cards = []
+    for rank in ranks_sorted:  #  ranks_sorted goes from high to low
+        rank_int = card_order_dict[rank]
+        if prev_rank - rank_int == 1:
+            counter += 1
+            prev_cards.append(rank)
+        else:
+            counter = 1
+            prev_cards = [rank]
+        prev_rank = rank_int
+        if counter == 5:
+            return (True, prev_cards)
+
+    #   Check special case of A to 5 straight
+    low_straight = ['5', '4', '3', '2']
+    if ranks_sorted[-4:] == low_straight and 'A' in cards_dict.keys():
+        return (True, low_straight + ['A'])
+
     return (False,)
 
 
@@ -241,7 +265,7 @@ def check_high_card(hand):
 
 def sort_cards(cards):
     """
-    Sorts the cards from highest to lowest.
+    Sorts the cards from highest to lowest rank.
 
     Args:
         cards (list of str): non-empty list of cards
@@ -256,7 +280,14 @@ def sort_cards(cards):
 
 def count_cards(cards):
     """
-    Counts the cards
+    Counts the # of appearances of each card rank.
+
+    Args:
+        cards (list of str): a list of card ranks
+    
+    Returns:
+        A dictionary mapping card ranks to the # of times it
+        appears in the "cards" list.
     """
     #   TODO: default dict?
     cards_dict = {}
@@ -266,3 +297,20 @@ def count_cards(cards):
         else:
             cards_dict[card[0]] = 1
     return cards_dict
+
+
+# if __name__ == "__main__":
+#     #   Straight tests
+#     #   A to T
+#     hand1 = ["Ah", "Kd", "Td", "4s", "3d", "Qd", "Jh"]
+
+#     #   9 to 5
+#     hand2 = ["5h", "4d", "6d", "7s", "9d", "Qd", "8h"]
+
+#     #   A to 5
+#     hand3 = ["5h", "4d", "2d", "3s", "9d", "Qd", "Ah"]
+
+#     #   No straight
+#     hand4 = ["3h", "4d", "6d", "7s", "9d", "Qd", "8h"]
+
+#     print(check_straight(hand4))
