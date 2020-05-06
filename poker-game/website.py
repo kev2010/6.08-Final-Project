@@ -188,7 +188,7 @@ def request_handler(request):
                             var flop1 = document.getElementById("flop1");
                             var flop1rank = document.getElementById("flop1-rank");
                             var flop1suit = document.getElementById("flop1-suit");
-                            flop1.hidden = showFlop;
+                            flop1.hidden = !showFlop;
                             if (showFlop) {
                                 flop1rank.innerHTML = board[0][0];
                                 //flop1suit.innerHTML = board[0][1];
@@ -202,7 +202,7 @@ def request_handler(request):
                             let flop2 = document.getElementById("flop2");
                             let flop2rank = document.getElementById("flop2-rank");
                             let flop2suit = document.getElementById("flop2-suit");
-                            flop2.hidden = showFlop;
+                            flop2.hidden = !showFlop;
                             if (showFlop) {
                                 flop2rank.innerHTML = board[1][0];
                                 //flop2suit.innerHTML = board[1][1];
@@ -211,7 +211,7 @@ def request_handler(request):
                             let flop3 = document.getElementById("flop3");
                             let flop3rank = document.getElementById("flop3-rank");
                             let flop3suit = document.getElementById("flop3-suit");
-                            flop3.hidden = showFlop;
+                            flop3.hidden = !showFlop;
                             if (showFlop) {
                                 flop3rank.innerHTML = board[2][0];
                                 //flop3suit.innerHTML = board[2][1];
@@ -226,7 +226,7 @@ def request_handler(request):
                             let turn = document.getElementById("turn");
                             let turnRank = document.getElementById("turn-rank");
                             let turnSuit = document.getElementById("turn-suit");
-                            turn.hidden = showTurn;
+                            turn.hidden = !showTurn;
                             if (showTurn) {
                                 turnRank.innerHTML = board[3][0];
                                 //turnSuit.innerHTML = board[3][1];
@@ -241,7 +241,7 @@ def request_handler(request):
                             let river = document.getElementById("river");
                             let riverRank = document.getElementById("river-rank");
                             let riverSuit = document.getElementById("river-suit");
-                            river.hidden = showRiver;
+                            river.hidden = !showRiver;
                             if (showRiver) {
                                 riverRank.innerHTML = board[4][0];
                                 //riverSuit.innerHTML = board[4][1];
