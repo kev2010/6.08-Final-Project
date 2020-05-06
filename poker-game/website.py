@@ -125,16 +125,28 @@ def request_handler(request):
 
             <body>
                 <div class="main">
-                    <p> These are _____'s cards. Insert a user param in the URL to see someone's cards</p>
+                    <h1> Welcome to Poker :) </h1>
                     <div class="table">
                         <div class="board">
-                            <div class="card-small" id="card1">
-                                <p class="card-text black">A</p>
+                            <div class="card-small">
+                                <p class="card-text black" id="flop1">A</p>
                                 <p class="card-img black">&clubs;</p>
                             </div>
-                            <div class="card-small" id="card2">
-                                <p class="card-text black">10</p>
+                            <div class="card-small">
+                                <p class="card-text black" id="flop2">10</p>
                                 <p class="card-img black">&spades;</p>
+                            </div>
+                            <div class="card-small">
+                                <p class="card-text red" id="flop3">K</p>
+                                <p class="card-img red">&hearts;</p>
+                            </div>
+                            <div class="card-small">
+                                <p class="card-text red" id="turn">Q</p>
+                                <p class="card-img red">&diams;</p>
+                            </div>
+                            <div class="card-small">
+                                <p class="card-text red" id="river">2</p>
+                                <p class="card-img red">&diams;</p>
                             </div>
                         </div>
                     </div>
