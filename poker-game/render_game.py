@@ -60,13 +60,14 @@ def display_game(players_cursor, states_cursor, user):
     # return result
     query = '''SELECT * FROM states_table;'''
     states_cursor.execute(query)
-    r = [dict((states_cursor.description[i][0], value) \
-               for i, value in enumerate(row)) for row in states_cursor.fetchall()]
+    r = {"state": dict((states_cursor.description[i][0], value) \
+               for i, value in enumerate(row)) for row in states_cursor.fetchall()}
 
     players_query = '''SELECT * FROM players_table;'''
     players_cursor.execute(players_query)
-    r.extend([dict((players_cursor.description[i][0], value) \
-               for i, value in enumerate(row)) for row in players_cursor.fetchall()])
+    temp = [dict((players_cursor.description[i][0], value) \
+               for i, value in enumerate(row)) for row in players_cursor.fetchall()]
+    r["players"] = temp[0]
     json_output = json.dumps(r)
     return json_output
 

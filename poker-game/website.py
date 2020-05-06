@@ -171,9 +171,11 @@ def request_handler(request):
                             //  the joke!
                             console.log(response);
                             let to_display = JSON.stringify(response);
-                            let gameState = response[0];
+                            gameState = response.state;
 
+                            //  If there is a game going on
                             if (gameState.length != 0) {
+                                let gameState = response[0];
                                 let board = gameState.board.split(",");
 
                                 // FLOP
