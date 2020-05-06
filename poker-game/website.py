@@ -172,69 +172,72 @@ def request_handler(request):
                             console.log(response);
                             let to_display = JSON.stringify(response);
                             let gameState = response[0];
-                            let board = gameState.board.split(",");
 
-                            // FLOP
-                            var showFlop = false;
-                            if (board.length === 3) {
-                                showFlop = true;
-                            }
+                            if (gameState.length != 0) {
+                                let board = gameState.board.split(",");
 
-                            var flop1 = document.getElementById("flop1");
-                            var flop1rank = document.getElementById("flop1-rank");
-                            var flop1suit = document.getElementById("flop1-suit");
-                            flop1.hidden = !showFlop;
-                            if (showFlop) {
-                                flop1rank.innerHTML = board[0][0];
-                                //flop1suit.innerHTML = board[0][1];
-                            }
+                                // FLOP
+                                var showFlop = false;
+                                if (board.length === 3) {
+                                    showFlop = true;
+                                }
 
-                            let flop2 = document.getElementById("flop2");
-                            let flop2rank = document.getElementById("flop2-rank");
-                            let flop2suit = document.getElementById("flop2-suit");
-                            flop2.hidden = !showFlop;
-                            if (showFlop) {
-                                flop2rank.innerHTML = board[1][0];
-                                //flop2suit.innerHTML = board[1][1];
-                            }
+                                var flop1 = document.getElementById("flop1");
+                                var flop1rank = document.getElementById("flop1-rank");
+                                var flop1suit = document.getElementById("flop1-suit");
+                                flop1.hidden = !showFlop;
+                                if (showFlop) {
+                                    flop1rank.innerHTML = board[0][0];
+                                    //flop1suit.innerHTML = board[0][1];
+                                }
 
-                            let flop3 = document.getElementById("flop3");
-                            let flop3rank = document.getElementById("flop3-rank");
-                            let flop3suit = document.getElementById("flop3-suit");
-                            flop3.hidden = !showFlop;
-                            if (showFlop) {
-                                flop3rank.innerHTML = board[2][0];
-                                //flop3suit.innerHTML = board[2][1];
-                            }
+                                let flop2 = document.getElementById("flop2");
+                                let flop2rank = document.getElementById("flop2-rank");
+                                let flop2suit = document.getElementById("flop2-suit");
+                                flop2.hidden = !showFlop;
+                                if (showFlop) {
+                                    flop2rank.innerHTML = board[1][0];
+                                    //flop2suit.innerHTML = board[1][1];
+                                }
 
-                            // TURN
-                            var showTurn = false;
-                            if (board.length === 4) {
-                                showTurn = true;
-                            }
+                                let flop3 = document.getElementById("flop3");
+                                let flop3rank = document.getElementById("flop3-rank");
+                                let flop3suit = document.getElementById("flop3-suit");
+                                flop3.hidden = !showFlop;
+                                if (showFlop) {
+                                    flop3rank.innerHTML = board[2][0];
+                                    //flop3suit.innerHTML = board[2][1];
+                                }
 
-                            let turn = document.getElementById("turn");
-                            let turnRank = document.getElementById("turn-rank");
-                            let turnSuit = document.getElementById("turn-suit");
-                            turn.hidden = !showTurn;
-                            if (showTurn) {
-                                turnRank.innerHTML = board[3][0];
-                                //turnSuit.innerHTML = board[3][1];
-                            }
+                                // TURN
+                                var showTurn = false;
+                                if (board.length === 4) {
+                                    showTurn = true;
+                                }
 
-                            // RIVER
-                            var showRiver = false;
-                            if (board.length === 5) {
-                                showRiver = true;
-                            }
+                                let turn = document.getElementById("turn");
+                                let turnRank = document.getElementById("turn-rank");
+                                let turnSuit = document.getElementById("turn-suit");
+                                turn.hidden = !showTurn;
+                                if (showTurn) {
+                                    turnRank.innerHTML = board[3][0];
+                                    //turnSuit.innerHTML = board[3][1];
+                                }
 
-                            let river = document.getElementById("river");
-                            let riverRank = document.getElementById("river-rank");
-                            let riverSuit = document.getElementById("river-suit");
-                            river.hidden = !showRiver;
-                            if (showRiver) {
-                                riverRank.innerHTML = board[4][0];
-                                //riverSuit.innerHTML = board[4][1];
+                                // RIVER
+                                var showRiver = false;
+                                if (board.length === 5) {
+                                    showRiver = true;
+                                }
+
+                                let river = document.getElementById("river");
+                                let riverRank = document.getElementById("river-rank");
+                                let riverSuit = document.getElementById("river-suit");
+                                river.hidden = !showRiver;
+                                if (showRiver) {
+                                    riverRank.innerHTML = board[4][0];
+                                    //riverSuit.innerHTML = board[4][1];
+                                }
                             }
                             
                             // Now, target the DIV in question, and set the innerHTML to the jokeText
