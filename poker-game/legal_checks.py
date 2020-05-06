@@ -90,14 +90,14 @@ def is_bet_legal(players_cursor, states_cursor, user):
             a BB left.
     """
     if not is_on_user(players_cursor, states_cursor, user):
-        return (False, 0, 0)
+        return (False, 0, 0, 0)
     
     #   Betting is legal only if there are no bets present
     #   Otherwise, it would be considered raising
     bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
     bets = players_cursor.execute(bets_query, (0,)).fetchall()
     if bets:
-        return (False, 0, 0)
+        return (False, 0, 0, 0)
     else:
         user_query = '''SELECT * FROM players_table WHERE user = ?;'''
         player = players_cursor.execute(user_query, (user,)).fetchall()[0]
@@ -115,13 +115,43 @@ def is_raise_legal(players_cursor, states_cursor, user):
         user (str): non-empty username
     
     Returns:
-        A length three tuple where the first entry is a boolean
-        indicating if raising is legal, and the second and third
+        A length four tuple where the first entry is a boolean
+        indicating if raising is legal, and the second and fourth
         entries are the min raise to and max raise to allowed, 
-        respectively. Note that the second and third entries are 
-        0 if first entry is false.
+        respectively. The third entry is the 2nd max raise to allowed 
+        since players are not allowed to have a stack size of less 
+        than a big blind left after betting (Read is_bet_legal spec
+        to see an example). Note that the second, third and fourth 
+        entries are 0 if first entry is false.
     """
-    pass
+    if not is_on_user(players_cursor, states_cursor, user):
+        return (False, 0, 0, 0)
+
+    #   Raising is legal only if there are bets present
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if len(bets) == 0:
+        return (False, 0, 0, 0)
+    else:
+        #   Find the largest and 2nd largest bet
+        max_bet = 0
+        for better in bets:
+            if better[BET] > max_bet:
+                max_bet = better[BET]
+        
+        second_max_bet = 0
+        if len(bets) != 1:
+            #   TODO: Maybe don't copy? 
+            other_bets = [i for i in bets if i != max_bet]
+            for better in other_bets:
+                if better[BET] > second_max_bet:
+                    second_max_bet = better[BET]
+        
+        user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+        player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+        min_raise = 2*max_bet - second_max_bet
+        return (True, 
+                min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
 def is_fold_legal(players_cursor, states_cursor, user):

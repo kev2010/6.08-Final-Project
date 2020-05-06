@@ -217,43 +217,8 @@ def raise_bet(players_cursor, states_cursor, user, amount):
     players = players_cursor.execute(players_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()[0]
-
-    #   Make sure action is on the user
-    #   TODO: perhaps make this a function?
-    game_action = game_state[ACTION]
     user_query = '''SELECT * FROM players_table WHERE user = ?;'''
     player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-    user_position = player[POSITION]
-    if game_action != user_position:
-        raise ValueError
-
-    #   Make sure raising is a legal option
-    #   Raising is legal only if there are bets present
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
-    if len(bets) == 0:
-        raise ValueError
-
-    #   Make sure raise size is legal
-    #   Must be raising BY at least the previous raise (except for all-in)
-    #   TODO: perhaps split the all-in case from raise?
-    if amount != player[BALANCE] + player[BET]:  #  All-in
-        #   Find the largest and 2nd largest bet
-        max_bet = 0
-        for better in bets:
-            if better[BET] > max_bet:
-                max_bet = better[BET]
-        
-        second_max_bet = 0
-        if len(bets) != 1:
-            #   TODO: Maybe don't copy? 
-            other_bets = [i for i in bets if i != max_bet]
-            for better in other_bets:
-                if better[BET] > second_max_bet:
-                    second_max_bet = better[BET]
-        
-        if amount < 2*max_bet - second_max_bet:
-            raise ValueError
 
     #   Update player state with the raise
     new_bal = player[BALANCE] + player[BET] - amount
@@ -274,7 +239,7 @@ def raise_bet(players_cursor, states_cursor, user, amount):
     #   Update action
     #   TODO: perhaps combine all the "update action" code together?
     for i in range(1, len(players)):
-        position = (user_position + i) % len(players)
+        position = (player[POSITION] + i) % len(players)
         next_player = players[position]
         if next_player[CARDS] != '' and next_player[BALANCE] > 0: 
             update_action = ''' UPDATE states_table
