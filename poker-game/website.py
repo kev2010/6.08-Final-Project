@@ -68,56 +68,7 @@ def request_handler(request):
             <head>
                 <title>Poker!</title>
                 <style>
-                    .main {
-                    width: 1000px;
-                    }
-
-                    .table {
-                    background-color: green;
-                    height: 500px;
-                    width: 80%;
-                    border-radius: 50%;
-                    margin: 0 auto;
-                    border: 1em solid black;
-                    }
-
-                    .board {
-                    position: relative;
-                    top: 40%;
-                    left: 30%;
-                    }
-                    .card-small {
-                    border: .2em solid black;
-                    border-radius: 10%;
-                    height: 80px;
-                    width: 56px; /*70% of height*/
-                    margin-right: 5px;
-                    float: left;
-                    background-color: white;
-                    }
-
-                    .card-text {
-                    margin: 0;
-                    margin-top: 15%;
-                    text-align: center;
-                    font-size: 1.5em;
-                    font-weight: bold;
-                    padding: 0;
-                    }
-
-                    .card-img {
-                    text-align: center;
-                    margin: 0;
-                    font-size: 2em;
-                    }
-
-                    .red {
-                    color: red;
-                    }
-
-                    .black {
-                    color: black;
-                    }
+                    <link rel="stylesheet" href="styles.css">     
                 </style>
             </head>
 
@@ -125,26 +76,14 @@ def request_handler(request):
                 <div class="main">
                     <div class="table">
                         <div class="board">
-                        <div class="card-small">
-                            <p class="card-text black">A</p>
-                            <p class="card-img black">&clubs;</p>
-                        </div>
-                        <div class="card-small">
-                            <p class="card-text black">10</p>
-                            <p class="card-img black">&spades;</p>
-                        </div>
-                        <div class="card-small">
-                            <p class="card-text red">K</p>
-                            <p class="card-img red">&hearts;</p>
-                        </div>
-                        <div class="card-small">
-                            <p class="card-text red">Q</p>
-                            <p class="card-img red">&diams;</p>
-                        </div>
-                        <div class="card-small">
-                            <p class="card-text red">2</p>
-                            <p class="card-img red">&diams;</p>
-                        </div>
+                            <div class="card-small">
+                                <p class="card-text black">A</p>
+                                <p class="card-img black">&clubs;</p>
+                            </div>
+                            <div class="card-small">
+                                <p class="card-text black">10</p>
+                                <p class="card-img black">&spades;</p>
+                            </div>
                         </div>
                     </div>
                 </div>
