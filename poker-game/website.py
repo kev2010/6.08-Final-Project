@@ -146,9 +146,10 @@ def request_handler(request):
             <script>
                 function joke() {
                     let xhttp = new XMLHttpRequest();
-                    var params = JSON.stringify({ 'type': 'spectate' });
+                    var params = "type=spectate";
                     let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py";
-
+                    
+                    http.open("GET", url+"?"+params, true);
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
                             // XMLHttp will provide the servers response as text, we need to parse to turn it into JSON
@@ -167,7 +168,7 @@ def request_handler(request):
                     }
 
                     xhttp.open("GET", url, true);
-                    xhttp.send(params);
+                    xhttp.send(null);
                 }
 
                 window.onload = joke;
