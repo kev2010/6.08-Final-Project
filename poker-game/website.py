@@ -162,7 +162,7 @@ def request_handler(request):
                             
                             // Now, target the DIV in question, and set the innerHTML to the jokeText
                             let targetDiv = document.getElementById("instructor-answer");
-                            targetDiv.innerHTML = jokeText;
+                            targetDiv.innerHTML = to_display;
                         }
                     }
 
