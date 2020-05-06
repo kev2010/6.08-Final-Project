@@ -310,7 +310,7 @@ def count_cards(cards):
     return cards_dict
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # #   Straight tests
     # #   A to T
     # hand1 = ["Ah", "Kd", "Td", "4s", "3d", "Qd", "Jh"]
