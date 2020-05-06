@@ -151,7 +151,7 @@ def is_raise_legal(players_cursor, states_cursor, user):
         player = players_cursor.execute(user_query, (user,)).fetchall()[0]
         min_raise = 2*max_bet - second_max_bet
         return (True, 
-                min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
+                second_max_bet, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
 def is_fold_legal(players_cursor, states_cursor, user):

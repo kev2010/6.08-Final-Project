@@ -112,7 +112,7 @@ def get_handler(user, request, players_cursor, states_cursor):
             size$action_1@action_2@param1@param2@param3@action_3@...
         Example with 25/50 blinds and stack sizes of 1000. Currently
         pre-flop and action is on UTG.
-            4$call@raise@100@950@1000@fold@leave@
+            7$call@raise@100@950@1000@fold@leave@
     """
     users_query = '''SELECT * FROM players_table;'''
     users = players_cursor.execute(users_query).fetchall()
