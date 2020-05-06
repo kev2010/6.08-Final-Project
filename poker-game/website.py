@@ -178,6 +178,8 @@ def request_handler(request):
 
                             // FLOP
                             var showFlop = false;
+                            console.log("hi");
+                            console.log(document.getElementById("flop1"));
                             if (board.length === 3) {
                                 showFlop = true;
                             }
@@ -195,6 +197,7 @@ def request_handler(request):
                                 console.log(board[0][1]);
                             }
                             console.log(document.getElementById("flop1-rank"));
+                            console.log(document.getElementById("flop1"));
 
                             let flop2 = document.getElementById("flop2");
                             let flop2rank = document.getElementById("flop2-rank");
