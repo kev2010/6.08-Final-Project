@@ -55,7 +55,15 @@ def is_call_legal(players_cursor, states_cursor, user):
     Returns:
         True if calling is legal.
     """
-    pass
+    #   Make sure action is on the user
+    if not is_on_user(players_cursor, states_cursor, user):
+        return False
+
+    #   Calling is legal only if there are bets present
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
+    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    if len(bets) == 0:
+        raise ValueError
 
 
 def is_bet_legal(players_cursor, states_cursor, user):
