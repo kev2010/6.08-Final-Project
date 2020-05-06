@@ -189,7 +189,7 @@ def request_handler(request):
                             flop1.hidden = showFlop;
                             if (showFlop) {
                                 flop1rank.innerHTML = board[0][0];
-                                flop1suit.innerHTML = board[0][1];
+                                //flop1suit.innerHTML = board[0][1];
                                 console.log(board[0]);
                                 console.log(board[0][0]);
                                 console.log(board[0][1]);
@@ -201,7 +201,7 @@ def request_handler(request):
                             flop2.hidden = showFlop;
                             if (showFlop) {
                                 flop2rank.innerHTML = board[1][0];
-                                flop2suit.innerHTML = board[1][1];
+                                //flop2suit.innerHTML = board[1][1];
                             }
 
                             let flop3 = document.getElementById("flop3");
@@ -210,7 +210,7 @@ def request_handler(request):
                             flop3.hidden = showFlop;
                             if (showFlop) {
                                 flop3rank.innerHTML = board[2][0];
-                                flop3suit.innerHTML = board[2][1];
+                                //flop3suit.innerHTML = board[2][1];
                             }
 
                             // TURN
@@ -225,7 +225,7 @@ def request_handler(request):
                             turn.hidden = showTurn;
                             if (showTurn) {
                                 turnRank.innerHTML = board[3][0];
-                                turnSuit.innerHTML = board[3][1];
+                                //turnSuit.innerHTML = board[3][1];
                             }
 
                             // RIVER
@@ -240,7 +240,7 @@ def request_handler(request):
                             river.hidden = showRiver;
                             if (showRiver) {
                                 riverRank.innerHTML = board[4][0];
-                                riverSuit.innerHTML = board[4][1];
+                                //riverSuit.innerHTML = board[4][1];
                             }
                             
                             // Now, target the DIV in question, and set the innerHTML to the jokeText
