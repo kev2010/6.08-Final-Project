@@ -174,6 +174,7 @@ def request_handler(request):
                             let gameState = response[0];
                             console.log(gameState);
                             let board = gameState.board.split(",");
+                            console.log(board);
 
                             // FLOP
                             var showFlop = false;
