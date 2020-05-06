@@ -236,6 +236,10 @@ def request_handler(request):
                                 riverRank.innerHTML = board[4][0]
                                 riverSuit.innerHTML = board[4][1]
                             }
+                            
+                            // Now, target the DIV in question, and set the innerHTML to the jokeText
+                            let targetDiv = document.getElementById("instructor-answer");
+                            targetDiv.innerHTML = to_display;
                         }
                     }
 
