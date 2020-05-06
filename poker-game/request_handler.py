@@ -20,7 +20,7 @@ def request_handler(request):
     requests provide the following information:
 
     POST: user={user: str}&action={action: str}&amount={amount:str of int}
-    GET: None
+    GET: param => user={user: str}
     
     Returns a string representing the state of the poker game. The string is
     in the form of a JSON in the following format:
@@ -99,8 +99,8 @@ def request_handler(request):
 def get_handler(user, request, players_cursor, states_cursor):
     """
     Handles a GET request as defined in the request_handler function.
-    Returns a string representing the game state as defined in
-    request_handler.
+    Returns a string representing the possible actions the user
+    can take.
 
     Args:
         request (dict): maps request params to corresponding values
@@ -108,35 +108,55 @@ def get_handler(user, request, players_cursor, states_cursor):
         states_cursor (SQL Cursor): cursor for the states_table
 
     Returns:
-        TODO: A JSON string representing the players and state of 
-        the game as defined above
-
-        Currently returns the game state as specified by the
-        display_game function
+        A string with the following format:
+            size$action_1@action_2@param1@param2@param3@action_3@...
+        Example with 25/50 blinds and stack sizes of 1000. Currently
+        pre-flop and action is on UTG.
+            4$call@raise@100@950@1000@fold@leave@
     """
-    
     users_query = '''SELECT * FROM players_table;'''
     users = players_cursor.execute(users_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()
-    if users[0][USERNAME] == user and len(game_state) == 0:
-      possible_actions = ["start"]
-      
-      return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
-    else:
-      game_action = game_state[0][ACTION]
-      user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-      user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
-      if game_action == user_position:
-        possible_actions = ["leave", "check", "call", "bet", "raise", "fold"]
-        return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
-      else:
-        possible_actions = ["leave"]
-        return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"      
- 
-      
 
-    #return display_game(players_cursor, states_cursor)
+    possible_actions = []
+    if len(game_state) == 0:  #  game hasn't started yet
+        possible_actions = ["leave"]
+        if users[0][USERNAME] == user:
+            possible_actions.append("start")
+    else:  #  game already started
+        possible_actions = []
+        if is_check_legal(players_cursor, states_cursor, user):
+            possible_actions.append("check")
+        if is_call_legal(players_cursor, states_cursor, user):
+            possible_actions.append("call")
+        bet_legal, min_bet, max_bet, all_in = is_bet_legal(players_cursor, states_cursor, user)
+        if bet_legal:
+            possible_actions.extend(["bet", str(min_bet), str(max_bet), str(all_in)])
+        raise_legal, min_raise, max_raise, all_in = is_raise_legal(players_cursor, states_cursor, user)
+        if raise_legal:
+            possible_actions.extend(["raise", str(min_raise), str(max_raise), str(all_in)])
+        if is_fold_legal(players_cursor, states_cursor, user):
+            possible_actions.append("fold")
+        
+        possible_actions.append("leave")
+
+    return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
+
+    # if users[0][USERNAME] == user and len(game_state) == 0:
+    #   possible_actions = ["start"]
+      
+    #   return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
+    # else:
+    #   game_action = game_state[0][ACTION]
+    #   user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    #   user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
+    #   if game_action == user_position:
+    #     possible_actions = ["leave", "check", "call", "bet", "raise", "fold"]
+    #     return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
+    #   else:
+    #     possible_actions = ["leave"]
+    #     return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
 
 
 def post_handler(request, players_cursor, states_cursor):

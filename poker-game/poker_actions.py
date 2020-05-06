@@ -6,7 +6,7 @@ from game_logic import *
 from legal_checks import *
 
 
-#   TODO: TEST THIS
+
 def check(players_cursor, states_cursor, user):
     """
     Handles a poker check request. Passes the turn to the next player or
@@ -62,7 +62,7 @@ def check(players_cursor, states_cursor, user):
                     FRAMES.append(display_game(players_cursor, states_cursor, user))
                     break
 
-#   TODO: TEST THIS
+
 def call(players_cursor, states_cursor, user):
     """
     Handles a poker call request. Calls the previous bet and passes
