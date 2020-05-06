@@ -87,3 +87,25 @@ def is_fold_legal(players_cursor, states_cursor, user):
         True if folding is legal.
     """
     pass
+
+
+def is_on_user(players_cursor, states_cursor, user):
+    """
+    Determines whether the action is on the user.
+
+    Args:
+        players_cursor (SQL Cursor): cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+        user (str): non-empty username
+    
+    Returns:
+        True if action is on user.
+    """
+    query = '''SELECT * FROM states_table;'''
+    game_state  = states_cursor.execute(query).fetchall()[0]
+
+    #   Make sure action is on the user
+    game_action = game_state[ACTION]
+    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
+    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
+    return game_action == user_position

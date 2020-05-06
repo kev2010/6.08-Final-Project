@@ -3,6 +3,7 @@ sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 from render_game import *
 from game_logic import *
+from legal_checks import *
 
 
 #   TODO: TEST THIS
@@ -20,7 +21,7 @@ def check(players_cursor, states_cursor, user):
             blind, and the current action is on the big blind.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
     
