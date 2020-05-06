@@ -152,7 +152,7 @@ def request_handler(request):
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
                             // XMLHttp will provide the servers response as text, we need to parse to turn it into JSON
-                            console.log(response);
+                            console.log(this.response);
                             let response = JSON.parse(this.response); // 89
 
                             // Press f12 to see the console.log and see the full response body from the jokes api, there
