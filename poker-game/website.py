@@ -183,9 +183,9 @@ def request_handler(request):
                             }
                             console.log(showFlop);
 
-                            let flop1 = document.getElementById("flop1");
-                            let flop1rank = document.getElementById("flop1-rank");
-                            let flop1suit = document.getElementById("flop1-suit");
+                            var flop1 = document.getElementById("flop1");
+                            var flop1rank = document.getElementById("flop1-rank");
+                            var flop1suit = document.getElementById("flop1-suit");
                             flop1.hidden = showFlop;
                             if (showFlop) {
                                 flop1rank.innerHTML = board[0][0];
