@@ -156,19 +156,17 @@ def request_handler(request):
             </body>
 
             <script>
-                function joke() {
+                function display() {
                     let xhttp = new XMLHttpRequest();
                     var params = "type=spectate";
                     let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py";
                     
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            // XMLHttp will provide the servers response as text, we need to parse to turn it into JSON
+                            // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
                             let response = JSON.parse(this.response); // 89
 
-                            // Press f12 to see the console.log and see the full response body from the jokes api, there
-                            //  is a lot of other information we can use, for this example, I just care about the text of
-                            //  the joke!
+                            // Press f12 to see the console.log and see the full response body from the poker api
                             console.log(response);
                             let to_display = JSON.stringify(response);
 
@@ -243,7 +241,7 @@ def request_handler(request):
                                     }
                                 }
                             }
-                            // Now, target the DIV in question, and set the innerHTML to the jokeText
+                            // Now, target the DIV in question, and set the innerHTML to the response
                             let targetDiv = document.getElementById("instructor-answer");
                             targetDiv.innerHTML = to_display;
                         }
@@ -253,11 +251,11 @@ def request_handler(request):
                     xhttp.send(null);
                 }
 
-                window.onload = joke;
+                window.onload = display;
 
                 setInterval(function(){
                     console.log("refreshing");
-                    joke();
+                    display();
                 },1000);
             </script>
         '''
