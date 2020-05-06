@@ -142,16 +142,16 @@ def is_raise_legal(players_cursor, states_cursor, user):
         second_max_bet = 0
         if len(bets) != 1:
             #   TODO: Maybe don't copy? 
-            other_bets = [i for i in bets if i != max_bet]
+            other_bets = [i for i in bets if i[BET] != max_bet]
             for better in other_bets:
                 if better[BET] > second_max_bet:
                     second_max_bet = better[BET]
-        
+        delta = max_bet - second_max_bet
         user_query = '''SELECT * FROM players_table WHERE user = ?;'''
         player = players_cursor.execute(user_query, (user,)).fetchall()[0]
-        min_raise = 2*max_bet - second_max_bet
+        min_raise = max_bet + (delta if delta > BIG_BLIND else BIG_BLIND)
         return (True, 
-                second_max_bet-20, player[BALANCE] - BIG_BLIND, player[BALANCE])
+                min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
 def is_fold_legal(players_cursor, states_cursor, user):
