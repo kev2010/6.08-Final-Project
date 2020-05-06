@@ -14,7 +14,6 @@ def request_handler(request):
     """
     insert cool spec here
     """
-
     conn_players = sqlite3.connect(players_db)
     conn_state = sqlite3.connect(state_db)
     c_state = conn_state.cursor()
@@ -64,6 +63,43 @@ def request_handler(request):
     # x+= "<br><br><br> copyright team079!"
 
     # return x
-    return "<meta http-equiv=\"refresh\" content=\"3\" ><h1> HI </h1>"
+    # return "<meta http-equiv=\"refresh\" content=\"3\" ><h1> HI </h1>"
+    return '''
+    <head>
+        <title>AJAX Example</title>
+    </head>
+
+    <body>
+        <div id="instructor-answer"></div>
+    </body>
+
+    <script>
+        window.onload = function() {
+            let xhttp = new XMLHttpRequest();
+            let url = "https://api.jokes.one/jod";
+
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    // XMLHttp will provide the servers response as text, we need to parse to turn it into JSON
+                    let response = JSON.parse(this.response);
+
+                    // Press f12 to see the console.log and see the full response body from the jokes api, there
+                    //  is a lot of other information we can use, for this example, I just care about the text of
+                    //  the joke!
+                    console.log(response);
+                    let jokeText = response.contents.jokes[0].joke.text;
+                    
+                    // Now, target the DIV in question, and set the innerHTML to the jokeText
+                    let targetDiv = document.getElementById("instructor-answer");
+                    targetDiv.innerHTML = jokeText;
+                }
+            }
+
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+    </script>
+
+    '''
     
 
