@@ -102,6 +102,7 @@ def request_handler(request):
                 window.onload = joke;
 
                 setInterval(function(){
+                    console.log("refreshing");
                     joke();
                 },1000);
             </script>
