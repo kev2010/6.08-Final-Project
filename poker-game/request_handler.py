@@ -179,12 +179,19 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query).fetchall()
 
-    # for state in all_frames:
-    #     #   Delete this state if over 1 second has passed
+    #   Delete all frames older than 1 second if there are >1 frames
+    if len(all_frames) > 1:
+        one_second_ago = datetime.datetime.now()- datetime.timedelta(seconds = 1)
+        delete_frames = '''DELETE FROM frames_table WHERE time < ?'''
+        frames_cursor.execute(delete_frames, (one_second_ago,))
 
+    #   Get all the frames again
+    frames_query = '''SELECT * FROM frames_table 
+                      ORDER BY time ASC;'''
+    all_frames = frames_cursor.execute(frames_query).fetchall()
 
-
-    return display_game(players_cursor, states_cursor, "")
+    #   Return the oldest frame
+    return all_frames[0]
 
 
 def post_handler(request, players_cursor, states_cursor, frames_cursor):
