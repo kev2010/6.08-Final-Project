@@ -108,6 +108,8 @@ def request_handler(request):
     conn_players.close()
     conn_state.commit()
     conn_state.close()
+    conn_frames.commit()
+    conn_frames.close()
     return game_state
 
 
