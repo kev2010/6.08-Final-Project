@@ -9,7 +9,7 @@ from render_game import *
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
-
+#   Delete?
 def request_handler(request):
     """
     insert cool spec here
@@ -260,4 +260,3 @@ def request_handler(request):
             </script>
         '''
     
-

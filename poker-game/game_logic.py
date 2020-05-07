@@ -5,6 +5,7 @@ from settings import *
 from render_game import *
 from poker_hands import *
 
+
 def start_new_hand(players_cursor, states_cursor, dealer_position, user):
     """
     Begins a new hand at the table. Posts blinds and deals two cards

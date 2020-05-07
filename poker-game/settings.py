@@ -1,3 +1,4 @@
+#   SQL db locations on server
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 
