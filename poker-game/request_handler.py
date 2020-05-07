@@ -11,6 +11,10 @@ from room_actions import *
 from render_game import *
 from settings import *
 
+players_db = '__HOME__/team079/poker-game/players.db'
+state_db = '__HOME__/team079/poker-game/state.db'
+frames_db = '__HOME__/team079/poker-game/frames.db'
+
 #   TODO: Make these functions take in database name string parameters
 #   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
 #   TODO: Potentially make a function for passing action? Does it relate to checking/calling/etc.
