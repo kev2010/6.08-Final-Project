@@ -1,5 +1,6 @@
 import json
 import sys
+import datetime
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 
@@ -58,9 +59,9 @@ def display_game(players_cursor, states_cursor, user):
     #     # result += str(s) + "\n"
     
     # return result
+    r = {"state": {}, "players": {}}
     query = '''SELECT * FROM states_table;'''
     states_cursor.execute(query)
-    r = {"state": {}, "players": {}}
     r["state"] = [dict((states_cursor.description[i][0], value) \
                for i, value in enumerate(row)) for row in states_cursor.fetchall()]
 
@@ -69,18 +70,16 @@ def display_game(players_cursor, states_cursor, user):
     users = [dict((players_cursor.description[i][0], value) \
                for i, value in enumerate(row)) for row in players_cursor.fetchall()]
     r["players"] = users
+    
     json_output = json.dumps(r)
     return json_output
 
 
-def render_frames():
+def update_frames(frames_cursor):
     """
-    Renders the frames of the game state.
+    Updates the frames of the game state.
     """
-    counter = 1
-    result = ""
-    for frame in FRAMES:
-        result += "FRAME " + str(counter) + ":\n"
-        result += frame + "\n\n"
-        counter += 1
-    return result
+    for frame in FRAMES:    #   frame is json string
+        update_states = ''' INSERT into frames_table 
+                            VALUES (?,?); '''
+        frames_cursor.execute(update_states, (frame, datetime.datetime.now()))

@@ -29,7 +29,7 @@ const display = () => {
                         <td>${players[i].user}</td>
                         <td>${players[i].bal}</td>
                         <td>${players[i].bet}</td>
-                        <td>${displayHoleCards(cards)}</td>
+                        <td>${(cards.length == 2) ? displayHoleCards(cards) : "Folded"}</td>
                     `;
                 }
             }
@@ -41,6 +41,7 @@ const display = () => {
                     displayBoard(gameState);
                     displayDealer(gameState);
                     displayAction(gameState);
+                    displayPot(gameState);
                 }
             }
 
@@ -93,6 +94,12 @@ const displayAction = (gameState) => {
     let action = gameState.action;
     var elt = document.getElementById("seat" + (action+1));
     elt.innerHTML += `<td><------</td>`;
+}
+
+const displayPot = (gameState) => {
+    let pot = gameState.pot;
+    var elt = document.getElementById("pot");
+    elt.innerHTML = `POT TOTAL: ${pot}`;
 }
 
 const displayHoleCards = (cards) => {

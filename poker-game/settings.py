@@ -1,6 +1,7 @@
 #   SQL db locations on server
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
+frames_db = '__HOME__/team079/poker-game/frames.db'
 
 #   Constants
 MAX_PLAYERS = 3
@@ -28,3 +29,7 @@ BOARD = 1
 DEALER = 2
 ACTION = 3
 POT = 4
+
+#   Frames SQL DB indicies
+STATE = 0
+TIME = 1

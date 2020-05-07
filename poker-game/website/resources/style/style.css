@@ -24,6 +24,14 @@
     left: 30%;
 }
 
+.pot {
+    position: relative;
+    top: 60%;
+    left: 10%;
+    float: left;
+    text-align: center;
+}
+
 .card-small {
     border: .2em solid black;
     border-radius: 10%;

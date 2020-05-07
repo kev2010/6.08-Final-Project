@@ -8,6 +8,7 @@ import sys
 sys.path.append('__HOME__/team079/poker-game')
 from poker_actions import *
 from room_actions import *
+from render_game import *
 
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
@@ -71,19 +72,25 @@ def request_handler(request):
         A JSON string representing the players and state of 
         the game as defined above
     """
-    #   Initialize the players_table and states_table SQL database
-    # create_player_database(players_db)
-    # create_state_database(state_db)
+    #   Initialize the players_table SQL database
     conn_players = sqlite3.connect(players_db)
     c_player = conn_players.cursor()
     c_player.execute('''CREATE TABLE IF NOT EXISTS players_table 
                         (user text, bal int, bet int, invested int, 
                         cards text, position int);''')
+    
+    #   Initialize the states_table SQL database
     conn_state = sqlite3.connect(state_db)
     c_state = conn_state.cursor()
     c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
                         (deck text, board text, dealer int, action
                         int, pot int);''')
+
+    #   Initialize the frames_table SQL database
+    conn_frames = sqlite3.connect(frames_db)
+    c_frame = conn_frames.cursor()
+    c_frame.execute('''CREATE TABLE IF NOT EXISTS frames_table 
+                        (state text, time timestamp);''')
 
     game_state = ""
     if request['method'] == 'GET':
@@ -92,9 +99,9 @@ def request_handler(request):
             user = request["values"]["user"]
             game_state = get_actions_handler(user, request, c_player, c_state)
         elif get_type == "spectate":
-            game_state = get_spectate_handler(request, c_player, c_state)
+            game_state = get_spectate_handler(request, c_player, c_state, c_frame)
     elif request['method'] == 'POST':
-        game_state = post_handler(request, c_player, c_state)
+        game_state = post_handler(request, c_player, c_state, c_frame)
 
     #   TODO: Figure out if this is the right order of commit/close
     conn_players.commit()
@@ -167,11 +174,20 @@ def get_actions_handler(user, request, players_cursor, states_cursor):
     #     return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
 
 
-def get_spectate_handler(request, players_cursor, states_cursor):
+def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
+    frames_query = '''SELECT * FROM frames_table 
+                      ORDER BY time ASC;'''
+    all_frames = frames_cursor.execute(frames_query).fetchall()
+
+    # for state in all_frames:
+    #     #   Delete this state if over 1 second has passed
+
+
+
     return display_game(players_cursor, states_cursor, "")
 
 
-def post_handler(request, players_cursor, states_cursor):
+def post_handler(request, players_cursor, states_cursor, frames_cursor):
     """
     Handles a POST request as defined in the request_handler function.
     Returns a string representing the game state as defined in
@@ -212,5 +228,6 @@ def post_handler(request, players_cursor, states_cursor):
     else:
         return "Requested action not recognized!"
 
-    return render_frames()
+    update_frames(frames_cursor)
+    return "Success!"
 
