@@ -183,10 +183,19 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
     frames_query = '''SELECT * FROM frames_table 
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query).fetchall()
+    # relevant_frames = []
+
+    # for frame in all_frames:
+    #     two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
+    #     if frame[TIME] >= two_seconds_ago:  #   this means if this frame is newer
+    #         relevant_frames.append(frame)
+
+    # if len(relevant_frames) == 0:   #   we are too late
+    #     relevant_frames = all_frames[-1]    #   we just take the most recent frame
 
     #   Delete all frames older than 2 seconds if there are >1 frames
     if len(all_frames) > 1:
-        one_second_ago = datetime.datetime.now()- datetime.timedelta(seconds = 2)
+        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds = 1)
         delete_frames = '''DELETE FROM frames_table WHERE time < ?'''
         frames_cursor.execute(delete_frames, (one_second_ago,))
 
@@ -195,7 +204,6 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query).fetchall()
     #   Return the oldest frame's state
-    return all_frames
     return all_frames[0][STATE]
 
 

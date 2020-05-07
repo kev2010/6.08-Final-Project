@@ -79,10 +79,13 @@ def update_frames(frames_cursor):
     """
     Updates the frames of the game state.
     """
+    counter = 0
     for frame in FRAMES:    #   frame is json string
         update_states = ''' INSERT into frames_table 
                             VALUES (?,?); '''
-        frames_cursor.execute(update_states, (frame, datetime.datetime.now()))
+        time = datetime.datetime.now() + datetime.timedelta(seconds=counter)
+        frames_cursor.execute(update_states, (frame, time))
+        counter += 1
 
 def display_frames(frames_cursor):
     query = '''SELECT * FROM frames_table;'''
