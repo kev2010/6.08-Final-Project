@@ -100,7 +100,7 @@ def request_handler(request):
         get_type = request["values"]["type"]
         if get_type == "actions":
             user = request["values"]["user"]
-            game_state = get_actions_handler(user, request, c_player, c_state)
+            game_state = get_actions_handler(user, request, c_player, c_state, c_frame)
         elif get_type == "spectate":
             game_state = get_spectate_handler(request, c_player, c_state, c_frame)
     elif request['method'] == 'POST':
@@ -116,7 +116,7 @@ def request_handler(request):
     return game_state
 
 
-def get_actions_handler(user, request, players_cursor, states_cursor):
+def get_actions_handler(user, request, players_cursor, states_cursor, frames_cursor):
     """
     Handles a GET request as defined in the request_handler function.
     Returns a string representing the possible actions the user
@@ -138,13 +138,15 @@ def get_actions_handler(user, request, players_cursor, states_cursor):
     users = players_cursor.execute(users_query).fetchall()
     query = '''SELECT * FROM states_table;'''
     game_state  = states_cursor.execute(query).fetchall()
+    frames_query = '''SELECT * FROM frames_table;'''
+    frames = frames_cursor.execute(frames_query).fetchall()
 
     possible_actions = []
     if len(game_state) == 0:  #  game hasn't started yet
         possible_actions = ["leave"]
         if users[0][USERNAME] == user:
             possible_actions.append("start")
-    else:  #  game already started
+    elif len(frames) == 1:  #  all frames are done processing
         possible_actions = []
         if is_check_legal(players_cursor, states_cursor, user):
             possible_actions.append("check")
