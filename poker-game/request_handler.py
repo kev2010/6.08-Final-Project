@@ -184,9 +184,9 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query).fetchall()
 
-    #   Delete all frames older than 1 second if there are >1 frames
-    if len(all_frames) > 2:
-        one_second_ago = datetime.datetime.now()- datetime.timedelta(seconds = 1)
+    #   Delete all frames older than 2 seconds if there are >1 frames
+    if len(all_frames) > 1:
+        one_second_ago = datetime.datetime.now()- datetime.timedelta(seconds = 2)
         delete_frames = '''DELETE FROM frames_table WHERE time < ?'''
         frames_cursor.execute(delete_frames, (one_second_ago,))
 
