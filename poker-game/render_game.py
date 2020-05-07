@@ -83,3 +83,17 @@ def update_frames(frames_cursor):
         update_states = ''' INSERT into frames_table 
                             VALUES (?,?); '''
         frames_cursor.execute(update_states, (frame, datetime.datetime.now()))
+
+def display_frames(frames_cursor):
+    query = '''SELECT * FROM frames_table;'''
+    frames = frames_cursor.execute(query).fetchall()
+
+    counter = 1
+    result = ""
+    for state in frames:
+        result += "FRAME" + str(counter)
+        result += state + "\n"
+        counter += 1
+    
+    return result
+    

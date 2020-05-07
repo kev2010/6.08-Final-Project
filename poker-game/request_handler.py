@@ -240,5 +240,5 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
         return "Requested action not recognized!"
 
     update_frames(frames_cursor)
-    return "Success!"
+    return display_frames(frames_cursor)
 
