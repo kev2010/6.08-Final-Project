@@ -1,3 +1,7 @@
+"""
+PokerAPI handles POST/GET requests.
+"""
+
 import sqlite3
 import random
 import sys
