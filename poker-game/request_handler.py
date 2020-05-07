@@ -11,6 +11,7 @@ from room_actions import *
 from render_game import *
 from settings import *
 
+#   Putting these in settings breaks the server... not sure why imports don't work
 players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 frames_db = '__HOME__/team079/poker-game/frames.db'
@@ -193,7 +194,7 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
     frames_query = '''SELECT * FROM frames_table 
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query).fetchall()
-
+    return all_frames
     #   Return the oldest frame
     return all_frames[0]
 
