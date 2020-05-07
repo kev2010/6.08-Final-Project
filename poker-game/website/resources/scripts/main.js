@@ -39,6 +39,7 @@ const display = () => {
                 if (gameState.length != 0) {
                     displayBoard(gameState);
                     displayDealer(gameState);
+                    displayAction(gameState);
                 }
             }
 
@@ -84,7 +85,13 @@ const displayBoard = (gameState) => {
 const displayDealer = (gameState) => {
     let dealer = gameState.dealer;
     var elt = document.getElementById("seat" + (dealer+1));
-    elt.innerHTML = elt.innerHTML + `<td>O</td>`;
+    elt.innerHTML += `<td>O</td>`;
+}
+
+const displayAction = (gameState) => {
+    let action = gameState.action;
+    var elt = document.getElementById("seat" + (action+1));
+    elt.innerHTML += `<td><------</td>`;
 }
 
 const displayHoleCards = (cards) => {
