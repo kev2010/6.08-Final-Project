@@ -9,9 +9,7 @@ sys.path.append('__HOME__/team079/poker-game')
 from poker_actions import *
 from room_actions import *
 from render_game import *
-
-players_db = '__HOME__/team079/poker-game/players.db'
-state_db = '__HOME__/team079/poker-game/state.db'
+from settings import *
 
 #   TODO: Make these functions take in database name string parameters
 #   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
