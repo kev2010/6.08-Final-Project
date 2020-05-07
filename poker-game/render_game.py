@@ -91,8 +91,8 @@ def display_frames(frames_cursor):
     counter = 1
     result = ""
     for state in frames:
-        result += "FRAME" + str(counter)
-        result += str(state) + "\n"
+        result += "FRAME" + str(counter) + "\n"
+        result += str(state) + "\n\n"
         counter += 1
     
     return result

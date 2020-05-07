@@ -195,6 +195,7 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query).fetchall()
     #   Return the oldest frame's state
+    return all_frames
     return all_frames[0][STATE]
 
 
