@@ -301,7 +301,14 @@ def fold(players_cursor, states_cursor, user):
             position = (player[POSITION] + i) % len(players)
             next_player = players[position]
             #  user has cards, isn't all-in, and hasn't bet the right amount condition
-            if next_player[CARDS] != '' and next_player[BET] != max_bet and next_player[BALANCE] > 0: 
+            has_cards_wrong_bet = next_player[CARDS] != '' and next_player[BET] != max_bet and next_player[BALANCE] > 0:
+            #  NOTE: special case where everyone limps preflop
+            #  TODO: perhaps this actually isn't a special case?
+            preflop = len(game_state[BOARD]) == 0
+            big_blind_pos = (game_state[DEALER] + 2) % len(players)
+            big_blind_special = preflop and next_player[POSITION] == big_blind_pos and max_bet == BIG_BLIND 
+
+            if has_cards_wrong_bet or big_blind_special:
                 update_action = ''' UPDATE states_table
                                     SET action = ? '''
                 states_cursor.execute(update_action, (position,))

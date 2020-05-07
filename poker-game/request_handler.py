@@ -195,7 +195,7 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
 
     #   Delete all frames older than 2 seconds if there are >1 frames
     if len(all_frames) > 1:
-        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds = 1.5)
+        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
         delete_frames = '''DELETE FROM frames_table WHERE time < ?'''
         frames_cursor.execute(delete_frames, (one_second_ago,))
 

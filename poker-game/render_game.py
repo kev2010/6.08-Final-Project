@@ -85,7 +85,7 @@ def update_frames(frames_cursor):
                             VALUES (?,?); '''
         time = datetime.datetime.now() + datetime.timedelta(seconds=counter)
         frames_cursor.execute(update_states, (frame, time))
-        counter += 1
+        counter += 2
 
 def display_frames(frames_cursor):
     query = '''SELECT * FROM frames_table;'''
