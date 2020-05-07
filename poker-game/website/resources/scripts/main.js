@@ -19,13 +19,29 @@ const display = () => {
             console.log(response);
             let to_display = JSON.stringify(response);
 
-            if (response.state.length != 0){
+            if (response.players.length != 0) {
+                players = response.players;
+                for (var i = 0; i < players.length; i++) {
+                    var elt = document.getElementById("seat" + (i+1));
+                    var cards = players[i].cards.split(',');
+                    elt.innerHTML = `
+                        <td>${players[i].user}</td>
+                        <td>${players[i].bal}</td>
+                        <td>${players[i].bet}</td>
+                        <td>${displayHoleCards(cards)}</td>
+                    `;
+                }
+            }
+
+            if (response.state.length != 0) {
                 gameState = response.state[0];
                 //  If there is a game going on
                 if (gameState.length != 0) {
                     displayBoard(gameState);
+                    displayDealer(gameState);
                 }
             }
+
             // Now, target the DIV in question, and set the innerHTML to the response
             let targetDiv = document.getElementById("instructor-answer");
             targetDiv.innerHTML = to_display;
@@ -40,7 +56,7 @@ const displayBoard = (gameState) => {
     let board = gameState.board.split(',');
     let streets = ['flop1', 'flop2', 'flop3', 'turn', 'river']
 
-    for (i = 0; i < streets.length; i++) {
+    for (var i = 0; i < streets.length; i++) {
         var showCard = false;
         if (board.length >= (i+1)) {
             showCard = true;
@@ -63,6 +79,37 @@ const displayBoard = (gameState) => {
             }
         }
     }
+}
+
+const displayDealer = (gameState) => {
+    let dealer = gameState.dealer;
+    var elt = document.getElementById("seat" + (dealer+1));
+    elt.innerHTML = elt.innerHTML + `<td>O</td>`;
+}
+
+const displayHoleCards = (cards) => {
+    result = ""
+    for (var i = 0; i < cards.length; i++) {
+        var rank = cards[i][0];
+        var suit = cards[i][1];
+        var suitHTML = "";
+        var color = ""
+
+        if (suit === 's' || suit === 'c') {
+            suitHTML = (suit === 's') ? "&spades;" : "&clubs;";
+            color = "black";
+        } else {
+            suitHTML = (suit === 'h') ? "&hearts;" : "&diams;";
+            color = "red";
+        }
+        result += `
+        <div class="card-small" id="flop2">
+            <p class="card-text ${color}">${rank}</p>
+            <p class="card-img ${color}">${suitHTML}</p>
+        </div>
+        `
+    }
+    return result;
 }
 
 window.onload = display;
