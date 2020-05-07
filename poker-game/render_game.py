@@ -4,7 +4,7 @@ import datetime
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 
-def display_game(players_cursor, states_cursor):
+def display_game(players_cursor, states_cursor, user):
     """
     Returns the poker game state in a properly formatted string.
     The return format is as follows:
