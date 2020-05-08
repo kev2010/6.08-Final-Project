@@ -7,7 +7,7 @@ const suitHTML = {
 
 const display = () => {
     let xhttp = new XMLHttpRequest();
-    var params = "type=spectate";
+    var params = "type=spectate&room_id=123";
     //  URL for PokerAPI
     let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py";
     
