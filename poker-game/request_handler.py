@@ -191,29 +191,40 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                       WHERE room_id = ?
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
-    # relevant_frames = []
+    relevant_frames = []
 
-    # for frame in all_frames:
-    #     two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
-    #     if frame[TIME] >= two_seconds_ago:  #   this means if this frame is newer
-    #         relevant_frames.append(frame)
+    for frame in all_frames:
+        two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
+        if frame[TIME] >= two_seconds_ago:  #   this means if this frame is newer
+            relevant_frames.append(frame)
 
-    # if len(relevant_frames) == 0:   #   we are too late
-    #     relevant_frames = all_frames[-1]    #   we just take the most recent frame
-
-    #   Delete all frames older than 2 seconds if there are >1 frames
-    if len(all_frames) > 1:
-        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
+    if len(relevant_frames) == 0:   #   we are too late
+        relevant_frames = [all_frames[-1]]    #   we just take the most recent frame
+        #   Delete the rest of the frames
+        older = relevant_frames[0][TIME]
         delete_frames = '''DELETE FROM frames_table WHERE time < ? AND room_id = ?'''
-        frames_cursor.execute(delete_frames, (one_second_ago, room_id))
+        frames_cursor.execute(delete_frames, (older, room_id))
+    else:
+        two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
+        delete_frames = '''DELETE FROM frames_table WHERE time < ? AND room_id = ?'''
+        frames_cursor.execute(delete_frames, (two_seconds_ago, room_id))
+    
+    return relevant_frames[0][STATE]
 
-    #   Get all the frames again
-    frames_query = '''SELECT * FROM frames_table
-                      WHERE room_id = ?
-                      ORDER BY time ASC;'''
-    all_frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
-    #   Return the oldest frame's state
-    return all_frames[0][STATE]
+
+    # #   Delete all frames older than 2 seconds if there are >1 frames
+    # if len(all_frames) > 1:
+    #     two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
+    #     delete_frames = '''DELETE FROM frames_table WHERE time < ? AND room_id = ?'''
+    #     frames_cursor.execute(delete_frames, (two_seconds_ago, room_id))
+
+    # #   Get all the frames again
+    # frames_query = '''SELECT * FROM frames_table
+    #                   WHERE room_id = ?
+    #                   ORDER BY time ASC;'''
+    # all_frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
+    # #   Return the oldest frame's state
+    # return all_frames[0][STATE]
 
 
 def post_handler(request, players_cursor, states_cursor, frames_cursor):
