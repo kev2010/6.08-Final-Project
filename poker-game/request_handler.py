@@ -191,15 +191,11 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                       WHERE room_id = ?
                       ORDER BY time ASC;'''
     all_frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
-    relevant_frames = []
-
-    for frame in all_frames:
-        two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
-        ts = frame[TIME]
-        f = '%Y-%m-%d %H:%M:%S'
-        time_obj = datetime.datetime.strptime(ts, f)
-        if time_obj >= two_seconds_ago:  #   this means if this frame is newer
-            relevant_frames.append(frame)
+    two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
+    relevant_frames_query = '''SELECT * FROM frames_table 
+                               WHERE room_id = ? AND time >= ?
+                               ORDER BY time ASC;''' 
+    relevant_frames = frames_cursor.execute(relevant_frames_query, (room_id, two_seconds_ago)).fetchall()
 
     if len(relevant_frames) == 0:   #   we are too late
         relevant_frames = [all_frames[-1]]    #   we just take the most recent frame
