@@ -3,33 +3,30 @@ sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 
 
-def is_check_legal(players_cursor, states_cursor, user):
+def is_check_legal(players, game_state, user):
     """
     Determines whether a check action is legal given the state
     of the game.
 
     Args:
-        players_cursor (SQL Cursor): cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        players (list of tuples): list of players as defined by the SQL player
+            database (check request_handler.py file specification). The players
+            should be sorted in ascending order of position.
+        state (tuple): a game state as defined by the SQL state database in
+            request_handler.py.
+        user (str): non-empty username to check the action for.
     
     Returns:
         True if checking is legal.
     """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
+    user_position = [p[POSITION] for p in players if p[USERNAME] == user][0]
 
     #   Make sure action is on the user
-    if not is_on_user(players_cursor, states_cursor, user):
+    if not is_on_user(players, game_state, user):
         return False
     
     #   Checking is legal only if there are no bets yet or in the big blind special case
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    bets = [p for p in players if p[BET] > 0]
     #   Find max bet
     max_bet = 0
     for better in bets:
@@ -42,37 +39,42 @@ def is_check_legal(players_cursor, states_cursor, user):
     return not bets or big_blind_special
     
 
-def is_call_legal(players_cursor, states_cursor, user):
+def is_call_legal(players, game_state, user):
     """
     Determines whether the call action is legal given the state
     of the game.
 
     Args:
-        players_cursor (SQL Cursor): cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        players (list of tuples): list of players as defined by the SQL player
+            database (check request_handler.py file specification). The players
+            should be sorted in ascending order of position.
+        state (tuple): a game state as defined by the SQL state database in
+            request_handler.py.
+        user (str): non-empty username to check the action for.
     
     Returns:
         True if calling is legal.
     """
     #   Make sure action is on the user
-    if not is_on_user(players_cursor, states_cursor, user):
+    if not is_on_user(players, game_state, user):
         return False
 
     #   Calling is legal only if there are bets present
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    bets = [p for p in players if p[BET] > 0]
     return len(bets) > 0
 
 
-def is_bet_legal(players_cursor, states_cursor, user):
+def is_bet_legal(players, game_state, user):
     """
     Determines if betting is legal given the state of the game.
 
     Args:
-        players_cursor (SQL Cursor): cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        players (list of tuples): list of players as defined by the SQL player
+            database (check request_handler.py file specification). The players
+            should be sorted in ascending order of position.
+        state (tuple): a game state as defined by the SQL state database in
+            request_handler.py.
+        user (str): non-empty username to check the action for.
     
     Returns:
         A length four tuple where the first entry is a boolean
@@ -89,30 +91,31 @@ def is_bet_legal(players_cursor, states_cursor, user):
             between 950 and 1000 since that would leave less than
             a BB left.
     """
-    if not is_on_user(players_cursor, states_cursor, user):
+    if not is_on_user(players, game_state, user):
         return (False, 0, 0, 0)
     
     #   Betting is legal only if there are no bets present
     #   Otherwise, it would be considered raising
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    bets = [p for p in players if p[BET] > 0]
     if bets:
         return (False, 0, 0, 0)
     else:
-        user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-        player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+        player = [p for p in players if p[USERNAME] == user]
         return (True, 
                 BIG_BLIND, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
-def is_raise_legal(players_cursor, states_cursor, user):
+def is_raise_legal(players, game_state, user):
     """
     Determines if raising is legal given the state of the game.
 
     Args:
-        players_cursor (SQL Cursor): cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        players (list of tuples): list of players as defined by the SQL player
+            database (check request_handler.py file specification). The players
+            should be sorted in ascending order of position.
+        state (tuple): a game state as defined by the SQL state database in
+            request_handler.py.
+        user (str): non-empty username to check the action for.
     
     Returns:
         A length four tuple where the first entry is a boolean
@@ -124,12 +127,11 @@ def is_raise_legal(players_cursor, states_cursor, user):
         to see an example). Note that the second, third and fourth 
         entries are 0 if first entry is false.
     """
-    if not is_on_user(players_cursor, states_cursor, user):
+    if not is_on_user(players, game_state, user):
         return (False, 0, 0, 0)
 
     #   Raising is legal only if there are bets present
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    bets = [p for p in players if p[BET] > 0]
     if len(bets) == 0:
         return (False, 0, 0, 0)
     else:
@@ -147,47 +149,49 @@ def is_raise_legal(players_cursor, states_cursor, user):
                 if better[BET] > second_max_bet:
                     second_max_bet = better[BET]
         delta = max_bet - second_max_bet
-        user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-        player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+        player = [p for p in players if p[USERNAME] == user]
         min_raise = max_bet + (delta if delta > BIG_BLIND else BIG_BLIND)
         return (True, 
                 min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
-def is_fold_legal(players_cursor, states_cursor, user):
+def is_fold_legal(players, game_state, user):
     """
     Determines whether the fold action is legal given the state
     of the game.
 
     Args:
-        players_cursor (SQL Cursor): cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        players (list of tuples): list of players as defined by the SQL player
+            database (check request_handler.py file specification). The players
+            should be sorted in ascending order of position.
+        state (tuple): a game state as defined by the SQL state database in
+            request_handler.py.
+        user (str): non-empty username to check the action for.
     
     Returns:
         True if folding is legal.
     """
     #   Same case as calling
-    return is_call_legal(players_cursor, states_cursor, user)
+    return is_call_legal(players, game_state, user)
 
 
-def is_on_user(players_cursor, states_cursor, user):
+def is_on_user(players, game_state,  user):
     """
     Determines whether the action is on the user.
 
     Args:
-        players_cursor (SQL Cursor): cursor for the players_table
-        states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        players (list of tuples): list of players as defined by the SQL player
+            database (check request_handler.py file specification). The players
+            should be sorted in ascending order of position.
+        state (tuple): a game state as defined by the SQL state database in
+            request_handler.py.
+        user (str): non-empty username to check the action for.
     
     Returns:
         True if action is on user.
     """
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-
     #   Make sure action is on the user
     game_action = game_state[ACTION]
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
+    user_position = [p[POSITION] for p in players if p[USERNAME] == user][0]
     return game_action == user_position
+    

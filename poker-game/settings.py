@@ -22,6 +22,7 @@ BET = 2
 INVESTED = 3
 CARDS = 4
 POSITION = 5
+PLAYER_ID = 6
 
 #   Game State SQL DB indicies
 DECK = 0
@@ -29,7 +30,9 @@ BOARD = 1
 DEALER = 2
 ACTION = 3
 POT = 4
+STATE_ID = 5
 
 #   Frames SQL DB indicies
 STATE = 0
 TIME = 1
+FRAME_ID = 2

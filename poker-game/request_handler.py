@@ -27,7 +27,7 @@ def request_handler(request):
     Handles POST/GET requests for the poker game server. Assumes the POST/GET
     requests provide the following information:
 
-    POST: user={user: str}&action={action: str}&amount={amount:str of int}
+    POST: user={user: str}&action={action: str}&amount={amount:str of int}&room_id={room_id: str}
     GET: param => user={user: str}
     
     Returns a string representing the state of the poker game. The string is
@@ -80,27 +80,26 @@ def request_handler(request):
     c_player = conn_players.cursor()
     c_player.execute('''CREATE TABLE IF NOT EXISTS players_table 
                         (user text, bal int, bet int, invested int, 
-                        cards text, position int);''')
+                        cards text, position int, room_id text);''')
     
     #   Initialize the states_table SQL database
     conn_state = sqlite3.connect(state_db)
     c_state = conn_state.cursor()
     c_state.execute('''CREATE TABLE IF NOT EXISTS states_table 
                         (deck text, board text, dealer int, action
-                        int, pot int);''')
+                        int, pot int, room_id text);''')
 
     #   Initialize the frames_table SQL database
     conn_frames = sqlite3.connect(frames_db)
     c_frame = conn_frames.cursor()
     c_frame.execute('''CREATE TABLE IF NOT EXISTS frames_table 
-                        (state text, time timestamp);''')
+                        (state text, time timestamp, room_id text);''')
 
     game_state = ""
     if request['method'] == 'GET':
         get_type = request["values"]["type"]
         if get_type == "actions":
-            user = request["values"]["user"]
-            game_state = get_actions_handler(user, request, c_player, c_state, c_frame)
+            game_state = get_actions_handler(request, c_player, c_state, c_frame)
         elif get_type == "spectate":
             game_state = get_spectate_handler(request, c_player, c_state, c_frame)
     elif request['method'] == 'POST':
@@ -116,7 +115,7 @@ def request_handler(request):
     return game_state
 
 
-def get_actions_handler(user, request, players_cursor, states_cursor, frames_cursor):
+def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
     """
     Handles a GET request as defined in the request_handler function.
     Returns a string representing the possible actions the user
@@ -134,12 +133,17 @@ def get_actions_handler(user, request, players_cursor, states_cursor, frames_cur
         pre-flop and action is on UTG.
             7$call@raise@100@950@1000@fold@leave@
     """
-    users_query = '''SELECT * FROM players_table;'''
-    users = players_cursor.execute(users_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()
-    frames_query = '''SELECT * FROM frames_table;'''
-    frames = frames_cursor.execute(frames_query).fetchall()
+    user = request["values"]["user"]
+    room_id = request["values"]["room_id"]
+
+    users_query = '''SELECT * FROM players_table 
+                     WHERE room_id = ? 
+                     ORDER BY position ASC;'''
+    users = players_cursor.execute(users_query, (room_id,)).fetchall()
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    frames_query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
+    frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
 
     possible_actions = []
     if len(game_state) == 0:  #  game hasn't started yet
@@ -148,17 +152,17 @@ def get_actions_handler(user, request, players_cursor, states_cursor, frames_cur
             possible_actions.append("start")
     elif len(frames) == 1:  #  all frames are done processing
         possible_actions = []
-        if is_check_legal(players_cursor, states_cursor, user):
+        if is_check_legal(users, game_state, user):
             possible_actions.append("check")
-        if is_call_legal(players_cursor, states_cursor, user):
+        if is_call_legal(users, game_state, user):
             possible_actions.append("call")
-        bet_legal, min_bet, max_bet, all_in = is_bet_legal(players_cursor, states_cursor, user)
+        bet_legal, min_bet, max_bet, all_in = is_bet_legal(users, game_state, user)
         if bet_legal:
             possible_actions.extend(["bet", str(min_bet), str(max_bet), str(all_in)])
-        raise_legal, min_raise, max_raise, all_in = is_raise_legal(players_cursor, states_cursor, user)
+        raise_legal, min_raise, max_raise, all_in = is_raise_legal(users, game_state, user)
         if raise_legal:
             possible_actions.extend(["raise", str(min_raise), str(max_raise), str(all_in)])
-        if is_fold_legal(players_cursor, states_cursor, user):
+        if is_fold_legal(users, game_state, user):
             possible_actions.append("fold")
         
         possible_actions.append("leave")
