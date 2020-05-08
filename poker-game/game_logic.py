@@ -57,7 +57,7 @@ def post_blinds(players_cursor, states_cursor, dealer_position, user, room_id):
                                 SET bal = ?,
                                     bet = ?,
                                     invested = ?
-                                WHERE user = ?,
+                                WHERE user = ?  AND 
                                       room_id = ?'''
             players_cursor.execute(update_blinds, (bal, bet, invested, user, room_id))
     
@@ -100,7 +100,7 @@ def deal_table(players_cursor, states_cursor, user, room_id):
         hand = ",".join(two_cards)
         update_cards = ''' UPDATE players_table
                            SET cards = ?
-                           WHERE user = ?,
+                           WHERE user = ?  AND 
                                  room_id = ?'''
         players_cursor.execute(update_cards, (hand, name, room_id))
 
@@ -138,7 +138,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards, user, room_id):
     for user in players:
         update_bet = ''' UPDATE players_table
                          SET bet = ?
-                         WHERE user = ?,
+                         WHERE user = ? AND 
                                room_id = ?'''
         players_cursor.execute(update_bet, (0, user[USERNAME], room_id))
 
@@ -234,7 +234,7 @@ def distribute_pots(players_cursor, states_cursor, user, room_id):
                                 bet = ?,
                                 invested = ?,
                                 cards = ?
-                            WHERE user = ?,
+                            WHERE user = ? AND 
                                   room_id = ?'''
         players_cursor.execute(update_user, (new_bal, new_bet, new_invested, '', player[USERNAME], room_id))
     

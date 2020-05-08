@@ -25,9 +25,9 @@ def check(players_cursor, states_cursor, user, room_id):
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
 
     #   See if it's big blind special case
-    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
     user_position = players_cursor.execute(user_query, (user, room_id)).fetchall()[0][POSITION]
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?, room_id = ?'''
+    bets_query = '''SELECT * FROM players_table WHERE bet > ? AND  room_id = ?'''
     bets = players_cursor.execute(bets_query, (0, room_id)).fetchall()
     #   Find max bet
     max_bet = 0
@@ -82,11 +82,11 @@ def call(players_cursor, states_cursor, user, room_id):
     players = players_cursor.execute(players_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
     player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
     
     #   Find the max bet that user has to call
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?, room_id = ?'''
+    bets_query = '''SELECT * FROM players_table WHERE bet > ? AND room_id = ?'''
     bets = players_cursor.execute(bets_query, (0, room_id)).fetchall()
     max_bet = 0
     for better in bets:
@@ -102,7 +102,7 @@ def call(players_cursor, states_cursor, user, room_id):
                         SET bal = ?,
                             bet = ?,
                             invested = ?
-                        WHERE user = ?,
+                        WHERE user = ?  AND 
                               room_id = ?'''
     players_cursor.execute(update_chips, (new_bal, new_bet, new_invested, user, room_id))
 
@@ -160,7 +160,7 @@ def bet(players_cursor, states_cursor, user, amount, room_id):
     players = players_cursor.execute(players_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
     player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
 
     #   Update player state with the bet
@@ -170,7 +170,7 @@ def bet(players_cursor, states_cursor, user, amount, room_id):
                         SET bal = ?,
                             bet = ?,
                             invested = ?
-                        WHERE user = ?,
+                        WHERE user = ? AND 
                               room_id = ?'''
     players_cursor.execute(update_chips, (new_bal, amount, new_invested, user, room_id))
 
@@ -212,7 +212,7 @@ def raise_bet(players_cursor, states_cursor, user, amount, room_id):
     players = players_cursor.execute(players_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
     player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
 
     #   Update player state with the raise
@@ -223,7 +223,7 @@ def raise_bet(players_cursor, states_cursor, user, amount, room_id):
                         SET bal = ?,
                             bet = ?,
                             invested = ?
-                        WHERE user = ?,
+                        WHERE user = ? AND 
                               room_id = ?'''
     players_cursor.execute(update_chips, (new_bal, amount, new_invested, user, room_id))
 
@@ -262,16 +262,16 @@ def fold(players_cursor, states_cursor, user, room_id):
     players = players_cursor.execute(players_query, room_id).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
     player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
     
     update_cards = ''' UPDATE players_table
                        SET cards = ?
-                       WHERE user = ?,
+                       WHERE user = ? AND 
                              room_id = ?'''
     players_cursor.execute(update_cards, ('', user, room_id))
 
-    users_playing_query = '''SELECT * FROM players_table WHERE cards != ?, room_id = ?;'''
+    users_playing_query = '''SELECT * FROM players_table WHERE cards != ? AND  room_id = ?;'''
     users_playing = players_cursor.execute(users_playing_query, ('', room_id)).fetchall()
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
@@ -279,7 +279,7 @@ def fold(players_cursor, states_cursor, user, room_id):
         distribute_pots(players_cursor, states_cursor, user, room_id)
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
-        bets_query = '''SELECT * FROM players_table WHERE bet > ?, room_id = ?'''
+        bets_query = '''SELECT * FROM players_table WHERE bet > ? AND room_id = ?'''
         bets = players_cursor.execute(bets_query, (0, room_id)).fetchall()
         #   Find the max bet
         max_bet = 0
