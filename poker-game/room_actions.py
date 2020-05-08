@@ -20,7 +20,7 @@ def join_game(players_cursor, states_cursor, user, room_id):
                     or the game is full
     """
     #   Make sure player isn't already in the game
-    joined_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    joined_query = '''SELECT * FROM players_table WHERE user = ? AND room_id = ?;'''
     joined = players_cursor.execute(joined_query, (user, room_id)).fetchall()
     if len(joined) > 0:
         #   TODO: Return proper message for already in game
