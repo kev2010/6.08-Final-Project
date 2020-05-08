@@ -232,25 +232,26 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
     user = request['form']['user']
     action = request['form']['action']
     amount = int(request['form']['amount'])
+    room_id = request['form']['room_id']
 
     #   Split actions based on type of request
     #   TODO: implement other actions
     if action == "join":
-        join_game(players_cursor, states_cursor, user)
+        join_game(players_cursor, states_cursor, user, room_id)
     elif action == "start":
-        start_game(players_cursor, states_cursor, user)
+        start_game(players_cursor, states_cursor, user, room_id)
     elif action == "leave":
-        leave_game(players_cursor, states_cursor, user)
+        leave_game(players_cursor, states_cursor, user, room_id)
     elif action == "check":
-        check(players_cursor, states_cursor, user)
+        check(players_cursor, states_cursor, user, room_id)
     elif action == "call":
-        call(players_cursor, states_cursor, user)
+        call(players_cursor, states_cursor, user, room_id)
     elif action == "bet":
-        bet(players_cursor, states_cursor, user, amount)
+        bet(players_cursor, states_cursor, user, amount, room_id)
     elif action == "raise":
-        raise_bet(players_cursor, states_cursor, user, amount)
+        raise_bet(players_cursor, states_cursor, user, amount, room_id)
     elif action == "fold":
-        fold(players_cursor, states_cursor, user)
+        fold(players_cursor, states_cursor, user, room_id)
     else:
         return "Requested action not recognized!"
 
