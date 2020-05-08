@@ -196,9 +196,9 @@ def distribute_pots(players_cursor, states_cursor, user, room_id):
         room_id (str): the id for the room user is in
     """
     players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
-    game_state = states_cursor.execute(query).fetchall()[0]
+    game_state = states_cursor.execute(query, (room_id,)).fetchall()[0]
     
     #   Maps username to [chips invested, chips to add to bal, still live]
     all_playing = {p[USERNAME]: [p[INVESTED], 0, p[CARDS] != ''] for p in players if p[INVESTED] > 0}
