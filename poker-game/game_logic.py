@@ -48,7 +48,7 @@ def post_blinds(players_cursor, states_cursor, dealer_position, user, room_id):
         bal = seat[BALANCE]
         position = seat[POSITION]
         #   Update player's balance and bet if they are small/big blind
-        if position == small or position == big:
+        if bal != 0 and (position == small or position == big):
             blind = SMALL_BLIND if (position == small) else BIG_BLIND
             bet = blind if (bal >= blind) else bal
             bal = (bal - blind) if (bal >= blind) else 0
