@@ -190,7 +190,7 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
     frames_query = '''SELECT * FROM frames_table 
                       WHERE room_id = ?
                       ORDER BY time ASC;'''
-    all_frames = frames_cursor.execute(frames_query, (room_id)).fetchall()
+    all_frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
     # relevant_frames = []
 
     # for frame in all_frames:
