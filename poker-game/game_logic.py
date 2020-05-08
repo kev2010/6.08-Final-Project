@@ -72,7 +72,7 @@ def post_blinds(players_cursor, states_cursor, dealer_position, user, room_id):
                     room_id)
     states_cursor.execute(state_update, update_values)
 
-    FRAMES.append(display_game(players_cursor, states_cursor, user))
+    FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 
 
 def deal_table(players_cursor, states_cursor, user, room_id):
@@ -110,7 +110,7 @@ def deal_table(players_cursor, states_cursor, user, room_id):
                       WHERE room_id = ? '''
     states_cursor.execute(update_deck, (",".join(deck), room_id))
 
-    FRAMES.append(display_game(players_cursor, states_cursor, user))
+    FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 
 #   TODO: TEST THIS
 def next_stage(players_cursor, states_cursor, num_board_cards, user, room_id):
@@ -144,7 +144,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards, user, room_id):
 
     #   Update game state for the next street
     if num_board_cards == 5:  #  River
-        FRAMES.append(display_game(players_cursor, states_cursor, user))
+        FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
         distribute_pots(players_cursor, states_cursor, user, room_id)
     else:
         #   Draw the next card(s) for the board based on street
@@ -175,7 +175,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards, user, room_id):
                                action = ?
                            WHERE room_id = ?'''
         states_cursor.execute(update_cards, (new_deck, new_board, next_action, room_id))
-        FRAMES.append(display_game(players_cursor, states_cursor, user))
+        FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 
         #   Everyone is all-in case
         if not found:
@@ -246,7 +246,7 @@ def distribute_pots(players_cursor, states_cursor, user, room_id):
                         WHERE room_id = ?'''
     states_cursor.execute(update_state, ('', '', 0, room_id))
 
-    FRAMES.append(display_game(players_cursor, states_cursor, user))
+    FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 
     #   Now start a new hand
     start_new_hand(players_cursor, states_cursor, (game_state[DEALER] + 1) % len(players), user, room_id)

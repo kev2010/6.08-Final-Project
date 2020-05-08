@@ -7,7 +7,7 @@ from legal_checks import *
 
 
 
-def check(players_cursor, states_cursor, user):
+def check(players_cursor, states_cursor, user, room_id):
     """
     Handles a poker check request. Passes the turn to the next player or
     goes to the next stage. Assumes that checking is a legal action and
@@ -17,17 +17,18 @@ def check(players_cursor, states_cursor, user):
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
+        room_id (str): the id for the room user is in
     """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
+    players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
 
     #   See if it's big blind special case
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    user_position = players_cursor.execute(user_query, (user,)).fetchall()[0][POSITION]
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    user_position = players_cursor.execute(user_query, (user, room_id)).fetchall()[0][POSITION]
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?, room_id = ?'''
+    bets = players_cursor.execute(bets_query, (0, room_id)).fetchall()
     #   Find max bet
     max_bet = 0
     for better in bets:
@@ -39,7 +40,7 @@ def check(players_cursor, states_cursor, user):
     
     #   Take care of BB special case if necessary
     if big_blind_special:
-        next_stage(players_cursor, states_cursor, 0, user)
+        next_stage(players_cursor, states_cursor, 0, user, room_id)
     else:
         #   Otherwise, we pass the action to the next player
         #   that has cards and isn't all-in, or end the action
@@ -51,19 +52,20 @@ def check(players_cursor, states_cursor, user):
                 board_cards = game_state[BOARD].split(',')
                 if len(board_cards) == 1:   #  empty case
                     board_cards = []
-                next_stage(players_cursor, states_cursor, len(board_cards), user)
+                next_stage(players_cursor, states_cursor, len(board_cards), user, room_id)
                 break
             elif i != 0:
                 next_player = players[position]
                 if next_player[CARDS] != '' and next_player[BALANCE] > 0:
                     update_action = ''' UPDATE states_table
-                                        SET action = ? '''
-                    states_cursor.execute(update_action, (position,))
-                    FRAMES.append(display_game(players_cursor, states_cursor, user))
+                                        SET action = ?
+                                        WHERE room_id = ?'''
+                    states_cursor.execute(update_action, (position, room_id))
+                    FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
                     break
 
 
-def call(players_cursor, states_cursor, user):
+def call(players_cursor, states_cursor, user, room_id):
     """
     Handles a poker call request. Calls the previous bet and passes
     the turn to the next player or goes to the next stage if calling
@@ -74,17 +76,18 @@ def call(players_cursor, states_cursor, user):
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
+        room_id (str): the id for the room user is in
     """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
     
     #   Find the max bet that user has to call
-    bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-    bets = players_cursor.execute(bets_query, (0,)).fetchall()
+    bets_query = '''SELECT * FROM players_table WHERE bet > ?, room_id = ?'''
+    bets = players_cursor.execute(bets_query, (0, room_id)).fetchall()
     max_bet = 0
     for better in bets:
         if better[BET] > max_bet:
@@ -99,13 +102,15 @@ def call(players_cursor, states_cursor, user):
                         SET bal = ?,
                             bet = ?,
                             invested = ?
-                        WHERE user = ?'''
-    players_cursor.execute(update_chips, (new_bal, new_bet, new_invested, user))
+                        WHERE user = ?,
+                              room_id = ?'''
+    players_cursor.execute(update_chips, (new_bal, new_bet, new_invested, user, room_id))
 
     #   Update the pot size
     update_pot = ''' UPDATE states_table
-                     SET pot = ?'''
-    states_cursor.execute(update_pot, (game_state[POT] + bet_delta,))
+                     SET pot = ?
+                     WHERE room_id = ?'''
+    states_cursor.execute(update_pot, (game_state[POT] + bet_delta, room_id))
     
     #   Update action
     found = False
@@ -122,21 +127,22 @@ def call(players_cursor, states_cursor, user):
 
         if has_cards_wrong_bet or big_blind_special: 
             update_action = ''' UPDATE states_table
-                                SET action = ? '''
-            states_cursor.execute(update_action, (position,))
+                                SET action = ? 
+                                WHERE room_id = ?'''
+            states_cursor.execute(update_action, (position, room_id))
             found = True
-            FRAMES.append(display_game(players_cursor, states_cursor, user))
+            FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
             break
     
     if not found:
         board_cards = game_state[BOARD].split(',')
         if len(board_cards) == 1:   #  empty case
             board_cards = []
-        FRAMES.append(display_game(players_cursor, states_cursor, user))
-        next_stage(players_cursor, states_cursor, len(board_cards), user)
+        FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
+        next_stage(players_cursor, states_cursor, len(board_cards), user, room_id)
 
 
-def bet(players_cursor, states_cursor, user, amount):
+def bet(players_cursor, states_cursor, user, amount, room_id):
     """
     Handles a poker bet request. Bets the specified amount and passes
     the turn to the next player if betting is a legal action. Assumes 
@@ -148,13 +154,14 @@ def bet(players_cursor, states_cursor, user, amount):
         user (str): non-empty username
         amount (int): a non-zero amount to bet. Must be a size that is
             legal in poker
+        room_id (str): the id for the room user is in
     """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
 
     #   Update player state with the bet
     new_bal = player[BALANCE] - amount
@@ -163,13 +170,15 @@ def bet(players_cursor, states_cursor, user, amount):
                         SET bal = ?,
                             bet = ?,
                             invested = ?
-                        WHERE user = ?'''
-    players_cursor.execute(update_chips, (new_bal, amount, new_invested, user))
+                        WHERE user = ?,
+                              room_id = ?'''
+    players_cursor.execute(update_chips, (new_bal, amount, new_invested, user, room_id))
 
     #   Update the pot size
     update_pot = ''' UPDATE states_table
-                     SET pot = ?'''
-    states_cursor.execute(update_pot, (game_state[POT] + amount,))
+                     SET pot = ?
+                     WHERE room_id = ?'''
+    states_cursor.execute(update_pot, (game_state[POT] + amount, room_id))
     
     #   Update action
     for i in range(1, len(players)):
@@ -177,29 +186,19 @@ def bet(players_cursor, states_cursor, user, amount):
         next_player = players[position]
         if next_player[CARDS] != '' and next_player[BALANCE] > 0: 
             update_action = ''' UPDATE states_table
-                                SET action = ? '''
-            states_cursor.execute(update_action, (position,))
-            FRAMES.append(display_game(players_cursor, states_cursor, user))
+                                SET action = ?
+                                WHERE room_id = ?'''
+            states_cursor.execute(update_action, (position, room_id))
+            FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
             break
 
 
-def raise_bet(players_cursor, states_cursor, user, amount):
+def raise_bet(players_cursor, states_cursor, user, amount, room_id):
     """
     Handles a poker raise request. Raises to the specified amount 
     and passes the turn to the next player if raising is legal. 
-    Assumes the board has either 0, 3, 4, or 5 cards.
-
-    Raising is legal if:
-        1. The action is on the user
-        2. There is at least one non-zero bet present at the table
-        3. The user is raising by at least the previous raise,
-            unless it is an all-in. For example, if the previous
-            raise was from 2bb to 6bb, any raise >=10bb is legal.
-        4. If another player has gone all-in, this user closes
-            the action, and the all-in size is not at least the
-            previous raise size, then raising is illegal.
-    
-    Note that for now, condition 4 is not checked.
+    Assumes raising is legal, and the board has either 0, 3, 4, 
+    or 5 cards.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
@@ -207,18 +206,14 @@ def raise_bet(players_cursor, states_cursor, user, amount):
         user (str): non-empty username
         amount (int): a non-zero amount to raise to. Must be a 
             size that is legal in poker
-    
-    Raises:
-        TODO: customize errors
-        ValueError: if action is not on the user, raising is illegal,
-            or the size to raise to is illegal 
+        room_id (str): the id for the room user is in
     """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
 
     #   Update player state with the raise
     new_bal = player[BALANCE] + player[BET] - amount
@@ -228,13 +223,15 @@ def raise_bet(players_cursor, states_cursor, user, amount):
                         SET bal = ?,
                             bet = ?,
                             invested = ?
-                        WHERE user = ?'''
-    players_cursor.execute(update_chips, (new_bal, amount, new_invested, user))
+                        WHERE user = ?,
+                              room_id = ?'''
+    players_cursor.execute(update_chips, (new_bal, amount, new_invested, user, room_id))
 
     #   Update the pot size
     update_pot = ''' UPDATE states_table
-                     SET pot = ?'''
-    states_cursor.execute(update_pot, (game_state[POT] + raise_delta,))
+                     SET pot = ?
+                     WHERE room_id = ?'''
+    states_cursor.execute(update_pot, (game_state[POT] + raise_delta, room_id))
     
     #   Update action
     #   TODO: perhaps combine all the "update action" code together?
@@ -243,53 +240,47 @@ def raise_bet(players_cursor, states_cursor, user, amount):
         next_player = players[position]
         if next_player[CARDS] != '' and next_player[BALANCE] > 0: 
             update_action = ''' UPDATE states_table
-                                SET action = ? '''
-            states_cursor.execute(update_action, (position,))
-            FRAMES.append(display_game(players_cursor, states_cursor, user))
+                                SET action = ?
+                                WHERE room_id = ?'''
+            states_cursor.execute(update_action, (position, room_id))
+            FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
             break
 
 
-def fold(players_cursor, states_cursor, user):
+def fold(players_cursor, states_cursor, user, room_id):
     """
     Handles a poker fold request. Folds the user's hand and 
-    passes the turn to the next player if folding is legal.
-
-    Folding is legal if:
-        1. The action is on the user
-        2. There is at least one non-zero bet present at the table
+    passes the turn to the next player.
 
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): non-empty username
-    
-    Raises:
-        TODO: customize errors
-        ValueError: if action is not on the user or folding
-            is illegal
+        room_id (str): the id for the room user is in
     """
-    players_query = '''SELECT * FROM players_table ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query).fetchall()
-    query = '''SELECT * FROM states_table;'''
-    game_state  = states_cursor.execute(query).fetchall()[0]
-    user_query = '''SELECT * FROM players_table WHERE user = ?;'''
-    player = players_cursor.execute(user_query, (user,)).fetchall()[0]
+    players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
+    players = players_cursor.execute(players_query, room_id).fetchall()
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    user_query = '''SELECT * FROM players_table WHERE user = ?, room_id = ?;'''
+    player = players_cursor.execute(user_query, (user, room_id)).fetchall()[0]
     
     update_cards = ''' UPDATE players_table
                        SET cards = ?
-                       WHERE user = ?'''
-    players_cursor.execute(update_cards, ('', user))
+                       WHERE user = ?,
+                             room_id = ?'''
+    players_cursor.execute(update_cards, ('', user, room_id))
 
-    users_playing_query = '''SELECT * FROM players_table WHERE cards != ?;'''
-    users_playing = players_cursor.execute(users_playing_query, ('',)).fetchall()
+    users_playing_query = '''SELECT * FROM players_table WHERE cards != ?, room_id = ?;'''
+    users_playing = players_cursor.execute(users_playing_query, ('', room_id)).fetchall()
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
-        FRAMES.append(display_game(players_cursor, states_cursor, user))
-        distribute_pots(players_cursor, states_cursor, user)
+        FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
+        distribute_pots(players_cursor, states_cursor, user, room_id)
     #   Otherwise, we just pass the action to next player (similar to calling)
     else:
-        bets_query = '''SELECT * FROM players_table WHERE bet > ?'''
-        bets = players_cursor.execute(bets_query, (0,)).fetchall()
+        bets_query = '''SELECT * FROM players_table WHERE bet > ?, room_id = ?'''
+        bets = players_cursor.execute(bets_query, (0, room_id)).fetchall()
         #   Find the max bet
         max_bet = 0
         for better in bets:
@@ -310,15 +301,16 @@ def fold(players_cursor, states_cursor, user):
 
             if has_cards_wrong_bet or big_blind_special:
                 update_action = ''' UPDATE states_table
-                                    SET action = ? '''
+                                    SET action = ?
+                                    WHERE room_id = ?'''
                 states_cursor.execute(update_action, (position,))
                 found = True
-                FRAMES.append(display_game(players_cursor, states_cursor, user))
+                FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
                 break
 
         if not found:
             board_cards = game_state[BOARD].split(',')
             if len(board_cards) == 1:   #  empty case
                 board_cards = []
-            FRAMES.append(display_game(players_cursor, states_cursor, user))
-            next_stage(players_cursor, states_cursor, len(board_cards), user)
+            FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
+            next_stage(players_cursor, states_cursor, len(board_cards), user, room_id)

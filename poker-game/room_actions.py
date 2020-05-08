@@ -38,7 +38,7 @@ def join_game(players_cursor, states_cursor, user, room_id):
     players_cursor.execute(insert_player,
                            (user, STARTING_STACK, 0, 0, "", len(players), room_id))
     
-    FRAMES.append(display_game(players_cursor, states_cursor, user))
+    FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 
 
 def start_game(players_cursor, states_cursor, user, room_id):
@@ -85,5 +85,5 @@ def leave_game(players_cursor, states_cursor, user, room_id):
     """
     leave_query = '''DELETE FROM players_table WHERE user = ?, room_id = ?'''
     players_cursor.execute(leave_query, (user, room_id))
-    FRAMES.append(display_game(players_cursor, states_cursor, user))
+    FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 

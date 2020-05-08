@@ -4,7 +4,7 @@ import datetime
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 
-def display_game(players_cursor, states_cursor, user):
+def display_game(players_cursor, states_cursor, user, room_id):
     """
     Returns the poker game state in a properly formatted string.
     The return format is as follows:
@@ -35,6 +35,7 @@ def display_game(players_cursor, states_cursor, user):
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): user who sent the request
+        room_id (str): the id for the room user is in
     
     Returns:
         A string of the state of the game, formatted as described
@@ -60,13 +61,13 @@ def display_game(players_cursor, states_cursor, user):
     
     # return result
     r = {"state": {}, "players": {}}
-    query = '''SELECT * FROM states_table;'''
-    states_cursor.execute(query)
+    query = '''SELECT * FROM states_table WHERE room_id = ?;'''
+    states_cursor.execute(query, (room_id,))
     r["state"] = [dict((states_cursor.description[i][0], value) \
                for i, value in enumerate(row)) for row in states_cursor.fetchall()]
 
-    players_query = '''SELECT * FROM players_table;'''
-    players_cursor.execute(players_query)
+    players_query = '''SELECT * FROM players_table WHERE room_id = ?;'''
+    players_cursor.execute(players_query, (room_id,))
     users = [dict((players_cursor.description[i][0], value) \
                for i, value in enumerate(row)) for row in players_cursor.fetchall()]
     r["players"] = users
@@ -75,21 +76,28 @@ def display_game(players_cursor, states_cursor, user):
     return json_output
 
 
-def update_frames(frames_cursor):
+def update_frames(frames_cursor, room_id):
     """
     Updates the frames of the game state.
+
+    Args:
+        TODO
     """
     counter = 0
     for frame in FRAMES:    #   frame is json string
         update_states = ''' INSERT into frames_table 
-                            VALUES (?,?); '''
+                            VALUES (?,?,?); '''
         time = datetime.datetime.now() + datetime.timedelta(seconds=counter)
-        frames_cursor.execute(update_states, (frame, time))
+        frames_cursor.execute(update_states, (frame, time, room_id))
         counter += 2
 
-def display_frames(frames_cursor):
-    query = '''SELECT * FROM frames_table;'''
-    frames = frames_cursor.execute(query).fetchall()
+
+def display_frames(frames_cursor, room_id):
+    """
+    TODO: spec
+    """
+    query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
+    frames = frames_cursor.execute(query, (room_id,)).fetchall()
 
     counter = 1
     result = ""
