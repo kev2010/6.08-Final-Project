@@ -92,17 +92,18 @@ def deal_table(players_cursor, states_cursor, user, room_id):
                                         WHERE room_id = ?''', (room_id,)).fetchall()
 
     for seat in players:
-        name = seat[USERNAME]
-        #   Draw two cards, update the current deck, and update player
-        two_cards = random.sample(deck, 2)
-        deck.remove(two_cards[0])
-        deck.remove(two_cards[1])
-        hand = ",".join(two_cards)
-        update_cards = ''' UPDATE players_table
-                           SET cards = ?
-                           WHERE user = ?  AND 
-                                 room_id = ?'''
-        players_cursor.execute(update_cards, (hand, name, room_id))
+        if seat[BALANCE] != 0:
+            name = seat[USERNAME]
+            #   Draw two cards, update the current deck, and update player
+            two_cards = random.sample(deck, 2)
+            deck.remove(two_cards[0])
+            deck.remove(two_cards[1])
+            hand = ",".join(two_cards)
+            update_cards = ''' UPDATE players_table
+                            SET cards = ?
+                            WHERE user = ?  AND 
+                                    room_id = ?'''
+            players_cursor.execute(update_cards, (hand, name, room_id))
 
     #   Update the deck with remaining cards
     update_deck = ''' UPDATE states_table
