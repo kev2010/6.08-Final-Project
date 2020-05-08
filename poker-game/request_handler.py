@@ -195,7 +195,10 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
 
     for frame in all_frames:
         two_seconds_ago = datetime.datetime.now() - datetime.timedelta(seconds = 2)
-        if frame[TIME] >= two_seconds_ago:  #   this means if this frame is newer
+        ts = frame[TIME]
+        f = '%Y-%m-%d %H:%M:%S'
+        time_obj = datetime.datetime.strptime(ts, f)
+        if time_obj >= two_seconds_ago:  #   this means if this frame is newer
             relevant_frames.append(frame)
 
     if len(relevant_frames) == 0:   #   we are too late
