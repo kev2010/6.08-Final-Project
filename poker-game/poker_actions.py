@@ -1,3 +1,9 @@
+"""Handles user poker game actions
+
+This module deals with poker actions (checking, calling, betting, etc.).
+All of the functions interact with the players and states SQL database.
+"""
+
 import sys
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
@@ -10,13 +16,12 @@ from legal_checks import *
 def check(players_cursor, states_cursor, user, room_id):
     """
     Handles a poker check request. Passes the turn to the next player or
-    goes to the next stage. Assumes that checking is a legal action and
-    board has either 3, 4, or 5 cards.
+    goes to the next stage. Assumes that checking is a legal action.
 
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        user (str): non-empty username who sent the request
         room_id (str): the id for the room user is in
     """
     players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
@@ -68,14 +73,13 @@ def check(players_cursor, states_cursor, user, room_id):
 def call(players_cursor, states_cursor, user, room_id):
     """
     Handles a poker call request. Calls the previous bet and passes
-    the turn to the next player or goes to the next stage if calling
-    is a legal action. Assumes that calling is legal and the board 
-    has either 0, 3, 4, or 5 cards.
+    the turn to the next player or goes to the next stage. Assumes 
+    that calling is legal.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        user (str): non-empty username who sent the request
         room_id (str): the id for the room user is in
     """
     players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
@@ -145,13 +149,12 @@ def call(players_cursor, states_cursor, user, room_id):
 def bet(players_cursor, states_cursor, user, amount, room_id):
     """
     Handles a poker bet request. Bets the specified amount and passes
-    the turn to the next player if betting is a legal action. Assumes 
-    betting is legal, and the board has either 0, 3, 4, or 5 cards.
+    the turn to the next player. Assumes betting is legal.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        user (str): non-empty username who sent the request
         amount (int): a non-zero amount to bet. Must be a size that is
             legal in poker
         room_id (str): the id for the room user is in
@@ -196,9 +199,7 @@ def bet(players_cursor, states_cursor, user, amount, room_id):
 def raise_bet(players_cursor, states_cursor, user, amount, room_id):
     """
     Handles a poker raise request. Raises to the specified amount 
-    and passes the turn to the next player if raising is legal. 
-    Assumes raising is legal, and the board has either 0, 3, 4, 
-    or 5 cards.
+    and passes the turn to the next player. Assumes raising is legal.
 
     Args:
         players_cursor (SQL Cursor) cursor for the players_table
@@ -255,7 +256,7 @@ def fold(players_cursor, states_cursor, user, room_id):
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
-        user (str): non-empty username
+        user (str): non-empty username who sent the request
         room_id (str): the id for the room user is in
     """
     players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''

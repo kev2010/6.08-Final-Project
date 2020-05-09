@@ -1,9 +1,10 @@
 """Handles back-end poker game logic.
 
 This module deals with poker logic (starting new hands, dealing the board,
-distributing pots, etc.). All of the functions interact with the players
+distributing pots, etc.). Most of these functions interact with the players
 and states SQL database.
 """
+
 import sys
 import random
 sys.path.append('__HOME__/team079/poker-game')
