@@ -1,7 +1,18 @@
+"""Handles player actions regarding the room.
+
+This module handles actions that affect the state of the
+room in a poker game (e.g. joining, leaving, starting
+the game, etc.)
+
+Todo:
+    * Raise custom errors for joining/starting
+"""
+
 import sys
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 from game_logic import *
+
 
 def join_game(players_cursor, states_cursor, user, room_id):
     """
@@ -15,7 +26,6 @@ def join_game(players_cursor, states_cursor, user, room_id):
         room_id (str): the id for the room user is in
     
     Raises:
-        TODO: Custom errors for joining
         ValueError: if player is already in the game
                     or the game is full
     """

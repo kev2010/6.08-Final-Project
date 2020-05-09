@@ -361,4 +361,3 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
     update_frames(frames_cursor, room_id)
     # return display_frames(frames_cursor, room_id)
     return "Success!"
-
