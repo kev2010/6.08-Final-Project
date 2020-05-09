@@ -188,13 +188,13 @@ void extract_raise_params(char* pointer) {
   char *token;
   uint8_t indx = 0;
   /* get the first token */
-  token = strtok(pointer, delimiter);
+  token = strtok(pointer, s);
   /* walk through other tokens */
-  token = strtok(NULL, delimiter);
+  token = strtok(NULL, s);
   
   while ( token != NULL ) {
     raise_params[indx] = atoi(token);
-    token = strtok(NULL, delimiter);
+    token = strtok(NULL, s);
     indx ++ ;
   }
 }
@@ -204,13 +204,13 @@ void extract_bet_params(char* pointer) {
   char *token;
   uint8_t indx = 0;
   /* get the first token */
-  token = strtok(pointer, delimiter);
+  token = strtok(pointer, s);
   /* walk through other tokens */
-  token = strtok(NULL, delimiter);
+  token = strtok(NULL, s);
   
   while ( token != NULL ) {
     bet_params[indx] = atoi(token);
-    token = strtok(NULL, delimiter);
+    token = strtok(NULL, s);
     indx ++ ;
   }
 }
@@ -242,10 +242,14 @@ void extract_poker_actions() {
     if (strcmp(act1, "raise") == 0) {
       strcat(poker_actions, "raise@");
       extract_raise_params(ptr);
-    } else if (strcmp(act2, "bet") == 0) {
+    } 
+    
+    else if (strcmp(act2, "bet") == 0) {
       strcat(poker_actions, "bet@");
       extract_bet_params(ptr);
-    } else {
+    } 
+    
+    else {
       char temp[10] = "";
       sprintf(temp, "%s@", ptr);
       strcat(poker_actions, temp);
@@ -255,8 +259,11 @@ void extract_poker_actions() {
   }
   Serial.println("printing actions");
   Serial.println(poker_actions);
-  Serial.println(previous_actions_buffer);
-  Serial.println(actions_buffer);
+//  Serial.println(previous_actions_buffer);
+//  Serial.println(actions_buffer);
+  Serial.println(raise_params[0]);
+  Serial.println(raise_params[1]);
+  Serial.println(raise_params[2]);
   Serial.println("printing finished");
 }
 
