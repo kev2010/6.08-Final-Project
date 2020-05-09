@@ -175,9 +175,17 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
     Returns:
         A string with the following format:
             size$action_1@action_2@param1@param2@param3@action_3@...
+
         Example with 25/50 blinds and stack sizes of 1000. Currently
         pre-flop and action is on UTG.
             7$call@raise@100@950@1000@fold@leave@
+        This means that the player can 7 possible actions: call a bet, 
+        raise to a size in the interval [100, 950] U [1000], fold, or
+        leave the game.
+
+        Only the "bet" and "raise" actions specify 3 parameters. Read the
+        specifications for "is_bet_legal()" and "is_raise_legal()" to
+        see how and why parameters are returned.
     """
     user = request["values"]["user"]
     room_id = request["values"]["room_id"]
