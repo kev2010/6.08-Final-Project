@@ -226,7 +226,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
         
         possible_actions.append("leave")
 
-    return str(len(possible_actions)) + "$" + "@".join(possible_actions) + "@"
+    return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
 
     # if users[0][USERNAME] == user and len(game_state) == 0:
     #   possible_actions = ["start"]

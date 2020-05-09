@@ -211,7 +211,9 @@ void extract_poker_actions() {
 
     ptr = strtok(NULL, delimiter);
   }
+  Serial.println("printing actions");
   Serial.println(poker_actions);
+  Serial.println("printing finished");
 }
 
 void extract_poker_action() {
