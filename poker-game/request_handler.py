@@ -195,8 +195,12 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
                      ORDER BY position ASC;'''
     users = players_cursor.execute(users_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
-    return states_cursor.execute(query, (room_id,)).fetchall()
-    game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    
+    try:
+        game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
+    except:
+        game_state = ()
+        
     frames_query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
     frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
 
