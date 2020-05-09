@@ -193,18 +193,20 @@ void extract_poker_actions() {
   while ( ptr != NULL ) {
     char act1[6];
     memcpy( act1, &ptr[0], 5 );
-    subbuff[5] = '\0';
+    act1[5] = '\0';
     
     char act2[4];
     memcpy( act2, &ptr[0], 3 );
-    subbuff[3] = '\0';
+    act2[3] = '\0';
 
     if (strcmp(act1, "raise") == 0) {
       strcat(poker_actions, "raise@");
     } else if (strcmp(act2, "bet") == 0) {
       strcat(poker_actions, "bet@");
     } else {
-      strcat(poker_actions, "%s@", ptr);
+      char temp[10];
+      sprintf(temp, "%s@", ptr);
+      strcat(poker_actions, temp);
     }
 
     ptr = strtok(NULL, delimiter);
@@ -561,7 +563,7 @@ void loop() {
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
         char join[] = "join";
-        handle_action_post_req(user, join, 0); // only time needed to hardcode action
+        handle_action_post_req(user, join, 0, room_id); // only time needed to hardcode action
         get_poker_actions_req(user, room_id);
         extract_poker_actions();
         //draw_poker_screen(actions_buffer, selection);
@@ -574,7 +576,7 @@ void loop() {
       }
 
       if (millis() - get_actions_timer > 5000) {
-        get_poker_actions_req(user);
+        get_poker_actions_req(user, room_id);
         extract_poker_actions(); // only now are actions_buffer updated
         Serial.println(actions_buffer);
         get_actions_timer = millis();
@@ -607,7 +609,7 @@ void loop() {
       break;
 
 
-    case ACTUAL_GAME:
+    case BET:
 
       if (millis() - timer >= ping_period) {
         ping_online(user);

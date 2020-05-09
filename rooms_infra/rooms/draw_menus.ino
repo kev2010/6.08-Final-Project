@@ -113,9 +113,15 @@ void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response b
   memset(room_message, 0, strlen(room_message));
   Serial.println(response_buffer);
   sprintf(room_message, room_descr); // changed
-  /* get the first token */
-  token = strtok(room_message, s);
+  
+  /* get the first token, extract room_id of room hosted */
+  token = strtok(room_message, "$");
+  memset(room_id, 0, strlen(room_id));
+  sprintf(room_id, token);
   /* walk through other tokens */
+  
+  token = strtok(room_message, s);
+  
   while ( token != NULL ) {
     tft.drawString(token, 10, 50 + 15 * counter, 1);
     token = strtok(NULL, s);

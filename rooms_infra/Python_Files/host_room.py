@@ -34,8 +34,8 @@ def request_handler(request):
         #return result
 
 
-
-        message = "Welcome to the room!" + "@" + " You are the host." + "@"
+        message = room_id + "$"
+        message += "Welcome to the room!" + "@" + " You are the host." + "@"
         message += "Here, we play " + GAME_ID_TO_NAME[game_id] + "."
 
         return message

@@ -98,7 +98,7 @@ void leave_room_post_req(char* user) { // changed
 
 
 void get_poker_actions_req(char* user, char* room_id){
-  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s HTTP/1.1\r\n", user,room_id);
+  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s&type=actions HTTP/1.1\r\n", user,room_id);
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
   strcat(request_buffer,"\r\n"); //add blank line!
   Serial.println(request_buffer);
@@ -106,9 +106,9 @@ void get_poker_actions_req(char* user, char* room_id){
   Serial.println(actions_buffer);
 }
 
-void handle_action_post_req(char* user, char* action, int amount) { // changed
+void handle_action_post_req(char* user, char* action, int amount, char* room_id) { // changed
   char body[1000]; //for body;
-  sprintf(body,"user=%s&action=%s&amount=%d", user, action, amount);
+  sprintf(body,"user=%s&action=%s&amount=%d&room_id=%s", user, action, amount, room_id);
   int body_len = strlen(body); //calculate body length (for header reporting)
   sprintf(request_buffer, "POST http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py HTTP/1.1\r\n");
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
