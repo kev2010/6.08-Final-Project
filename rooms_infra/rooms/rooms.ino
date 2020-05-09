@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "Giannis";
+char user[] = "giannis";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -73,6 +73,9 @@ char previous_actions_buffer[1000];
 char poker_actions[100];
 char action[50];
 uint8_t get_actions_timer;
+
+uint8_t raise_params[3];
+uint8_t bet_params[3];
 
 
 void setup() {
@@ -180,10 +183,47 @@ void extract_room_id() {
   }
 }
 
+void extract_raise_params(char* pointer) {
+  char s[] = ",";
+  char *token;
+  uint8_t indx = 0;
+  /* get the first token */
+  token = strtok(pointer, delimiter);
+  /* walk through other tokens */
+  token = strtok(NULL, delimiter);
+  
+  while ( token != NULL ) {
+    raise_params[indx] = atoi(token);
+    token = strtok(NULL, delimiter);
+    indx ++ ;
+  }
+}
+
+void extract_bet_params(char* pointer) {
+  char s[] = ",";
+  char *token;
+  uint8_t indx = 0;
+  /* get the first token */
+  token = strtok(pointer, delimiter);
+  /* walk through other tokens */
+  token = strtok(NULL, delimiter);
+  
+  while ( token != NULL ) {
+    bet_params[indx] = atoi(token);
+    token = strtok(NULL, delimiter);
+    indx ++ ;
+  }
+}
+
 void extract_poker_actions() {
   char delimiter[] = "@";
   char* ptr;
-  ptr = strtok(actions_buffer, "$");
+
+  char actions_buffer_copy[100];
+  memset(actions_buffer_copy, 0, strlen(actions_buffer_copy));
+  strcpy(actions_buffer_copy, actions_buffer);
+
+  ptr = strtok(actions_buffer_copy, "$");
   no_of_selections = atoi(ptr); // update numbers of selections
 
   ptr = strtok(NULL, delimiter);
@@ -201,8 +241,10 @@ void extract_poker_actions() {
 
     if (strcmp(act1, "raise") == 0) {
       strcat(poker_actions, "raise@");
+      extract_raise_params(ptr);
     } else if (strcmp(act2, "bet") == 0) {
       strcat(poker_actions, "bet@");
+      extract_bet_params(ptr);
     } else {
       char temp[10] = "";
       sprintf(temp, "%s@", ptr);
@@ -213,6 +255,8 @@ void extract_poker_actions() {
   }
   Serial.println("printing actions");
   Serial.println(poker_actions);
+  Serial.println(previous_actions_buffer);
+  Serial.println(actions_buffer);
   Serial.println("printing finished");
 }
 
@@ -575,23 +619,24 @@ void loop() {
 
         // intitialize previous actions <- current actions when first entering game
         memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-        sprintf(previous_actions_buffer, actions_buffer);
+        strcpy(previous_actions_buffer, actions_buffer);
       }
 
-//      if (millis() - get_actions_timer > 10000) {
-//        get_poker_actions_req(user, room_id);
-//        extract_poker_actions(); // only now are actions_buffer updated
-//        Serial.println(actions_buffer);
-//        get_actions_timer = millis();
-//
-//        // if there is any game update (new actions), draw game screen again, otherwise do nothing
-//        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
-//          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
-//          // set previous actions <- current actions when updating
-//          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-//          sprintf(previous_actions_buffer, actions_buffer);
-//        }
-//      }
+      if (millis() - get_actions_timer > 5000) {
+        get_poker_actions_req(user, room_id);
+
+        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+
+          extract_poker_actions(); // only now are actions_buffer updated
+          get_actions_timer = millis();
+
+          // if there is any game update (new actions), draw game screen again, otherwise do nothing
+          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
+          // set previous actions <- current actions when updating
+          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+          strcpy(previous_actions_buffer, actions_buffer);
+        }
+      }
 
 
       new_selection = update_selection(selection, no_of_selections);

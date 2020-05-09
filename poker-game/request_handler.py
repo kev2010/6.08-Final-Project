@@ -225,8 +225,10 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("fold")
         
         possible_actions.append("leave")
+        
+    return "3$start@bet,100,200,300@leave"
 
-    return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
+    #return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
 
     # if users[0][USERNAME] == user and len(game_state) == 0:
     #   possible_actions = ["start"]
