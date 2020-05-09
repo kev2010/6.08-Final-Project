@@ -1,38 +1,58 @@
+"""Renders the poker game for clients to process.
+
+This module provides a way for clients to access the game
+state from the Poker API. Serves as a conversion from
+the data in the SQL database to a JSON output.
+"""
+
 import json
 import sys
 import datetime
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
 
+
 def display_game(players_cursor, states_cursor, user, room_id):
     """
-    Returns the poker game state in a properly formatted string.
-    The return format is as follows:
-        
-        players:
-        (user:str, bal:int, bet:int, cards:str, position:int)
-        ...
+    Returns the poker game state in a properly formatted JSON
+    string. The return format is as follows:
 
-        state:
-        (deck:str, board:str, dealer:int, action:int, pot:int)
+        {
+            "state": {
+                "board": "Ah,7d,2s",
+                "dealer": 3,
+                "action": 1,
+                "pot": 225",
+                "room_id": "123"
+            },
+            "players": [
+                {
+                    "user": kev2010, 
+                    "bal": 850,
+                    "bet": 150,
+                    "invested": 150,
+                    "cards": "Ah,Kd",
+                    "position": 0,
+                    "room_id": "123"
+                },
+                {
+                    "user": baptiste, 
+                    "bal": 950,
+                    "bet": 50,
+                    "invested": 50,
+                    "cards": "",
+                    "position": 1,
+                    "room_id": "123"
+                },
+                ...
+            ]
+        }
     
     There can be multiple players, but there is only one state
-    for the poker game. The following is an example string that
-    could be returned.
-
-        players:
-        ('kev2010', 950, 0, '2s,9s', 0)
-        ('jasonllu', 950, 0, 'Jh,8s', 1)
-        ('baptiste', 950, 0, '7d,4c', 2)
-
-        state:
-        ('Js,3s,8h, ...', 'Qd,2h,9h,3d', 0, 1, 150)
-    
-    Note that the deck in the state will have more cards, as
-    indicated by the "...".
+    for the poker game.
 
     Args:
-        players_cursor (SQL Cursor) cursor for the players_table
+        players_cursor (SQL Cursor): cursor for the players_table
         states_cursor (SQL Cursor): cursor for the states_table
         user (str): user who sent the request
         room_id (str): the id for the room user is in
@@ -41,7 +61,6 @@ def display_game(players_cursor, states_cursor, user, room_id):
         A string of the state of the game, formatted as described
         above
     """
-    # #   TODO: Return proper JSON message of the state of the game
     # players_query = '''SELECT * FROM players_table;'''
     # players = players_cursor.execute(players_query).fetchall()
     # result = "players:\n"
@@ -81,7 +100,8 @@ def update_frames(frames_cursor, room_id):
     Updates the frames of the game state.
 
     Args:
-        TODO
+        frames_cursor (SQL cursor): cursor for the frames_table
+        room_id (str): the id for the room to get frames from
     """
     counter = 0
     for frame in FRAMES:    #   frame is json string
@@ -94,7 +114,12 @@ def update_frames(frames_cursor, room_id):
 
 def display_frames(frames_cursor, room_id):
     """
-    TODO: spec
+    Displays all the stored frames of the game state in the room
+    with the given room_id.
+
+    Args:
+        frames_cursor (SQL cursor): cursor for the frames_table
+        room_id (str): the id for the room to get frames from
     """
     query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
     frames = frames_cursor.execute(query, (room_id,)).fetchall()
