@@ -1,3 +1,8 @@
+"""Checks if certain poker actions are legal given a game state.
+
+This module contains functions that check if certain poker actions
+are allowed given the state of the players and game.
+"""
 import sys
 sys.path.append('__HOME__/team079/poker-game')
 from settings import *
@@ -12,7 +17,7 @@ def is_check_legal(players, game_state, user):
         players (list of tuples): list of players as defined by the SQL player
             database (check request_handler.py file specification). The players
             should be sorted in ascending order of position.
-        state (tuple): a game state as defined by the SQL state database in
+        game_state (tuple): a game state as defined by the SQL state database in
             request_handler.py.
         user (str): non-empty username to check the action for.
     
@@ -48,7 +53,7 @@ def is_call_legal(players, game_state, user):
         players (list of tuples): list of players as defined by the SQL player
             database (check request_handler.py file specification). The players
             should be sorted in ascending order of position.
-        state (tuple): a game state as defined by the SQL state database in
+        game_state (tuple): a game state as defined by the SQL state database in
             request_handler.py.
         user (str): non-empty username to check the action for.
     
@@ -72,7 +77,7 @@ def is_bet_legal(players, game_state, user):
         players (list of tuples): list of players as defined by the SQL player
             database (check request_handler.py file specification). The players
             should be sorted in ascending order of position.
-        state (tuple): a game state as defined by the SQL state database in
+        game_state (tuple): a game state as defined by the SQL state database in
             request_handler.py.
         user (str): non-empty username to check the action for.
     
@@ -113,7 +118,7 @@ def is_raise_legal(players, game_state, user):
         players (list of tuples): list of players as defined by the SQL player
             database (check request_handler.py file specification). The players
             should be sorted in ascending order of position.
-        state (tuple): a game state as defined by the SQL state database in
+        game_state (tuple): a game state as defined by the SQL state database in
             request_handler.py.
         user (str): non-empty username to check the action for.
     
@@ -164,7 +169,7 @@ def is_fold_legal(players, game_state, user):
         players (list of tuples): list of players as defined by the SQL player
             database (check request_handler.py file specification). The players
             should be sorted in ascending order of position.
-        state (tuple): a game state as defined by the SQL state database in
+        game_state (tuple): a game state as defined by the SQL state database in
             request_handler.py.
         user (str): non-empty username to check the action for.
     
@@ -183,7 +188,7 @@ def is_on_user(players, game_state,  user):
         players (list of tuples): list of players as defined by the SQL player
             database (check request_handler.py file specification). The players
             should be sorted in ascending order of position.
-        state (tuple): a game state as defined by the SQL state database in
+        game_state (tuple): a game state as defined by the SQL state database in
             request_handler.py.
         user (str): non-empty username to check the action for.
     
@@ -194,4 +199,3 @@ def is_on_user(players, game_state,  user):
     game_action = game_state[ACTION]
     user_position = [p[POSITION] for p in players if p[USERNAME] == user][0]
     return game_action == user_position
-    
