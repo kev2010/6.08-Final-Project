@@ -1,3 +1,9 @@
+"""Handles back-end poker game logic.
+
+This module deals with poker logic (starting new hands, dealing the board,
+distributing pots, etc.). All of the functions interact with the players
+and states SQL database.
+"""
 import sys
 import random
 sys.path.append('__HOME__/team079/poker-game')
@@ -28,8 +34,8 @@ def start_new_hand(players_cursor, states_cursor, dealer_position, user, room_id
 def post_blinds(players_cursor, states_cursor, dealer_position, user, room_id):
     """
     Post blinds for the small blind and big blind positions.
-    Assumes that there are at least three players. Updates the
-    pot size and dealer position.
+    Assumes that there are at least two players. Updates the
+    pot size, dealer position, and action.
 
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
@@ -113,12 +119,12 @@ def deal_table(players_cursor, states_cursor, user, room_id):
 
     FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
 
-#   TODO: TEST THIS
+
 def next_stage(players_cursor, states_cursor, num_board_cards, user, room_id):
     """
     Updates the game state by going into the next stage (e.g. Preflop to Flop,
     Flop to Turn, Turn to River, or River to Showdown). Collects all bets on
-    previous street and updates the pot size.
+    previous street and updates the deck, board, and action.
 
     Args:
         players_cursor (SQL Cursor): cursor for the players_table
@@ -185,7 +191,7 @@ def next_stage(players_cursor, states_cursor, num_board_cards, user, room_id):
 
 def distribute_pots(players_cursor, states_cursor, user, room_id):
     """
-    Distribute all pots to the winners (this includes all side pots). Updates 
+    Distribute the pot to all winners (this includes side pots). Updates 
     the player state by removing bets and cards and updating the balance if 
     necessary. Updates the game state by removing the deck, board, and pot.
     Afterwards, start a new hand.
@@ -255,8 +261,13 @@ def distribute_pots(players_cursor, states_cursor, user, room_id):
 
 def find_winners(players, board_cards):
     """
-    players = (username, cards -> ['Ah', 'Kh'])
-    board = ['Ah', ...]
+    Given a list of player cards and the board, finds players that won.
+
+    Args:
+        players (list of tuples): a length 2 tuple where the first
+            element is a non-empty username string, and the second element
+            is a length 2 list of str denoting the hole cards of the user
+        board (list of str): a length 5 list of cards denoting the board
     """
     #   TODO: fix magic #
     best_hand = 0
