@@ -36,7 +36,7 @@ char host[] = "Host room";
 char join[] = "Join room";
 char turn_off[] = "Turn off";
 
-uint8_t state;
+uint32_t state;
 #define OFF 0
 #define LOGIN_PAGE 1
 #define MAIN_LOBBY 2
@@ -47,8 +47,8 @@ uint8_t state;
 #define RECORD 7
 #define LEADERBOARD 8
 #define POKER_GAME 9
-#define BET 10
-#define RAISE 11
+//#define BET 10
+//#define RAISE 11
 
 const uint8_t PIN_1 = 16; //button 1
 const uint8_t PIN_2 = 5; //button 2
@@ -194,7 +194,7 @@ void extract_poker_actions() {
     char act1[6];
     memcpy( act1, &ptr[0], 5 );
     act1[5] = '\0';
-    
+
     char act2[4];
     memcpy( act2, &ptr[0], 3 );
     act2[3] = '\0';
@@ -204,7 +204,7 @@ void extract_poker_actions() {
     } else if (strcmp(act2, "bet") == 0) {
       strcat(poker_actions, "bet@");
     } else {
-      char temp[10];
+      char temp[10] = "";
       sprintf(temp, "%s@", ptr);
       strcat(poker_actions, temp);
     }
@@ -565,10 +565,11 @@ void loop() {
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
         char join[] = "join";
+
         handle_action_post_req(user, join, 0, room_id); // only time needed to hardcode action
         get_poker_actions_req(user, room_id);
         extract_poker_actions();
-        //draw_poker_screen(actions_buffer, selection);
+        draw_poker_screen(poker_actions, selection);
         //Serial.println(actions_buffer);
         get_actions_timer = millis();
 
@@ -577,25 +578,27 @@ void loop() {
         sprintf(previous_actions_buffer, actions_buffer);
       }
 
-      if (millis() - get_actions_timer > 5000) {
-        get_poker_actions_req(user, room_id);
-        extract_poker_actions(); // only now are actions_buffer updated
-        Serial.println(actions_buffer);
-        get_actions_timer = millis();
+//      if (millis() - get_actions_timer > 10000) {
+//        get_poker_actions_req(user, room_id);
+//        extract_poker_actions(); // only now are actions_buffer updated
+//        Serial.println(actions_buffer);
+//        get_actions_timer = millis();
+//
+//        // if there is any game update (new actions), draw game screen again, otherwise do nothing
+//        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+//          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
+//          // set previous actions <- current actions when updating
+//          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+//          sprintf(previous_actions_buffer, actions_buffer);
+//        }
+//      }
 
-        // if there is any game update (new actions), draw game screen again, otherwise do nothing
-        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
-          //draw_poker_screen(actions_buffer, selection); // may need to reset selection (?)
-          // set previous actions <- current actions when updating
-          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-          sprintf(previous_actions_buffer, actions_buffer);
-        }
-      }
 
       new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
+        Serial.println("new selection");
         selection = new_selection;
-        draw_poker_screen(actions_buffer, selection);
+        draw_poker_screen(poker_actions, selection);
       }
 
       transition_btn = digitalRead(PIN_2);
@@ -608,38 +611,8 @@ void loop() {
       }
       old_transition_btn = transition_btn;
 
-      break;
+      state = POKER_GAME;
 
-
-    case BET:
-
-      if (millis() - timer >= ping_period) {
-        ping_online(user);
-        timer = millis();
-      }
-
-      if (flag) {
-        selection = 0;
-        no_of_selections = 6; // CHANGE ME
-        flag = false;
-        tft.fillScreen(TFT_BLACK); //fill background
-        draw_poker_actions(selection);
-      }
-
-      new_selection = update_selection(selection, no_of_selections);
-      if (new_selection != selection) {
-        selection = new_selection;
-        draw_poker_actions(selection);
-      }
-
-      transition_btn = digitalRead(PIN_2);
-      if (transition_btn != old_transition_btn && transition_btn == 1) {
-        flag = true;
-        if (selection == 0) {
-          state = MAIN_LOBBY;
-        }
-      }
-      old_transition_btn = transition_btn;
 
       break;
 

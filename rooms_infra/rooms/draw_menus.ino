@@ -157,7 +157,8 @@ void draw_poker_actions(uint8_t selection) {
   tft.drawString(">", 25, 50 + (selection * 10), 1);
 }
 
-void draw_poker_screen(char* possible_actions, uint8_t selection) {
+void draw_poker_screen(char* poker_actions, uint8_t selection) {
+  tft.fillScreen(TFT_BLACK);
   tft.drawString("POKER", 20, 10, 2);
   tft.drawString("-----------------------", 0, 30, 2);
 
@@ -166,7 +167,7 @@ void draw_poker_screen(char* possible_actions, uint8_t selection) {
   uint8_t counter = 0;
   char actions_copy[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
   memset(actions_copy, 0, strlen(actions_copy));
-  sprintf(actions_copy, possible_actions);
+  sprintf(actions_copy, poker_actions);
   /* get the first token */
   token = strtok(actions_copy, s);
   /* walk through other tokens */
@@ -176,6 +177,11 @@ void draw_poker_screen(char* possible_actions, uint8_t selection) {
     counter ++ ;
     token = strtok(NULL, s);
   }
+
+  Serial.println("no_of_selections");
+  Serial.println(no_of_selections);
+  Serial.println("selection");
+  Serial.println(selection);
 
   tft.drawString(">", 10, 45 + (selection * 15), 1);
 

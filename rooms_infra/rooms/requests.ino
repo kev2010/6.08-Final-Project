@@ -75,7 +75,7 @@ void join_room_post_req(char* user, char* room_id) { // changed
   strcat(request_buffer, body); //body
   strcat(request_buffer, "\r\n"); //header
   Serial.println(request_buffer);
-  do_http_request("608dev-2.net", request_buffer, response_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true); 
+  do_http_request("608dev-2.net", request_buffer, response_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
   Serial.println(response_buffer);
 }
 
@@ -97,18 +97,17 @@ void leave_room_post_req(char* user) { // changed
 }
 
 
-void get_poker_actions_req(char* user, char* room_id){
-  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s&type=actions HTTP/1.1\r\n", user,room_id);
+void get_poker_actions_req(char* user, char* room_id) {
+  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s&type=actions HTTP/1.1\r\n", user, room_id);
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
-  strcat(request_buffer,"\r\n"); //add blank line!
-  Serial.println(request_buffer);
+  strcat(request_buffer, "\r\n"); //add blank line!
   do_http_request("608dev-2.net", request_buffer, actions_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
-  Serial.println(actions_buffer);
+  state = POKER_GAME;
 }
 
 void handle_action_post_req(char* user, char* action, int amount, char* room_id) { // changed
   char body[1000]; //for body;
-  sprintf(body,"user=%s&action=%s&amount=%d&room_id=%s", user, action, amount, room_id);
+  sprintf(body, "user=%s&action=%s&amount=%d&room_id=%s", user, action, amount, room_id);
   int body_len = strlen(body); //calculate body length (for header reporting)
   sprintf(request_buffer, "POST http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py HTTP/1.1\r\n");
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
@@ -125,7 +124,7 @@ void handle_action_post_req(char* user, char* action, int amount, char* room_id)
 void get_leaders() {
   sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/push_ups.py?username=%s HTTP/1.1\r\n", user);
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
-  strcat(request_buffer,"\r\n"); //add blank line!
+  strcat(request_buffer, "\r\n"); //add blank line!
   Serial.println(request_buffer);
   do_http_request("608dev-2.net", request_buffer, response_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
   Serial.println(response_buffer);
