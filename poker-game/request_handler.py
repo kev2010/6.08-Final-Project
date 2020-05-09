@@ -178,7 +178,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
 
         Example with 25/50 blinds and stack sizes of 1000. Currently
         pre-flop and action is on UTG.
-            7$call@raise@100@950@1000@fold@leave@
+            7$call@raise@100@950@1000@fold@leave@                               (will change)
         This means that the player can 7 possible actions: call a bet, 
         raise to a size in the interval [100, 950] U [1000], fold, or
         leave the game.
@@ -212,10 +212,10 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("call")
         bet_legal, min_bet, max_bet, all_in = is_bet_legal(users, game_state, user)
         if bet_legal:
-            possible_actions.extend(["bet", str(min_bet), str(max_bet), str(all_in)])
+            possible_actions.append("bet," + str(min_bet) + "," + str(max_bet) + "," + str(all_in))
         raise_legal, min_raise, max_raise, all_in = is_raise_legal(users, game_state, user)
         if raise_legal:
-            possible_actions.extend(["raise", str(min_raise), str(max_raise), str(all_in)])
+            possible_actions.append("raise," + str(min_raise) + "," + str(max_raise) + "," + str(all_in))
         if is_fold_legal(users, game_state, user):
             possible_actions.append("fold")
         

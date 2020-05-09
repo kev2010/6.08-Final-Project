@@ -97,13 +97,13 @@ void leave_room_post_req(char* user) { // changed
 }
 
 
-void get_poker_actions_req(char* user){ // maybe change to require username
-  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s HTTP/1.1\r\n", user);
+void get_poker_actions_req(char* user, char* room_id){
+  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s HTTP/1.1\r\n", user,room_id);
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
   strcat(request_buffer,"\r\n"); //add blank line!
   Serial.println(request_buffer);
-  do_http_request("608dev-2.net", request_buffer, response_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
-  Serial.println(response_buffer);
+  do_http_request("608dev-2.net", request_buffer, actions_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
+  Serial.println(actions_buffer);
 }
 
 void handle_action_post_req(char* user, char* action, int amount) { // changed

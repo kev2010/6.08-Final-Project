@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "608pal";
+char user[] = "Giannis";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -47,6 +47,8 @@ uint8_t state;
 #define RECORD 7
 #define LEADERBOARD 8
 #define POKER_GAME 9
+#define BET 10
+#define RAISE 11
 
 const uint8_t PIN_1 = 16; //button 1
 const uint8_t PIN_2 = 5; //button 2
@@ -66,9 +68,10 @@ uint32_t timer;
 const uint32_t ping_period = 10000;
 
 // For Poker
-char possible_actions[1000];
-char previous_possible_actions[1000];
-char action[100];
+char actions_buffer[1000];
+char previous_actions_buffer[1000];
+char poker_actions[100];
+char action[50];
 uint8_t get_actions_timer;
 
 
@@ -177,26 +180,47 @@ void extract_room_id() {
   }
 }
 
-void extract_actions_buffer(char* response_buffer) {
-  char delimiter[] = "$";
+void extract_poker_actions() {
+  char delimiter[] = "@";
   char* ptr;
-  ptr = strtok(response_buffer, delimiter);
+  ptr = strtok(actions_buffer, "$");
   no_of_selections = atoi(ptr); // update numbers of selections
 
   ptr = strtok(NULL, delimiter);
-  memset(possible_actions, 0, strlen(possible_actions));
-  sprintf(possible_actions, ptr);
+
+  memset(poker_actions, 0, strlen(poker_actions));
+
+  while ( ptr != NULL ) {
+    char act1[6];
+    memcpy( act1, &ptr[0], 5 );
+    subbuff[5] = '\0';
+    
+    char act2[4];
+    memcpy( act2, &ptr[0], 3 );
+    subbuff[3] = '\0';
+
+    if (strcmp(act1, "raise") == 0) {
+      strcat(poker_actions, "raise@");
+    } else if (strcmp(act2, "bet") == 0) {
+      strcat(poker_actions, "bet@");
+    } else {
+      strcat(poker_actions, "%s@", ptr);
+    }
+
+    ptr = strtok(NULL, delimiter);
+  }
+  Serial.println(poker_actions);
 }
 
 void extract_poker_action() {
   char delimiter[] = "@";
   char *token;
   uint8_t counter = 1;
-  char possible_actions_copy[1000]; // copy of possible_actions
+  char actions_buffer_copy[1000]; // copy of actions_buffer
   memset(action, 0, strlen(action));
-  sprintf(possible_actions_copy, possible_actions);
+  sprintf(actions_buffer_copy, actions_buffer);
   /* get the first token */
-  token = strtok(possible_actions_copy, delimiter);
+  token = strtok(actions_buffer_copy, delimiter);
   /* walk through other tokens */
   while ( token != NULL ) {
     if (counter == selection) {
@@ -364,13 +388,13 @@ void loop() {
         else {
           extract_room_id();
           join_room_post_req(user, room_id);
-//          memset(room_descr, 0, strlen(room_descr));
-//          char delimiter[] = "$";
-//          char *token;
-//          char temp[5];
-//          sprintf(temp, strtok(response_buffer, delimiter));
-//          game_selection = atoi(temp);
-//          sprintf(room_descr, strtok(NULL, delimiter));          
+          //          memset(room_descr, 0, strlen(room_descr));
+          //          char delimiter[] = "$";
+          //          char *token;
+          //          char temp[5];
+          //          sprintf(temp, strtok(response_buffer, delimiter));
+          //          game_selection = atoi(temp);
+          //          sprintf(room_descr, strtok(NULL, delimiter));
 
           char delimiter[] = "$";
           char* ptr;
@@ -538,42 +562,78 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         char join[] = "join";
         handle_action_post_req(user, join, 0); // only time needed to hardcode action
-        get_poker_actions_req(user);
-        extract_actions_buffer(response_buffer);
-        Serial.println(possible_actions);
+        get_poker_actions_req(user, room_id);
+        extract_poker_actions();
+        //draw_poker_screen(actions_buffer, selection);
+        //Serial.println(actions_buffer);
         get_actions_timer = millis();
 
         // intitialize previous actions <- current actions when first entering game
-        memset(previous_possible_actions, 0, strlen(previous_possible_actions));
-        sprintf(previous_possible_actions, possible_actions);
+        memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+        sprintf(previous_actions_buffer, actions_buffer);
       }
 
       if (millis() - get_actions_timer > 5000) {
         get_poker_actions_req(user);
-        extract_actions_buffer(response_buffer); // only now are possible_actions updated
-        Serial.println(possible_actions);
+        extract_poker_actions(); // only now are actions_buffer updated
+        Serial.println(actions_buffer);
         get_actions_timer = millis();
 
         // if there is any game update (new actions), draw game screen again, otherwise do nothing
-        if (strcmp(previous_possible_actions, possible_actions) != 0) {
-          draw_poker_screen(possible_actions, selection); // may need to reset selection (?)
+        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+          //draw_poker_screen(actions_buffer, selection); // may need to reset selection (?)
           // set previous actions <- current actions when updating
-          memset(previous_possible_actions, 0, strlen(previous_possible_actions));
-          sprintf(previous_possible_actions, possible_actions);
+          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+          sprintf(previous_actions_buffer, actions_buffer);
         }
       }
 
       new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         selection = new_selection;
-        draw_poker_screen(possible_actions, selection);
+        draw_poker_screen(actions_buffer, selection);
       }
 
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
-        //flag = true;
-        extract_poker_action();
-        //handle_action_post_req(user, action, 0); // cannot choose amount now, it's fixed (e.g. 50)
+        flag = true;
+        //extract_poker_action();
+        //handle_action_post_req(user, "start", 0); // cannot choose amount now, it's fixed (e.g. 50)
+        //draw_poker_actions(selection);
+        //state = ACTUAL_GAME;
+      }
+      old_transition_btn = transition_btn;
+
+      break;
+
+
+    case ACTUAL_GAME:
+
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+      }
+
+      if (flag) {
+        selection = 0;
+        no_of_selections = 6; // CHANGE ME
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        draw_poker_actions(selection);
+      }
+
+      new_selection = update_selection(selection, no_of_selections);
+      if (new_selection != selection) {
+        selection = new_selection;
+        draw_poker_actions(selection);
+      }
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        flag = true;
+        if (selection == 0) {
+          state = MAIN_LOBBY;
+        }
       }
       old_transition_btn = transition_btn;
 

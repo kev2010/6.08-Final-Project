@@ -137,6 +137,20 @@ void draw_push_up_screen(uint8_t selection) {
   tft.drawString(">", 25, 50 + (selection * 20), 2);
 }
 
+
+void draw_poker_actions(uint8_t selection) {
+  tft.fillScreen(TFT_BLACK);
+  tft.drawString("POKER GAME", 20, 10, 2);
+  tft.drawString("-----------------------", 0, 30, 2);
+  tft.drawString("Leave", 40, 50, 1);
+  tft.drawString("Check", 40, 60, 1);
+  tft.drawString("Call", 40, 70, 1);
+  tft.drawString("Bet", 40, 80, 1);
+  tft.drawString("Raise", 40, 90, 1);
+  tft.drawString("Fold", 40, 100, 1);
+  tft.drawString(">", 25, 50 + (selection * 10), 1);
+}
+
 void draw_poker_screen(char* possible_actions, uint8_t selection) {
   tft.drawString("POKER", 20, 10, 2);
   tft.drawString("-----------------------", 0, 30, 2);
@@ -152,12 +166,12 @@ void draw_poker_screen(char* possible_actions, uint8_t selection) {
   /* walk through other tokens */
 
   while ( token != NULL ) {
-    tft.drawString(token, 20, 35 + 15 * counter, 1);
+    tft.drawString(token, 20, 45 + 15 * counter, 1);
     counter ++ ;
     token = strtok(NULL, s);
   }
 
-  tft.drawString(">", 20, 35 + (selection * 15), 1);
+  tft.drawString(">", 10, 45 + (selection * 15), 1);
 
 }
 
