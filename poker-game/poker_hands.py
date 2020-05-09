@@ -1,7 +1,34 @@
+"""Finds the best poker hand that can be made.
+
+This module abstracts the process of finding the best poker hand that
+can be made given a set of hole cards and board cards.
+
+Attributes:
+    card_order_dict (dict: str -> int): maps card values to their
+        numerical ranking
+"""
+
 card_order_dict = {"2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, 
                    "T":10, "J":11, "Q":12, "K":13, "A":14}
                    
 def find_best_hand(hole_cards, board):
+    """
+    Given two hole cards and five board cards, finds the best
+    poker hand that can be made from any combination of five
+    cards from that set.
+
+    Args:
+        hole_cards (list of str): a length two list of two
+            cards
+        board (list of str): a length five list of five
+            cards
+    
+    Returns:
+        A tuple where the first elt is a numerical ranking
+        of the hand (1 to 9, where 9 is a straight flush,
+        the highest), and the second elt is a list of str
+        of the five cards that make the best hand.
+    """
     cards = hole_cards + (board if len(board) == 5 else [])
     #   TODO: don't call funcitons twice? performance optimization?
     if check_straight_flush(cards)[0]:
