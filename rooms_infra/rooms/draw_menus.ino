@@ -120,7 +120,7 @@ void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response b
   sprintf(room_id, token);
   /* walk through other tokens */
   
-  token = strtok(room_message, s);
+  token = strtok(NULL, s);
   
   while ( token != NULL ) {
     tft.drawString(token, 10, 50 + 15 * counter, 1);
