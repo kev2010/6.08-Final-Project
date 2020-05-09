@@ -1,5 +1,65 @@
-"""
-PokerAPI handles POST/GET requests.
+"""Poker API Request Handler
+
+The Poker API handles POST/GET requests from clients. This module
+serves as the abstraction of poker games. All poker games are
+represented as follows:
+
+    Players:
+        (user:str, balance:int, bet:int, invested:int, cards:str, 
+        position:int, room_id:str)
+        ...
+    Game state:
+        (deck:str, board:str, dealer:int, action:int, pot:int,
+        room_id:str)
+    Frames:
+        (state:text, time:timestamp, room_id:str)
+        ...
+
+These entries are all stored in a players, states, and frames
+SQL database, respectively. Each entry in the players database
+stores relevant information about that user in the poker game.
+The game state entry stores information related to the game
+logic. Each entry in the frames database stores a JSON string
+of players and a game state at a timestamp.
+
+Note that the frames database is a combination of snapshots of
+the players and game_state databases. The purpose of storing frames
+is for clients to get a "user friendly" sequence of game states.
+
+Example:
+    If all players go all in preflop, instead of only returning 
+    the end game state, a sequence of intermediary "frames" 
+    (e.g. the flop, turn, river, and pot distribution) will be
+    returned for clients to process.
+
+The abstraction function for this ADT is as follows:
+
+    AF(players, game_state) = a poker game with players in
+        "players", where each player has two hole cards
+        specified by player[cards], a balance of player[balance],
+        and a bet of player[bet]. For the state of the game,
+        the deck is in game_state[deck], the board is in
+        game_state[board], the pot is in game_state[pot],
+        the dealer is in game_state[dealer], and the
+        action is on player with position game_state[action].
+
+Note that the Poker API currently supports multiple rooms. Clients
+can make POST/GET requests to the Poker API to simulate these
+multiple poker games. The request_handler specification outlines
+the possible interactions clients can make with the abstracted
+poker game.
+
+Attributes:
+    players_db (str): file location for the players SQL database
+    state_db (str): file location for the state SQL database
+    frames_db (str): file location for the frames SQL database
+
+Todo:
+    * Make these functions take in database name string parameters?
+    * Optimize query calls (there are a lot of redundant "get all 
+        players" queries) 
+    * Potentially make a function for passing action? Does it 
+        relate to checking/calling/etc.
 """
 
 import sqlite3
@@ -16,64 +76,51 @@ players_db = '__HOME__/team079/poker-game/players.db'
 state_db = '__HOME__/team079/poker-game/state.db'
 frames_db = '__HOME__/team079/poker-game/frames.db'
 
-#   TODO: Make these functions take in database name string parameters
-#   TODO: Optimize query calls (there are a lot of redundant "get all players" queries)
-#   TODO: Potentially make a function for passing action? Does it relate to checking/calling/etc.
-#   TODO: Make a function for legal actions?
-#   TODO: Adjust "frames" for multiple step actions?
 
 def request_handler(request):
     """
     Handles POST/GET requests for the poker game server. Assumes the POST/GET
     requests provide the following information:
 
-    POST: user={user: str}&action={action: str}&amount={amount:str of int}&room_id={room_id: str}
-    GET: param => user={user: str}
+    POST: user={str}&action={str}&amount={str of int}&room_id={str}
+    GET: param => user={str}&type={str}&room_id={str}
+
+    Each POST/GET request requires a room_id parameter since these
+    requests will only affect the player in the specified room_id. This
+    allows multiple rooms to host different poker games since actions in
+    one room_id will not affect a room with a different room_id.
     
-    Returns a string representing the state of the poker game. The string is
-    in the form of a JSON in the following format:
+    POST requests are for when players want to make actions in the poker
+    game. Therefore, POSTs only return a string saying "Success!" to clients.
+    The following actions are currently supported:
+        
+        1. "join" - lets any user join the poker game with given room_id
+        2. "start" - lets the host start a poker game with given room_id
+        3. "leave" - lets any user leave the poker game with given room_id
+        4. "check" - user performs a poker "check" action in the game
+        5. "call" - user performs a poker "call" action in the game
+        6. "bet" - user performs a poker "bet" action in the game with
+            the specified amount
+        7. "raise" - user performs a poker "raise" action in the game to
+            the specified amount
+        8. "fold" - user performs a poker "fold" action in the game
+    
+    GET requests are for observing the poker game. The return type depends
+    on the type specified in the GET request. The following types are 
+    currently supported:
 
-        game_state:
-            {
-                "players": [
-                    {
-                        "user": kev2010, 
-                        "bal": 850,
-                        "bet": 150,
-                        "invested": 150,
-                        "cards": "Ah,Kd"
-                        "position": 0
-                    },
-                    {
-                        "user": baptiste, 
-                        "bal": 950,
-                        "bet": 50,
-                        "cards": ""
-                        "position": 1
-                    },
-                    ...
-                ],
-                "state": {
-                    "board": "Ah,7d,2s",
-                    "dealer": 3,
-                    "action": 1,
-                    "pot": 225"
-                }
-            }
-
-    The game_state provides a list of players with the corresponding
-    information. Some fields in the player information are private,
-    such as the cards if player object is not the user sending the
-    post request. The game_state also contains the state with the board
-    cards, the current dealer position, who's action it's on, and 
-    the total pot size.
+        1. "actions" - gets all the legal actions a specified player can
+            make. Returns a string with all possible legal actions.
+        2. "spectate" - gets a single frame of the poker game. Returns
+            a string JSON containing a snapshot of players and the game
+            state.
 
     Args:
         request (dict): maps request params to corresponding values
     
     Returns:
-        A JSON string representing the players and state of 
-        the game as defined above
+        A string containing the relevant information for the POST/GET
+        request.
     """
     #   Initialize the players_table SQL database
     conn_players = sqlite3.connect(players_db)
@@ -105,7 +152,6 @@ def request_handler(request):
     elif request['method'] == 'POST':
         game_state = post_handler(request, c_player, c_state, c_frame)
 
-    #   TODO: Figure out if this is the right order of commit/close
     conn_players.commit()
     conn_players.close()
     conn_state.commit()
@@ -117,7 +163,7 @@ def request_handler(request):
 
 def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
     """
-    Handles a GET request as defined in the request_handler function.
+    Handles a GET actions request as defined in the request_handler function.
     Returns a string representing the possible actions the user
     can take.
 
@@ -186,6 +232,50 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
 
 
 def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
+    """
+    Handles a GET spectate request as defined in the request_handler function.
+    Returns a JSON string representing a singular frame of the game.
+
+    Args:
+        request (dict): maps request params to corresponding values
+        players_cursor (SQL Cursor): cursor for the players_table
+        states_cursor (SQL Cursor): cursor for the states_table
+
+    Returns:
+        Returns the poker game state in a properly formatted JSON
+        string. The return format is as follows:
+
+        {
+            "state": {
+                "board": "Ah,7d,2s",
+                "dealer": 3,
+                "action": 1,
+                "pot": 225",
+                "room_id": "123"
+            },
+            "players": [
+                {
+                    "user": kev2010, 
+                    "bal": 850,
+                    "bet": 150,
+                    "invested": 150,
+                    "cards": "Ah,Kd",
+                    "position": 0,
+                    "room_id": "123"
+                },
+                {
+                    "user": baptiste, 
+                    "bal": 950,
+                    "bet": 50,
+                    "invested": 50,
+                    "cards": "",
+                    "position": 1,
+                    "room_id": "123"
+                },
+                ...
+            ]
+        }
+    """
     room_id = request["values"]["room_id"]
     frames_query = '''SELECT * FROM frames_table 
                       WHERE room_id = ?
@@ -229,8 +319,6 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
 def post_handler(request, players_cursor, states_cursor, frames_cursor):
     """
     Handles a POST request as defined in the request_handler function.
-    Returns a string representing the game state as defined in
-    request_handler.
 
     Args:
         request (dict): maps request params to corresponding values
@@ -238,8 +326,10 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
         states_cursor (SQL Cursor): cursor for the states_table
 
     Returns:
-        A JSON string representing the players and state of 
-        the game as defined above
+        A string "Success!" if the action was processed correctly.
+        Otherwise, "Requested action not recognized!" is returned
+        if the POST request contains an action not currently
+        supported.
     """
     #   Get the user, action, and amount from the POST request
     user = request['form']['user']
@@ -269,5 +359,6 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
         return "Requested action not recognized!"
 
     update_frames(frames_cursor, room_id)
-    return display_frames(frames_cursor, room_id)
+    # return display_frames(frames_cursor, room_id)
+    return "Success!"
 

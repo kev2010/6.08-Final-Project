@@ -115,7 +115,9 @@ def update_frames(frames_cursor, room_id):
 def display_frames(frames_cursor, room_id):
     """
     Displays all the stored frames of the game state in the room
-    with the given room_id.
+    with the given room_id. Should only be used for debugging
+    since this exposes private elements (e.g. the deck, other
+    player's cards, etc.)
 
     Args:
         frames_cursor (SQL cursor): cursor for the frames_table
