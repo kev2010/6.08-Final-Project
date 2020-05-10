@@ -47,7 +47,7 @@ def request_handler(request):
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-        result = c.execute('''SELECT * FROM rooms''')
+        result = c.execute('''SELECT * FROM rooms ORDER BY open_time DESC''')
 
         room_descriptions = ""
         
