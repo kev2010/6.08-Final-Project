@@ -47,8 +47,8 @@ uint32_t state;
 #define RECORD 7
 #define LEADERBOARD 8
 #define POKER_GAME 9
-//#define BET 10
-//#define RAISE 11
+#define POKER_BET 10
+#define POKER_RAISE 11
 
 const uint8_t PIN_1 = 16; //button 1
 const uint8_t PIN_2 = 5; //button 2
@@ -256,6 +256,7 @@ void extract_selected_poker_action() {
   token = strtok(actions_copy, delimiter);
   /* walk through other tokens */
   while ( token != NULL ) {
+  
     if (counter == selection) {
       sprintf(action, token); // found action corresponding to selection
       Serial.println(action);
@@ -642,7 +643,7 @@ void loop() {
 
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
-        if (selection == no_of_selections - 1) { // if user wants to refresh page
+        if (selection == 0) { // if user wants to refresh page
           flag = true;
         }
         extract_selected_poker_action();
