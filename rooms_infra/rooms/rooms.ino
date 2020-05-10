@@ -125,6 +125,7 @@ void setup() {
   }
 
   timer = millis();
+  get_actions_timer = millis();
 
 
   // ping_online(user); // will use same function to post online status every 10 seconds
@@ -138,7 +139,7 @@ uint8_t update_selection(uint8_t selection, uint8_t no_of_selections) {
   selection_btn = digitalRead(PIN_1);
   if (selection_btn != old_selection_btn && selection_btn == 1) {
     tft.fillScreen(TFT_BLACK); //fill background
-    tft.setCursor(0, 0, 1); // set the cursor
+//    tft.setCursor(0, 0, 1); // set the cursor
     selection  = (selection + 1) % no_of_selections;
   }
   old_selection_btn = selection_btn;
@@ -584,7 +585,8 @@ void loop() {
         char join[] = "join";
 
         handle_action_post_req(user, join, 0, room_id); // only time needed to hardcode action
-        get_poker_actions_req(user, room_id);
+        //get_poker_actions_req(user, room_id);
+        poker_actions_post_req(user, room_id);
         extract_poker_actions();
         draw_poker_screen(poker_actions, selection);
         //Serial.println(actions_buffer);
@@ -595,33 +597,34 @@ void loop() {
         strcpy(previous_actions_buffer, actions_buffer);
       }
 
-      if (millis() - get_actions_timer > 5000) {
-        get_poker_actions_req(user, room_id);
-        get_actions_timer = millis();
-        //state = POKER_GAME;
+//      if (millis() - get_actions_timer >= 5000) {
+//        get_poker_actions_req(user, room_id);
+//        get_actions_timer = millis();
+//        //state = POKER_GAME;
+//
+//        Serial.println(strlen(actions_buffer));
+//        Serial.println(get_actions_timer);
+//
+//        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+//
+//          Serial.println("different actions");
+//
+//          extract_poker_actions(); // only now are actions_buffer updated
+//          //get_actions_timer = millis();
+//
+//          selection = 0;
+//
+//          // if there is any game update (new actions), draw game screen again, otherwise do nothing
+//          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
+//          // set previous actions <- current actions when updating
+//          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+//          strcpy(previous_actions_buffer, actions_buffer);
+//        }
+//        Serial.println("about to exit if statement..");
+//      }
 
-        Serial.println(strlen(actions_buffer));
-        Serial.println(get_actions_timer);
 
-        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
-
-          Serial.println("different actions");
-
-          extract_poker_actions(); // only now are actions_buffer updated
-          //get_actions_timer = millis();
-
-          selection = 0;
-
-          // if there is any game update (new actions), draw game screen again, otherwise do nothing
-          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
-          // set previous actions <- current actions when updating
-          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-          strcpy(previous_actions_buffer, actions_buffer);
-        }
-        Serial.println("about to exit if statement..");
-      }
-
-
+      //Serial.println("checking for new selection..");
       new_selection = update_selection(selection, no_of_selections);
       if (new_selection != selection) {
         Serial.println("new selection");
