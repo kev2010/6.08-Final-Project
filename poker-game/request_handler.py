@@ -226,18 +226,18 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("call")
         bet_legal, min_bet, max_bet, all_in = is_bet_legal(users, game_state, user)
         if bet_legal:
-            possible_actions.append("bet," + str(min_bet) + "," + str(max_bet) + "," + str(all_in))
+            possible_actions.append("bet@" + str(min_bet) + "@" + str(max_bet) + "@" + str(all_in))
         raise_legal, min_raise, max_raise, all_in = is_raise_legal(users, game_state, user)
         if raise_legal:
-            possible_actions.append("raise," + str(min_raise) + "," + str(max_raise) + "," + str(all_in))
+            possible_actions.append("raise@" + str(min_raise) + "@" + str(max_raise) + "@" + str(all_in))
         if is_fold_legal(users, game_state, user):
             possible_actions.append("fold")
         
         possible_actions.append("leave")
         
-    return "5$start@bet@100@200@400@leave@fold@raise@50@150@500"
+    #return "5$start@bet@100@200@400@leave@fold@raise@50@150@500"
 
-    #return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
+    return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
 
     # if users[0][USERNAME] == user and len(game_state) == 0:
     #   possible_actions = ["start"]

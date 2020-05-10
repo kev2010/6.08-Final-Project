@@ -143,6 +143,7 @@ void draw_push_up_screen(uint8_t selection) {
   tft.drawString(">", 25, 50 + (selection * 20), 2);
 }
 
+
 void draw_poker_screen(char* poker_actions, uint8_t selection) {
   tft.fillScreen(TFT_BLACK);
   tft.drawString("POKER", 20, 5, 2);
@@ -158,7 +159,7 @@ void draw_poker_screen(char* poker_actions, uint8_t selection) {
   token = strtok(actions_copy, s);
   /* walk through other tokens */
 
-  tft.drawString("refresh", 20, 35 + 15 * counter, 1);
+  tft.drawString("refresh page", 20, 35 + 15 * counter, 1);
   counter ++ ;
 
   while ( token != NULL ) {
@@ -189,9 +190,9 @@ void draw_poker_bet_screen(uint8_t selection) {
   tft.drawString(bet_amount_char, 10, 35, 2);
 
   char min_bet_char[30];
-  sprintf(min_bet_char, "min bet: %d", min_bet);
+  sprintf(min_bet_char, "min: %d", min_bet);
   char max_bet_char[30];
-  sprintf(max_bet_char, "max bet: %d", max_bet);
+  sprintf(max_bet_char, "max: %d", max_bet);
   char all_in_char[30];
   sprintf(all_in_char, "all in: %d", all_in);
 
@@ -207,7 +208,7 @@ void draw_poker_bet_screen(uint8_t selection) {
   tft.drawString("Increment", 10, 60, 1);
   tft.drawString("Decrement", 10, 75, 1);
   tft.drawString("All in", 10, 90, 1);
-  tft.drawString("Confirm bet", 10, 105, 1);
+  tft.drawString("Confirm", 10, 105, 1);
   tft.drawString("Go back", 10, 120, 1);
 
   tft.drawString(">", 2, 60 + (selection * 15), 1);
@@ -218,7 +219,7 @@ void draw_poker_bet_screen(uint8_t selection) {
 
 void draw_poker_raise_screen(uint8_t selection) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawString("CHOOSE BET AMOUNT", 10, 5, 2);
+  tft.drawString("CHOOSE RAISE AMOUNT", 10, 5, 2);
   tft.drawString("-----------------------", 0, 20, 2);
 
   int min_raise = raise_params[0];
@@ -233,9 +234,9 @@ void draw_poker_raise_screen(uint8_t selection) {
   tft.drawString(raise_amount_char, 10, 35, 2);
 
   char min_raise_char[30];
-  sprintf(min_raise_char, "min raise: %d", min_raise);
+  sprintf(min_raise_char, "min: %d", min_raise);
   char max_raise_char[30];
-  sprintf(max_raise_char, "max raise: %d", max_raise);
+  sprintf(max_raise_char, "max: %d", max_raise);
   char all_in_char[30];
   sprintf(all_in_char, "all in: %d", all_in);
 
@@ -251,7 +252,7 @@ void draw_poker_raise_screen(uint8_t selection) {
   tft.drawString("Increment", 10, 60, 1);
   tft.drawString("Decrement", 10, 75, 1);
   tft.drawString("All in", 10, 90, 1);
-  tft.drawString("Confirm raise", 10, 105, 1);
+  tft.drawString("Confirm", 10, 105, 1);
   tft.drawString("Go back", 10, 120, 1);
 
   tft.drawString(">", 2, 60 + (selection * 15), 1);

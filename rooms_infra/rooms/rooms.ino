@@ -301,7 +301,7 @@ void update_bet_amount() {
 void update_raise_amount() {
   int min_raise = raise_params[0];
   int max_raise = raise_params[1];
-  int all_in = bet_params[2];
+  int all_in = raise_params[2];
 
   if (raise_amount == all_in && selection != 2) {
     raise_amount = min_raise;
@@ -729,8 +729,8 @@ void loop() {
             //state = MAIN_LOBBY;
           }
           else {
-            //flag = true; // want to refresh actions page
-            //handle_action_post_req(user, action, 0, room_id);
+            flag = true; // want to refresh actions page
+            handle_action_post_req(user, action, 0, room_id);
           }
 
         }
@@ -773,6 +773,11 @@ void loop() {
           update_bet_amount();
           draw_poker_bet_screen(selection);
         }
+        else if (selection == 3) { // confirm bet, make post request (here action = "bet")
+          flag = true;
+          handle_action_post_req(user, action, bet_amount, room_id);
+          state = POKER_GAME;
+        }
         else if (selection == 4) {
           flag = true;
           state = POKER_GAME;
@@ -814,6 +819,11 @@ void loop() {
         if (selection == 0 || selection == 1 || selection == 2) {
           update_raise_amount();
           draw_poker_raise_screen(selection);
+        }
+        else if (selection == 3) { // confirm raise, make post request (here action = "raise")
+          flag = true;
+          handle_action_post_req(user, action, raise_amount, room_id);
+          state = POKER_GAME;
         }
         else if (selection == 4) {
           flag = true;
