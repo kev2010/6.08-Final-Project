@@ -374,11 +374,10 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
     #   Split actions based on type of request
     #   TODO: implement other actions
     
-    msg = "start not called yet"
     if action == "join":
         join_game(players_cursor, states_cursor, user, room_id)
     elif action == "start" or action[0:5] == "start":
-        msg = start_game(players_cursor, states_cursor, user, room_id)
+        start_game(players_cursor, states_cursor, user, room_id)
         
     elif action == "leave":
         leave_game(players_cursor, states_cursor, user, room_id)
@@ -397,4 +396,4 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
 
     update_frames(frames_cursor, room_id)
     # return display_frames(frames_cursor, room_id)
-    return "Success!" + msg
+    return "Success!" 

@@ -34,7 +34,7 @@ def join_game(players_cursor, states_cursor, user, room_id):
     joined = players_cursor.execute(joined_query, (user, room_id)).fetchall()
     if len(joined) > 0:
         #   TODO: Return proper message for already in game
-         raise ValueError
+         raise KeyError
 
     #   Check if the game is already full
     players_query = '''SELECT * FROM players_table WHERE room_id = ?;'''
@@ -84,7 +84,6 @@ def start_game(players_cursor, states_cursor, user, room_id):
     else:
         raise ValueError
 
-    return "game started"
 def leave_game(players_cursor, states_cursor, user, room_id):
     """
     Handles a leave game request. Deletes the user from the game.
