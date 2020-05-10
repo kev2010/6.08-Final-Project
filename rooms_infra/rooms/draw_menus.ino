@@ -215,29 +215,46 @@ void draw_poker_bet_screen(uint8_t selection) {
 }
 
 
-void draw_poker_raise_screen(char* poker_actions, uint8_t selection) {
+
+void draw_poker_raise_screen(uint8_t selection) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawString("CHOOSE RAISE SIZE", 20, 10, 2);
-  tft.drawString("-----------------------", 0, 30, 2);
+  tft.drawString("CHOOSE BET AMOUNT", 10, 5, 2);
+  tft.drawString("-----------------------", 0, 20, 2);
 
-  char s[] = "@";
-  char *token;
-  uint8_t counter = 0;
-  char actions_copy[500]; // copy of menu_choices to draw menu correctly when updating selector ">"
-  memset(actions_copy, 0, strlen(actions_copy));
-  sprintf(actions_copy, poker_actions);
-  /* get the first token */
-  token = strtok(actions_copy, s);
-  /* walk through other tokens */
+  int min_raise = raise_params[0];
+  int max_raise = raise_params[1];
+  int all_in = raise_params[2];
 
-  while ( token != NULL ) {
-    tft.drawString(token, 20, 45 + 15 * counter, 1);
-    counter ++ ;
-    token = strtok(NULL, s);
-  }
-  tft.drawString("refresh", 20, 45 + 15 * counter, 1);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
 
-  tft.drawString(">", 10, 45 + (selection * 15), 1);
+  char raise_amount_char[30];
+  sprintf(raise_amount_char, "Raise amount:    %d", raise_amount);
+
+  tft.drawString(raise_amount_char, 10, 35, 2);
+
+  char min_raise_char[30];
+  sprintf(min_raise_char, "min raise: %d", min_raise);
+  char max_raise_char[30];
+  sprintf(max_raise_char, "max raise: %d", max_raise);
+  char all_in_char[30];
+  sprintf(all_in_char, "all in: %d", all_in);
+
+  tft.drawString(min_raise_char, 85, 60, 1);
+  tft.drawString(max_raise_char, 85, 75, 1);
+  tft.drawString(all_in_char, 85, 90, 1);
+
+  tft.drawLine(80, 60, 80, 130, TFT_ORANGE);
+
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+
+
+  tft.drawString("Increment", 10, 60, 1);
+  tft.drawString("Decrement", 10, 75, 1);
+  tft.drawString("All in", 10, 90, 1);
+  tft.drawString("Confirm raise", 10, 105, 1);
+  tft.drawString("Go back", 10, 120, 1);
+
+  tft.drawString(">", 2, 60 + (selection * 15), 1);
 
 }
 

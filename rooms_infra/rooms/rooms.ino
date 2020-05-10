@@ -81,7 +81,7 @@ int bet_params[10];
 int raise_params[10];
 int bet_amount;
 int bet_increment = 10;
-int raise_size;
+int raise_amount;
 int raise_increment = 10;
 
 
@@ -293,6 +293,30 @@ void update_bet_amount() {
     }
     else if (selection == 2) {
       bet_amount = all_in;
+    }
+  }
+
+}
+
+void update_raise_amount() {
+  int min_raise = raise_params[0];
+  int max_raise = raise_params[1];
+  int all_in = bet_params[2];
+
+  if (raise_amount == all_in && selection != 2) {
+    raise_amount = min_raise;
+  }
+  else {
+    if (selection == 0) {
+      // increment bet amount
+      raise_amount = min(raise_amount + raise_increment, max_raise);
+    }
+    else if (selection == 1) {
+      // decrement bet amount
+      raise_amount = max(raise_amount - raise_increment, min_raise);
+    }
+    else if (selection == 2) {
+      raise_amount = all_in;
     }
   }
 
@@ -684,9 +708,6 @@ void loop() {
         draw_poker_screen(poker_actions, selection);
       }
 
-      //state = POKER_GAME;
-
-
 
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
@@ -704,8 +725,8 @@ void loop() {
             state = POKER_RAISE;
           }
           else if (strcmp(action, "leave") == 0) {
-            flag = true;
-            state = MAIN_LOBBY;
+            //flag = true;
+            //state = MAIN_LOBBY;
           }
           else {
             //flag = true; // want to refresh actions page
@@ -762,6 +783,49 @@ void loop() {
       old_transition_btn = transition_btn;
 
       break;
+
+
+    case POKER_RAISE:
+
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+      }
+
+      if (flag) {
+        selection = 0;
+        no_of_selections = 5;
+        raise_amount = raise_params[0];
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        draw_poker_raise_screen(selection);
+      }
+
+      new_selection = update_selection(selection, no_of_selections);
+      if (new_selection != selection) {
+        Serial.println("new selection");
+        selection = new_selection;
+        draw_poker_raise_screen(selection);
+      }
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        // flag = true;
+        if (selection == 0 || selection == 1 || selection == 2) {
+          update_raise_amount();
+          draw_poker_raise_screen(selection);
+        }
+        else if (selection == 4) {
+          flag = true;
+          state = POKER_GAME;
+        }
+
+      }
+
+      old_transition_btn = transition_btn;
+
+      break;
+
 
 
   }
