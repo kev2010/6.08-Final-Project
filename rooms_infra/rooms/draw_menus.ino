@@ -18,13 +18,13 @@ void draw_leaderboard_screen(uint8_t selection) {
   token = strtok(leader, s);
   users = atoi(token);
   token = strtok(NULL, s);
-  Serial.println(users);  
-  
+  Serial.println(users);
+
   /* walk through other tokens */
   uint8_t cnt = 0;
   uint8_t i = 0;
 
-  while ( token != NULL and i < 2*users ) {
+  while ( token != NULL and i < 2 * users ) {
     char a[3] = "";
     sprintf(a, "%d.", cnt + 1);
     if (i % 2 == 0) {
@@ -105,7 +105,7 @@ void draw_join_lobby_menu(char* menu_choices, uint8_t selection) { // can only s
 
 }
 
-void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response buffer)
+void draw_room_screen(uint8_t selection) {
   char s[] = "@";
   char *token;
   uint8_t counter = 0;
@@ -113,15 +113,15 @@ void draw_room_screen(uint8_t selection) { // CHANGE ME !! (don't use response b
   memset(room_message, 0, strlen(room_message));
   Serial.println(response_buffer);
   sprintf(room_message, room_descr); // changed
-  
+
   /* get the first token, extract room_id of room hosted */
   token = strtok(room_message, "$");
   memset(room_id, 0, strlen(room_id));
   sprintf(room_id, token);
   /* walk through other tokens */
-  
+
   token = strtok(NULL, s);
-  
+
   while ( token != NULL ) {
     tft.drawString(token, 10, 50 + 15 * counter, 1);
     token = strtok(NULL, s);
@@ -145,8 +145,8 @@ void draw_push_up_screen(uint8_t selection) {
 
 void draw_poker_screen(char* poker_actions, uint8_t selection) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawString("POKER", 20, 10, 2);
-  tft.drawString("-----------------------", 0, 25, 2);
+  tft.drawString("POKER", 20, 5, 2);
+  tft.drawString("-----------------------", 0, 20, 2);
 
   char s[] = "@";
   char *token;
@@ -158,50 +158,66 @@ void draw_poker_screen(char* poker_actions, uint8_t selection) {
   token = strtok(actions_copy, s);
   /* walk through other tokens */
 
-  tft.drawString("refresh", 20, 45 + 15 * counter, 1);
+  tft.drawString("refresh", 20, 35 + 15 * counter, 1);
   counter ++ ;
 
   while ( token != NULL ) {
-    tft.drawString(token, 20, 45 + 15 * counter, 1);
+    tft.drawString(token, 20, 35 + 15 * counter, 1);
     counter ++ ;
     token = strtok(NULL, s);
   }
 
-  tft.drawString(">", 10, 45 + (selection * 15), 1);
+  tft.drawString(">", 10, 35 + (selection * 15), 1);
 
 }
 
 
-void draw_poker_bet_screen(char* poker_actions, uint8_t selection) {
+void draw_poker_bet_screen(uint8_t selection) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawString("POKER", 20, 10, 2);
-  tft.drawString("-----------------------", 0, 30, 2);
+  tft.drawString("CHOOSE BET AMOUNT", 10, 5, 2);
+  tft.drawString("-----------------------", 0, 20, 2);
 
-  char s[] = "@";
-  char *token;
-  uint8_t counter = 0;
-  char actions_copy[500]; // copy of menu_choices to draw menu correctly when updating selector ">"
-  memset(actions_copy, 0, strlen(actions_copy));
-  sprintf(actions_copy, poker_actions);
-  /* get the first token */
-  token = strtok(actions_copy, s);
-  /* walk through other tokens */
+  int min_bet = bet_params[0];
+  int max_bet = bet_params[1];
+  int all_in = bet_params[2];
 
-  while ( token != NULL ) {
-    tft.drawString(token, 20, 45 + 15 * counter, 1);
-    counter ++ ;
-    token = strtok(NULL, s);
-  }
-  tft.drawString("refresh", 20, 45 + 15 * counter, 1);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
 
-  tft.drawString(">", 10, 45 + (selection * 15), 1);
+  char bet_amount_char[30];
+  sprintf(bet_amount_char, "Bet amount:    %d", bet_amount);
+
+  tft.drawString(bet_amount_char, 10, 35, 2);
+
+  char min_bet_char[30];
+  sprintf(min_bet_char, "min bet: %d", min_bet);
+  char max_bet_char[30];
+  sprintf(max_bet_char, "max bet: %d", max_bet);
+  char all_in_char[30];
+  sprintf(all_in_char, "all in: %d", all_in);
+
+  tft.drawString(min_bet_char, 85, 60, 1);
+  tft.drawString(max_bet_char, 85, 75, 1);
+  tft.drawString(all_in_char, 85, 90, 1);
+
+  tft.drawLine(80, 60, 80, 130, TFT_ORANGE);
+
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+
+
+  tft.drawString("Increment", 10, 60, 1);
+  tft.drawString("Decrement", 10, 75, 1);
+  tft.drawString("All in", 10, 90, 1);
+  tft.drawString("Confirm bet", 10, 105, 1);
+  tft.drawString("Go back", 10, 120, 1);
+
+  tft.drawString(">", 2, 60 + (selection * 15), 1);
 
 }
 
 
 void draw_poker_raise_screen(char* poker_actions, uint8_t selection) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawString("POKER", 20, 10, 2);
+  tft.drawString("CHOOSE RAISE SIZE", 20, 10, 2);
   tft.drawString("-----------------------", 0, 30, 2);
 
   char s[] = "@";

@@ -97,13 +97,14 @@ void leave_room_post_req(char* user) { // changed
 }
 
 
-void get_poker_actions_req(char* user, char* room_id) {
-  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s&type=actions HTTP/1.1\r\n", user, room_id);
+void get_poker_actions_req(char* user, char* this_room_id) {
+  sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s&type=actions HTTP/1.1\r\n", user, this_room_id);
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
   strcat(request_buffer, "\r\n"); //add blank line!
   memset(actions_buffer, 0, strlen(actions_buffer));
-  do_http_request("608dev-2.net", request_buffer, actions_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
+  do_http_request("608dev-2.net", request_buffer, actions_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);  
   Serial.println(actions_buffer);
+  state = POKER_GAME;
 }
 
 void poker_actions_post_req(char* user, char* room_id) { // changed
@@ -125,7 +126,7 @@ void poker_actions_post_req(char* user, char* room_id) { // changed
 
 void handle_action_post_req(char* user, char* action, int amount, char* room_id) { // changed
   char body[1000]; //for body;
-  sprintf(body, "user=%s&action=%s&amount=%d&room_id=%s&type=make_action", user, action, amount, room_id);
+  sprintf(body, "user=%s&action=%s&amount=%d&room_id=%s", user, action, amount, room_id);
   int body_len = strlen(body); //calculate body length (for header reporting)
   sprintf(request_buffer, "POST http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py HTTP/1.1\r\n");
   strcat(request_buffer, "Host: 608dev-2.net\r\n");

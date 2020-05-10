@@ -30,6 +30,7 @@ char room_descr[OUT_BUFFER_SIZE];
 char menu_choices[OUT_BUFFER_SIZE];
 char all_room_ids[5000];
 char room_id[500]; // room_id to join
+char room_id_copy[100];
 char leaderboard [200];
 
 char host[] = "Host room";
@@ -75,8 +76,13 @@ char poker_actions[100];
 char action[50];
 uint32_t get_actions_timer;
 
-int raise_params[10];
+
 int bet_params[10];
+int raise_params[10];
+int bet_amount;
+int bet_increment = 10;
+int raise_size;
+int raise_increment = 10;
 
 
 void setup() {
@@ -256,7 +262,7 @@ void extract_selected_poker_action() {
   token = strtok(actions_copy, delimiter);
   /* walk through other tokens */
   while ( token != NULL ) {
-  
+
     if (counter == selection) {
       sprintf(action, token); // found action corresponding to selection
       Serial.println(action);
@@ -265,6 +271,31 @@ void extract_selected_poker_action() {
     token = strtok(NULL, delimiter);
     counter ++ ;
   }
+}
+
+
+void update_bet_amount() {
+  int min_bet = bet_params[0];
+  int max_bet = bet_params[1];
+  int all_in = bet_params[2];
+
+  if (bet_amount == all_in && selection != 2) {
+    bet_amount = min_bet;
+  }
+  else {
+    if (selection == 0) {
+      // increment bet amount
+      bet_amount = min(bet_amount + bet_increment, max_bet);
+    }
+    else if (selection == 1) {
+      // decrement bet amount
+      bet_amount = max(bet_amount - bet_increment, min_bet);
+    }
+    else if (selection == 2) {
+      bet_amount = all_in;
+    }
+  }
+
 }
 
 
@@ -433,16 +464,14 @@ void loop() {
           sprintf(room_descr, ptr);
           Serial.println(game_selection);
 
-
-
           state = ROOM;
 
         }
       }
       old_transition_btn = transition_btn;
 
-
       break;
+
 
     case ROOM:
       if (millis() - timer >= ping_period) {
@@ -463,7 +492,7 @@ void loop() {
         no_of_selections = 2; // CHANGE ME
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
-        draw_room_screen(selection);
+        draw_room_screen(selection); // also extracts room id for future use
       }
 
       new_selection = update_selection(selection, no_of_selections);
@@ -593,8 +622,22 @@ void loop() {
           handle_action_post_req(user, join, 0, room_id); // only time needed to hardcode action
         }
 
+        //        Serial.println("room_id before get");
+        //        Serial.println(room_id);
+
+        char room_id_copy[500];
+        memset(room_id_copy, 0, strlen(room_id_copy));
+        strcpy(room_id_copy, room_id);
+
         get_poker_actions_req(user, room_id);
-        //poker_actions_post_req(user, room_id);
+        //        Serial.println("room_id_copy after get");
+        //        Serial.println(room_id_copy);
+
+        memset(room_id, 0, strlen(room_id));
+        strcpy(room_id, room_id_copy);
+        //        Serial.println("room_id after get");
+        //        Serial.println(room_id);
+
         extract_poker_actions();
         draw_poker_screen(poker_actions, selection);
         //Serial.println(actions_buffer);
@@ -641,21 +684,82 @@ void loop() {
         draw_poker_screen(poker_actions, selection);
       }
 
+      //state = POKER_GAME;
+
+
+
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
         if (selection == 0) { // if user wants to refresh page
           flag = true;
         }
-        extract_selected_poker_action();
-        //extract_poker_action();
-        //handle_action_post_req(user, "start", 0); // cannot choose amount now, it's fixed (e.g. 50)
-        //draw_poker_actions(selection);
-        //state = ACTUAL_GAME;
+        else {
+          extract_selected_poker_action(); // fills action char array with selected action
+          if (strcmp(action, "bet") == 0) {
+            flag = true;
+            state = POKER_BET;
+          }
+          else if (strcmp(action, "raise") == 0) {
+            flag = true;
+            state = POKER_RAISE;
+          }
+          else if (strcmp(action, "leave") == 0) {
+            flag = true;
+            state = MAIN_LOBBY;
+          }
+          else {
+            //flag = true; // want to refresh actions page
+            //handle_action_post_req(user, action, 0, room_id);
+          }
+
+        }
       }
+
       old_transition_btn = transition_btn;
 
-      state = POKER_GAME;
+      //state = POKER_GAME;
 
+      break;
+
+
+    case POKER_BET:
+
+      if (millis() - timer >= ping_period) {
+        ping_online(user);
+        timer = millis();
+      }
+
+      if (flag) {
+        selection = 0;
+        no_of_selections = 5;
+        bet_amount = bet_params[0];
+        flag = false;
+        tft.fillScreen(TFT_BLACK); //fill background
+        draw_poker_bet_screen(selection);
+      }
+
+      new_selection = update_selection(selection, no_of_selections);
+      if (new_selection != selection) {
+        Serial.println("new selection");
+        selection = new_selection;
+        draw_poker_bet_screen(selection);
+      }
+
+      transition_btn = digitalRead(PIN_2);
+      if (transition_btn != old_transition_btn && transition_btn == 1) {
+        // flag = true;
+        if (selection == 0 || selection == 1 || selection == 2) {
+          update_bet_amount();
+          draw_poker_bet_screen(selection);
+        }
+        else if (selection == 4) {
+          flag = true;
+          state = POKER_GAME;
+        }
+
+      }
+
+      old_transition_btn = transition_btn;
 
       break;
 
