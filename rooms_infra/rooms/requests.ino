@@ -101,8 +101,9 @@ void get_poker_actions_req(char* user, char* room_id) {
   sprintf(request_buffer, "GET http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?user=%s&room_id=%s&type=actions HTTP/1.1\r\n", user, room_id);
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
   strcat(request_buffer, "\r\n"); //add blank line!
+  memset(actions_buffer, 0, strlen(actions_buffer));
   do_http_request("608dev-2.net", request_buffer, actions_buffer, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, true);
-  state = POKER_GAME;
+  //state = POKER_GAME;
 }
 
 void handle_action_post_req(char* user, char* action, int amount, char* room_id) { // changed

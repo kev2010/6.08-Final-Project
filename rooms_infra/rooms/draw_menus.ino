@@ -165,7 +165,7 @@ void draw_poker_screen(char* poker_actions, uint8_t selection) {
   char s[] = "@";
   char *token;
   uint8_t counter = 0;
-  char actions_copy[OUT_BUFFER_SIZE]; // copy of menu_choices to draw menu correctly when updating selector ">"
+  char actions_copy[500]; // copy of menu_choices to draw menu correctly when updating selector ">"
   memset(actions_copy, 0, strlen(actions_copy));
   sprintf(actions_copy, poker_actions);
   /* get the first token */

@@ -72,10 +72,10 @@ char actions_buffer[1000];
 char previous_actions_buffer[1000];
 char poker_actions[100];
 char action[50];
-uint8_t get_actions_timer;
+uint32_t get_actions_timer;
 
-uint8_t raise_params[3];
-uint8_t bet_params[3];
+int raise_params[10];
+int bet_params[10];
 
 
 void setup() {
@@ -183,42 +183,6 @@ void extract_room_id() {
   }
 }
 
-void extract_raise_params(char* pointer) {
-  char s[] = ",";
-  char *token;
-  uint8_t indx = 0;
-  /* get the first token */
-  token = strtok(pointer, s);
-  /* walk through other tokens */
-  token = strtok(NULL, s);
-
-  while ( token != NULL ) {
-    raise_params[indx] = atoi(token);
-    token = strtok(NULL, s);
-    indx ++ ;
-  }
-}
-
-void extract_bet_params(char* pointer) {
-  char s[] = ",";
-  char *token;
-  uint8_t indx = 0;
-  /* get the first token */
-  token = strtok(pointer, s);
-  Serial.println("start printing tokens");
-  Serial.println(token);
-  /* walk through other tokens */
-  token = strtok(NULL, s);
-
-  while ( token != NULL ) {
-    Serial.println(token);
-    bet_params[indx] = atoi(token);
-    Serial.println(bet_params[indx]);
-    token = strtok(NULL, s);
-    indx ++ ;
-  }
-  Serial.println("finish printing tokens");
-}
 
 void extract_poker_actions() {
   char delimiter[] = "@";
@@ -247,27 +211,23 @@ void extract_poker_actions() {
     if (strcmp(act1, "raise") == 0) {
       strcat(poker_actions, "raise@");
 
-      char ptr_cp[100];
-      strcpy(ptr_cp, ptr);
-      extract_raise_params(ptr_cp);
+      ptr = strtok(NULL, delimiter);
+      raise_params[0] = atoi(ptr);
+      ptr = strtok(NULL, delimiter);
+      raise_params[1] = atoi(ptr);
+      ptr = strtok(NULL, delimiter);
+      raise_params[2] = atoi(ptr);
     }
 
     else if (strcmp(act2, "bet") == 0) {
       strcat(poker_actions, "bet@");
 
       ptr = strtok(NULL, delimiter);
-      ptr = strtok(NULL, delimiter);
       bet_params[0] = atoi(ptr);
       ptr = strtok(NULL, delimiter);
       bet_params[1] = atoi(ptr);
       ptr = strtok(NULL, delimiter);
       bet_params[2] = atoi(ptr);
-
-
-
-      //      char ptr_cp[100];
-      //      strcpy(ptr_cp, ptr);
-      //      extract_bet_params(ptr_cp);
     }
 
     else {
@@ -276,23 +236,9 @@ void extract_poker_actions() {
       strcat(poker_actions, temp);
     }
 
-    Serial.println("start printing ptr");
-    Serial.println(ptr);
-
     ptr = strtok(NULL, delimiter);
-
-    Serial.println(ptr);
-
-    Serial.println("stopped printing ptr");
   }
-  Serial.println("printing actions");
-  Serial.println(poker_actions);
-  //  Serial.println(previous_actions_buffer);
-  //  Serial.println(actions_buffer);
-  Serial.println(bet_params[0]);
-  Serial.println(bet_params[1]);
-  Serial.println(bet_params[2]);
-  Serial.println("printing finished");
+
 }
 
 void extract_poker_action() {
@@ -471,13 +417,6 @@ void loop() {
         else {
           extract_room_id();
           join_room_post_req(user, room_id);
-          //          memset(room_descr, 0, strlen(room_descr));
-          //          char delimiter[] = "$";
-          //          char *token;
-          //          char temp[5];
-          //          sprintf(temp, strtok(response_buffer, delimiter));
-          //          game_selection = atoi(temp);
-          //          sprintf(room_descr, strtok(NULL, delimiter));
 
           char delimiter[] = "$";
           char* ptr;
@@ -656,28 +595,31 @@ void loop() {
         strcpy(previous_actions_buffer, actions_buffer);
       }
 
-      //      if (millis() - get_actions_timer > 10000) {
-      //        get_poker_actions_req(user, room_id);
-      //        get_actions_timer = millis();
-      //        //state = POKER_GAME;
-      //
-      //        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
-      //
-      //          Serial.println("different actions");
-      //
-      //          extract_poker_actions(); // only now are actions_buffer updated
-      //          //get_actions_timer = millis();
-      //
-      //          selection = 0;
-      //
-      //          // if there is any game update (new actions), draw game screen again, otherwise do nothing
-      //          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
-      //          // set previous actions <- current actions when updating
-      //          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-      //          strcpy(previous_actions_buffer, actions_buffer);
-      //        }
-      //        Serial.println("about to exit if statement..");
-      //      }
+      if (millis() - get_actions_timer > 5000) {
+        get_poker_actions_req(user, room_id);
+        get_actions_timer = millis();
+        //state = POKER_GAME;
+
+        Serial.println(strlen(actions_buffer));
+        Serial.println(get_actions_timer);
+
+        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+
+          Serial.println("different actions");
+
+          extract_poker_actions(); // only now are actions_buffer updated
+          //get_actions_timer = millis();
+
+          selection = 0;
+
+          // if there is any game update (new actions), draw game screen again, otherwise do nothing
+          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
+          // set previous actions <- current actions when updating
+          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+          strcpy(previous_actions_buffer, actions_buffer);
+        }
+        Serial.println("about to exit if statement..");
+      }
 
 
       new_selection = update_selection(selection, no_of_selections);
@@ -697,7 +639,7 @@ void loop() {
       }
       old_transition_btn = transition_btn;
 
-      //state = POKER_GAME;
+      state = POKER_GAME;
 
 
       break;
