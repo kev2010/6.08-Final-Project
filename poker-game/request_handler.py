@@ -232,6 +232,8 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("raise@" + str(min_raise) + "@" + str(max_raise) + "@" + str(all_in))
         if is_fold_legal(users, game_state, user):
             possible_actions.append("fold")
+    else:
+      raise ValueError
         
         possible_actions.append("leave")
         
