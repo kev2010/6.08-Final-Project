@@ -226,7 +226,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
         
         possible_actions.append("leave")
         
-    return "4$start@bet,100,200,300,@leave@call"
+    return "4$start@bet@100@200@300@leave@call"
 
     #return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
 

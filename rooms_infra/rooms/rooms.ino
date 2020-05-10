@@ -255,12 +255,19 @@ void extract_poker_actions() {
     else if (strcmp(act2, "bet") == 0) {
       strcat(poker_actions, "bet@");
 
-      char ptr_cp[100];
-      strcpy(ptr_cp, ptr);
-      Serial.println("printing bet and 3 numbers");
-      Serial.println(ptr_cp);
-      Serial.println("ended printing bet and 3 numbers");
-      extract_bet_params(ptr_cp);
+      ptr = strtok(NULL, delimiter);
+      ptr = strtok(NULL, delimiter);
+      bet_params[0] = atoi(ptr);
+      ptr = strtok(NULL, delimiter);
+      bet_params[1] = atoi(ptr);
+      ptr = strtok(NULL, delimiter);
+      bet_params[2] = atoi(ptr);
+
+
+
+      //      char ptr_cp[100];
+      //      strcpy(ptr_cp, ptr);
+      //      extract_bet_params(ptr_cp);
     }
 
     else {
@@ -273,6 +280,8 @@ void extract_poker_actions() {
     Serial.println(ptr);
 
     ptr = strtok(NULL, delimiter);
+
+    Serial.println(ptr);
 
     Serial.println("stopped printing ptr");
   }
