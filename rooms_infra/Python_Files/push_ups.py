@@ -27,7 +27,7 @@ def request_handler(request):
         else:
             current_score = result[0][2]
             if score > current_score:
-                c.execute('''UPDATE push_ups SET score = ? WHERE username = ?;''', (score, username))
+                c.execute('''UPDATE push_ups SET score = ? WHERE username = ? AND room_id = ?;''', (score, username, roomid))
 
             conn.commit()  # commit commands
             conn.close()  # close connection to database
@@ -39,6 +39,8 @@ def request_handler(request):
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
+
+
 
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
         if len(result) == 0:
