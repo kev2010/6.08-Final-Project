@@ -177,11 +177,7 @@ void draw_poker_screen(char* poker_actions, uint8_t selection) {
     counter ++ ;
     token = strtok(NULL, s);
   }
-
-  Serial.println("no_of_selections");
-  Serial.println(no_of_selections);
-  Serial.println("selection");
-  Serial.println(selection);
+  tft.drawString("refresh", 20, 45 + 15 * counter, 1);
 
   tft.drawString(">", 10, 45 + (selection * 15), 1);
 

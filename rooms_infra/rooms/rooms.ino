@@ -57,6 +57,7 @@ uint8_t new_selection;
 uint8_t selection;
 uint8_t no_of_selections;
 boolean flag = true;
+boolean flag2 = true;
 uint8_t game_selection;
 
 uint8_t selection_btn;
@@ -139,7 +140,7 @@ uint8_t update_selection(uint8_t selection, uint8_t no_of_selections) {
   selection_btn = digitalRead(PIN_1);
   if (selection_btn != old_selection_btn && selection_btn == 1) {
     tft.fillScreen(TFT_BLACK); //fill background
-//    tft.setCursor(0, 0, 1); // set the cursor
+    //    tft.setCursor(0, 0, 1); // set the cursor
     selection  = (selection + 1) % no_of_selections;
   }
   old_selection_btn = selection_btn;
@@ -194,7 +195,7 @@ void extract_poker_actions() {
   strcpy(actions_buffer_copy, actions_buffer);
 
   ptr = strtok(actions_buffer_copy, "$");
-  no_of_selections = atoi(ptr); // update numbers of selections
+  no_of_selections = atoi(ptr) + 1; // update numbers of selections, adds 1 for page refresh option
 
   ptr = strtok(NULL, delimiter);
 
@@ -242,15 +243,17 @@ void extract_poker_actions() {
 
 }
 
-void extract_poker_action() {
+
+void extract_selected_poker_action() {
   char delimiter[] = "@";
   char *token;
-  uint8_t counter = 1;
-  char actions_buffer_copy[1000]; // copy of actions_buffer
+  uint8_t counter = 0;
+  char actions_copy[1000]; // copy of actions_buffer
   memset(action, 0, strlen(action));
-  sprintf(actions_buffer_copy, actions_buffer);
+  memset(actions_copy, 0, strlen(actions_copy));
+  sprintf(actions_copy, poker_actions);
   /* get the first token */
-  token = strtok(actions_buffer_copy, delimiter);
+  token = strtok(actions_copy, delimiter);
   /* walk through other tokens */
   while ( token != NULL ) {
     if (counter == selection) {
@@ -584,9 +587,13 @@ void loop() {
         tft.fillScreen(TFT_BLACK); //fill background
         char join[] = "join";
 
-        handle_action_post_req(user, join, 0, room_id); // only time needed to hardcode action
-        //get_poker_actions_req(user, room_id);
-        poker_actions_post_req(user, room_id);
+        if (flag2) {
+          flag2 = false;
+          handle_action_post_req(user, join, 0, room_id); // only time needed to hardcode action
+        }
+
+        get_poker_actions_req(user, room_id);
+        //poker_actions_post_req(user, room_id);
         extract_poker_actions();
         draw_poker_screen(poker_actions, selection);
         //Serial.println(actions_buffer);
@@ -597,32 +604,32 @@ void loop() {
         strcpy(previous_actions_buffer, actions_buffer);
       }
 
-      if (millis() - get_actions_timer >= 5000) {
-        //get_poker_actions_req(user, room_id);
-        poker_actions_post_req(user, room_id);
-        get_actions_timer = millis();
-        //state = POKER_GAME;
-
-        Serial.println(strlen(actions_buffer));
-        Serial.println(get_actions_timer);
-
-        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
-
-          Serial.println("different actions");
-
-          extract_poker_actions(); // only now are actions_buffer updated
-          //get_actions_timer = millis();
-
-          selection = 0;
-
-          // if there is any game update (new actions), draw game screen again, otherwise do nothing
-          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
-          // set previous actions <- current actions when updating
-          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-          strcpy(previous_actions_buffer, actions_buffer);
-        }
-        Serial.println("about to exit if statement..");
-      }
+      //      if (millis() - get_actions_timer >= 5000) {
+      //        get_poker_actions_req(user, room_id);
+      //        //poker_actions_post_req(user, room_id);
+      //        get_actions_timer = millis();
+      //        //state = POKER_GAME;
+      //
+      //        Serial.println(strlen(actions_buffer));
+      //        Serial.println(get_actions_timer);
+      //
+      //        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+      //
+      //          Serial.println("different actions");
+      //
+      //          extract_poker_actions(); // only now are actions_buffer updated
+      //          //get_actions_timer = millis();
+      //
+      //          selection = 0;
+      //
+      //          // if there is any game update (new actions), draw game screen again, otherwise do nothing
+      //          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
+      //          // set previous actions <- current actions when updating
+      //          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+      //          strcpy(previous_actions_buffer, actions_buffer);
+      //        }
+      //        Serial.println("about to exit if statement..");
+      //      }
 
 
       //Serial.println("checking for new selection..");
@@ -635,7 +642,10 @@ void loop() {
 
       transition_btn = digitalRead(PIN_2);
       if (transition_btn != old_transition_btn && transition_btn == 1) {
-        flag = true;
+        if (selection == no_of_selections - 1) { // if user wants to refresh page
+          flag = true;
+        }
+        extract_selected_poker_action();
         //extract_poker_action();
         //handle_action_post_req(user, "start", 0); // cannot choose amount now, it's fixed (e.g. 50)
         //draw_poker_actions(selection);
