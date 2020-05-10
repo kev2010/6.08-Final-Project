@@ -150,12 +150,11 @@ def request_handler(request):
         elif get_type == "spectate":
             game_state = get_spectate_handler(request, c_player, c_state, c_frame)
     elif request['method'] == 'POST':
+        game_state = post_handler(request, c_player, c_state, c_frame)
         
-        if request["form"]["type"] == "get_actions":
-            game_state = get_actions_handler(request, c_player, c_state, c_frame)
-        elif request["form"]["type"] == "make_action":
-            
-            game_state = post_handler(request, c_player, c_state, c_frame)
+#    if request["form"]["type"] == "get_actions":
+#        game_state = get_actions_handler(request, c_player, c_state, c_frame)
+#    elif request["form"]["type"] == "make_action":
 
     conn_players.commit()
     conn_players.close()
@@ -192,11 +191,13 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
         specifications for "is_bet_legal()" and "is_raise_legal()" to
         see how and why parameters are returned.
     """
-#    user = request["values"]["user"]
-#    room_id = request["values"]["room_id"]
+    user = request["values"]["user"]
+    room_id = request["values"]["room_id"]
     
-    user = request["form"]["user"]
-    room_id = request["form"]["room_id"]
+#    user = request["form"]["user"]
+#    room_id = request["form"]["room_id"]
+    
+    ## CHANGED , then reset
 
     users_query = '''SELECT * FROM players_table 
                      WHERE room_id = ? 

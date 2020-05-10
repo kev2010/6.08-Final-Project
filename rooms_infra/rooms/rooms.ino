@@ -597,31 +597,32 @@ void loop() {
         strcpy(previous_actions_buffer, actions_buffer);
       }
 
-//      if (millis() - get_actions_timer >= 5000) {
-//        get_poker_actions_req(user, room_id);
-//        get_actions_timer = millis();
-//        //state = POKER_GAME;
-//
-//        Serial.println(strlen(actions_buffer));
-//        Serial.println(get_actions_timer);
-//
-//        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
-//
-//          Serial.println("different actions");
-//
-//          extract_poker_actions(); // only now are actions_buffer updated
-//          //get_actions_timer = millis();
-//
-//          selection = 0;
-//
-//          // if there is any game update (new actions), draw game screen again, otherwise do nothing
-//          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
-//          // set previous actions <- current actions when updating
-//          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
-//          strcpy(previous_actions_buffer, actions_buffer);
-//        }
-//        Serial.println("about to exit if statement..");
-//      }
+      if (millis() - get_actions_timer >= 5000) {
+        //get_poker_actions_req(user, room_id);
+        poker_actions_post_req(user, room_id);
+        get_actions_timer = millis();
+        //state = POKER_GAME;
+
+        Serial.println(strlen(actions_buffer));
+        Serial.println(get_actions_timer);
+
+        if (strcmp(previous_actions_buffer, actions_buffer) != 0) {
+
+          Serial.println("different actions");
+
+          extract_poker_actions(); // only now are actions_buffer updated
+          //get_actions_timer = millis();
+
+          selection = 0;
+
+          // if there is any game update (new actions), draw game screen again, otherwise do nothing
+          draw_poker_screen(poker_actions, selection); // may need to reset selection (?)
+          // set previous actions <- current actions when updating
+          memset(previous_actions_buffer, 0, strlen(previous_actions_buffer));
+          strcpy(previous_actions_buffer, actions_buffer);
+        }
+        Serial.println("about to exit if statement..");
+      }
 
 
       //Serial.println("checking for new selection..");
