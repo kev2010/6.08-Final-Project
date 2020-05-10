@@ -39,6 +39,8 @@ def request_handler(request):
         # c.execute('''DELETE FROM rooms''')
         # c.execute('''DELETE FROM games''')
         # c.execute('''DELETE FROM users''')
+        # c.execute('''DELETE FROM push_ups''')
+
         # conn.commit()
         # conn.close()
         # return "ok"

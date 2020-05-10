@@ -34,7 +34,7 @@ def join_game(players_cursor, states_cursor, user, room_id):
     joined = players_cursor.execute(joined_query, (user, room_id)).fetchall()
     if len(joined) > 0:
         #   TODO: Return proper message for already in game
-         raise ValueError
+         raise KeyError
 
     #   Check if the game is already full
     players_query = '''SELECT * FROM players_table WHERE room_id = ?;'''
@@ -69,6 +69,7 @@ def start_game(players_cursor, states_cursor, user, room_id):
     users = players_cursor.execute(users_query, (room_id,)).fetchall()
     if users[0][USERNAME] == user:
         #   Insert a game state entry into the states_table
+        
         deck = ",".join(cards)
         board = ""
         dealer = random.randint(0, len(users) - 1)
@@ -79,9 +80,9 @@ def start_game(players_cursor, states_cursor, user, room_id):
                     VALUES (?,?,?,?,?,?);'''
         states_cursor.execute(new_state, (deck, board, dealer, action, pot, room_id))
         start_new_hand(players_cursor, states_cursor, dealer, user, room_id)
+        
     else:
         raise ValueError
-
 
 def leave_game(players_cursor, states_cursor, user, room_id):
     """
