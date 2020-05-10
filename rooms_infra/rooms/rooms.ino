@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "Giannis";
+char user[] = "john";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -476,7 +476,21 @@ void loop() {
         // make POST request when joining room
         else {
           extract_room_id();
+          Serial.println("room id to join:");
+          Serial.println(room_id);
+
+          char room_id_copy[500];
+          memset(room_id_copy, 0, strlen(room_id_copy));
+          strcpy(room_id_copy, room_id);
+
           join_room_post_req(user, room_id);
+
+          memset(room_id, 0, strlen(room_id));
+          strcpy(room_id, room_id_copy);
+
+          Serial.println("room id after post:");
+          Serial.println(room_id);
+
 
           char delimiter[] = "$";
           char* ptr;
@@ -489,6 +503,12 @@ void loop() {
           Serial.println(game_selection);
 
           state = ROOM;
+
+
+          Serial.println("room id after parsing:");
+          Serial.println(room_id);
+
+
 
         }
       }
@@ -511,12 +531,17 @@ void loop() {
         }
       }
 
+      Serial.println("room id inside room before flag:");
+      Serial.println(room_id);
+
       if (flag) {
         selection = 0;
         no_of_selections = 2; // CHANGE ME
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
         draw_room_screen(selection); // also extracts room id for future use
+        Serial.println("room id inside room after flag:");
+        Serial.println(room_id);
       }
 
       new_selection = update_selection(selection, no_of_selections);
