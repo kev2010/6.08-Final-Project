@@ -247,7 +247,7 @@ void extract_poker_actions() {
 void extract_selected_poker_action() {
   char delimiter[] = "@";
   char *token;
-  uint8_t counter = 0;
+  uint8_t counter = 1; // don't count first action, which is just refreshing the page
   char actions_copy[1000]; // copy of actions_buffer
   memset(action, 0, strlen(action));
   memset(actions_copy, 0, strlen(actions_copy));
