@@ -215,7 +215,6 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
 
     possible_actions = []
     if len(game_state) == 0:  #  game hasn't started yet
-        possible_actions = ["leave"]
         if users[0][USERNAME] == user:
             possible_actions.append("start")
     elif len(frames) == 1:  #  all frames are done processing

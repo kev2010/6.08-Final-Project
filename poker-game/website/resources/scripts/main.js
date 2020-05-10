@@ -1,3 +1,5 @@
+import { getCookie } from './cookies.js';
+
 const suitHTML = {
     "s": "&spades;",
     "h": "&hearts;",
@@ -10,11 +12,12 @@ var roomID = '';
 document.getElementById('room-id').onsubmit = function() { 
     roomID = document.getElementById('room').value;
     return false;
-};
+}
 
 const display = () => {
     let xhttp = new XMLHttpRequest();
-    var params = "type=spectate&room_id=" + roomID;
+    let user = getUser();
+    var params = `user=${user}&type=spectate&room_id=${roomID}`;
     console.log(roomID);
     //  URL for PokerAPI
     let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py";
@@ -61,6 +64,10 @@ const display = () => {
 
     xhttp.open("GET", url+"?"+params, true);
     xhttp.send(null);
+}
+
+const getUser = () => {
+    return getCookie("user");
 }
 
 const displayBoard = (gameState) => {

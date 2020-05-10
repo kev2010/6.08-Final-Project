@@ -19,6 +19,7 @@ def display_game(players_cursor, states_cursor, user, room_id):
 
         {
             "state": {
+                "deck": "Jh,8s,..."
                 "board": "Ah,7d,2s",
                 "dealer": 3,
                 "action": 1,
@@ -40,7 +41,7 @@ def display_game(players_cursor, states_cursor, user, room_id):
                     "bal": 950,
                     "bet": 50,
                     "invested": 50,
-                    "cards": "",
+                    "cards": "Ts,Td",
                     "position": 1,
                     "room_id": "123"
                 },
