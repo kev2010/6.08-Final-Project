@@ -272,7 +272,7 @@ def fold(players_cursor, states_cursor, user, room_id):
                              room_id = ?'''
     players_cursor.execute(update_cards, ('', user, room_id))
 
-    users_playing_query = '''SELECT * FROM players_table WHERE cards != ? AND  room_id = ?;'''
+    users_playing_query = '''SELECT * FROM players_table WHERE cards != ? AND room_id = ?;'''
     users_playing = players_cursor.execute(users_playing_query, ('', room_id)).fetchall()
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
