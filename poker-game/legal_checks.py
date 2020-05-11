@@ -105,7 +105,7 @@ def is_bet_legal(players, game_state, user):
     if bets:
         return (False, 0, 0, 0)
     else:
-        player = [p for p in players if p[USERNAME] == user]
+        player = [p for p in players if p[USERNAME] == user][0]
         return (True, 
                 BIG_BLIND, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
