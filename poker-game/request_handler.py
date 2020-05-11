@@ -328,13 +328,21 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
     #   Hide the deck and other player cards
     to_display = relevant_frames[0][STATE]
     data = json.loads(to_display)
-    return data
-    del data["state"]["deck"]
+    del data["state"][0]["deck"]
     for p in data["players"]:
         if p["user"] != request["values"]["user"]:
             p["cards"] = ""
     
     to_display = json.dumps(data)
+
+    """
+    {'state': [{'deck':
+'3d,3c,5d,9d,8h,4h,Ad,2d,6h,2c,9c,9s,Jh,Jc,5s,4s,Ac,Qd,Js,6d,8c,4d,7d,Jd,Ks,Td,6c,Kc,Qh,Kh,Kd,6s,Qs,Ah,7s,4c,7h,Ts,2h,8d,Qc,2s,8s,Th,5c,9h',
+'board': '', 'dealer': 2, 'action': 0, 'pot': 1075, 'room_id': '123'}], 'players': [{'user': 'kev2010', 'bal': 975,
+'bet': 25, 'invested': 25, 'cards': '3h,7c', 'position': 0, 'room_id': '123'}, {'user': 'jasonllu', 'bal': 950, 'bet':
+50, 'invested': 50, 'cards': '3s,5h', 'position': 1, 'room_id': '123'}, {'user': 'baptiste', 'bal': 0, 'bet': 1000,
+'invested': 1000, 'cards': 'Tc,As', 'position': 2, 'room_id': '123'}]}
+    """
 
     return to_display
     # return all_frames[0][STATE]
