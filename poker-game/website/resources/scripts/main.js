@@ -40,7 +40,7 @@ const display = () => {
                     var elt = document.getElementById("seat" + (i+1));
                     var cards = '';
                     if (players[i].cards === 'hidden') {
-                        cards = ['?s', '?s'];
+                        cards = ['  ', '  '];
                     } else if (players[i].cards === '') {
                         cards = "Folded";
                     } else {
@@ -138,9 +138,12 @@ const displayHoleCards = (cards) => {
         if (suit === 's' || suit === 'c') {
             suitHTML = (suit === 's') ? "&spades;" : "&clubs;";
             color = "black";
-        } else {
+        } else if (suit === 'h' || suit === 'd') {
             suitHTML = (suit === 'h') ? "&hearts;" : "&diams;";
             color = "red";
+        } else {
+            suitHTML = "";
+            color = "black";
         }
         result += `
         <div class="card-small" id="flop2">
