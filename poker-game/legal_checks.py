@@ -156,7 +156,7 @@ def is_raise_legal(players, game_state, user):
         delta = max_bet - second_max_bet
         player = [p for p in players if p[USERNAME] == user]
         min_raise = max_bet + (delta if delta > BIG_BLIND else BIG_BLIND)
-        return (player, p[USERNAME], user, players)
+        return (player, user, players)
         # return (True, 
         #         min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
