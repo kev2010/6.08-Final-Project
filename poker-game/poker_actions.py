@@ -260,7 +260,7 @@ def fold(players_cursor, states_cursor, user, room_id):
         room_id (str): the id for the room user is in
     """
     players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query, room_id).fetchall()
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
     user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
