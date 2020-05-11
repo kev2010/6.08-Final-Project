@@ -115,8 +115,12 @@ void draw_room_screen(uint8_t selection) {
   sprintf(room_message, room_descr); // changed
 
   /* get the first token, extract room_id of room hosted */
-  token = strtok(room_message, s);
+  memset(room_id, 0, strlen(room_id));
+  token = strtok(room_message, "$");
+  sprintf(room_id, token);
   /* walk through other tokens */
+
+  token = strtok(NULL, s);
 
   while ( token != NULL ) {
     tft.drawString(token, 10, 50 + 15 * counter, 1);

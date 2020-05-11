@@ -1,4 +1,4 @@
-t #include <WiFi.h> //Connect to WiFi Network
+#include <WiFi.h> //Connect to WiFi Network
 #include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
 #include <SPI.h> //Used in support of TFT Display
 #include <mpu6050_esp32.h>
@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "dude";
+char user[] = "Jerry";
 
 char user2[] = "petros";
 char user3[] = "christos";
