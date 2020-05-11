@@ -382,7 +382,7 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
     elif action == "start" or action[0:5] == "start":
         start_game(players_cursor, states_cursor, user, room_id)
         
-    elif action == "leave":
+    elif action == "leave" or action[0:5] == "leave":
         leave_game(players_cursor, states_cursor, user, room_id)
     elif action == "check":
         check(players_cursor, states_cursor, user, room_id)
