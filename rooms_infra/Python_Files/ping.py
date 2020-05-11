@@ -36,9 +36,6 @@ def request_handler(request):
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
-        c.execute(
-            '''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp, password_text);''')
-
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
         # c.execute('''DROP TABLE users''')
@@ -65,7 +62,7 @@ def request_handler(request):
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
 
-        return check_online()
+        check_online()
 
         c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
         conn.commit()
@@ -97,7 +94,6 @@ def check_online():
     conn.commit()  # commit commands
     conn.close()  # close connection to database
     to_leave = []
-    return result
     for r in result:
         gone_offline(r[0], r[1], r[2])
         to_leave.append(r[0])
