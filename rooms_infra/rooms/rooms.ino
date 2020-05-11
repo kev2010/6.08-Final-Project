@@ -10,7 +10,8 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "Jerry";
+char user[] = "GiannisK";
+char pswd[] = "Kaklamanis";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -135,7 +136,7 @@ void setup() {
   get_actions_timer = millis();
 
 
-  // ping_online(user); // will use same function to post online status every 10 seconds
+  // ping_online(user, pswd); // will use same function to post online status every 10 seconds
 
   state = LOGIN_PAGE;
   flag = true;
@@ -364,7 +365,7 @@ void loop() {
         flag = true;
         // selection = 0: login and ping online
         if (selection == 0) {
-          ping_online(user);
+          ping_online(user, pswd);
           timer = millis();
           state = MAIN_LOBBY;
 
@@ -379,7 +380,7 @@ void loop() {
 
     case MAIN_LOBBY:
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -414,7 +415,7 @@ void loop() {
 
     case HOST_LOBBY:
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -447,7 +448,7 @@ void loop() {
 
     case JOIN_LOBBY:
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -509,7 +510,7 @@ void loop() {
 
     case ROOM:
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
         // check if server returns "1" (everything ok) or "-1" (need to leave the room, if inside one)
         if (strcmp(response_buffer, "-1\n") == 0) { // SOS: needs the "\n" extension, o/w it doesn't work
@@ -556,7 +557,7 @@ void loop() {
 
     case PUSH_UP_GAME:
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -622,7 +623,7 @@ void loop() {
       break;
     case RECORD:
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -642,7 +643,7 @@ void loop() {
     case POKER_GAME:
 
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -758,7 +759,7 @@ void loop() {
     case POKER_BET:
 
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 
@@ -805,7 +806,7 @@ void loop() {
     case POKER_RAISE:
 
       if (millis() - timer >= ping_period) {
-        ping_online(user);
+        ping_online(user, pswd);
         timer = millis();
       }
 

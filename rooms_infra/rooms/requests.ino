@@ -1,6 +1,6 @@
-void ping_online(char* user) {
+void ping_online(char* user, char* pswd) {
   char body[200]; //for body;
-  sprintf(body, "username=%s", user); //generate body, posting to User, 1 step
+  sprintf(body, "username=%s&password=%s", user, pswd); //generate body, posting to User, 1 step
   int body_len = strlen(body); //calculate body length (for header reporting)
   sprintf(request_buffer, "POST http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/ping.py HTTP/1.1\r\n");
   strcat(request_buffer, "Host: 608dev-2.net\r\n");
