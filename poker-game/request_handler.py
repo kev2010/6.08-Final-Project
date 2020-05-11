@@ -327,7 +327,7 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
     
     #   Hide the deck and other player cards
     to_display = relevant_frames[0][STATE]
-    data = json.load(to_display)
+    data = json.loads(to_display)
     del data["state"]["deck"]
     for p in data["players"]:
         if p["user"] != request["values"]["user"]:
