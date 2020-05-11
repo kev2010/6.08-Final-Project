@@ -11,7 +11,6 @@ def request_handler(request):
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         result = c.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchall()
-        return result
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
