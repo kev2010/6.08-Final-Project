@@ -36,14 +36,17 @@ def request_handler(request):
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
+        c.execute(
+            '''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp, password_text);''')
+
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
-        c.execute('''DROP TABLE users''')
+        # c.execute('''DROP TABLE users''')
 
-        c.execute('''DELETE FROM rooms''')
-        c.execute('''DELETE FROM games''')
+        # c.execute('''DELETE FROM rooms''')
+        # c.execute('''DELETE FROM games''')
         # c.execute('''DELETE FROM users''')
-        c.execute('''DELETE FROM push_ups''')
+        # c.execute('''DELETE FROM push_ups''')
 
         # conn.commit()
         # conn.close()
