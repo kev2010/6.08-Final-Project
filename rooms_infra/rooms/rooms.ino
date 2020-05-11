@@ -1,4 +1,4 @@
-#include <WiFi.h> //Connect to WiFi Network
+t #include <WiFi.h> //Connect to WiFi Network
 #include <TFT_eSPI.h> // Graphics and font library for ST7735 driver chip
 #include <SPI.h> //Used in support of TFT Display
 #include <mpu6050_esp32.h>
