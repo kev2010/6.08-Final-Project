@@ -90,7 +90,7 @@ def check_online():
     conn.commit()  # commit commands
     conn.close()  # close connection to database
     to_leave = []
-
+    return result
     for r in result:
         gone_offline(r[0], r[1], r[2])
         to_leave.append(r[0])
