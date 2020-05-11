@@ -234,16 +234,10 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("fold")
         
         possible_actions.append("leave")
-<<<<<<< HEAD
-    else:
-        raise ValueError
-        
-=======
        
     else:
         return "Frames have length " + str(len(frames)) + " which is not 1"
- 
->>>>>>> edcf4eaee6b03433a87c6e3c3b17e30871e22433
+
     #return "5$start@bet@100@200@400@leave@fold@raise@50@150@500"
 
     return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
