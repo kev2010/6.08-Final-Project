@@ -304,7 +304,7 @@ def fold(players_cursor, states_cursor, user, room_id):
                 update_action = ''' UPDATE states_table
                                     SET action = ?
                                     WHERE room_id = ?'''
-                states_cursor.execute(update_action, (position,))
+                states_cursor.execute(update_action, (position, room_id))
                 found = True
                 FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
                 break
