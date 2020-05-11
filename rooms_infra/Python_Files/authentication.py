@@ -15,7 +15,7 @@ def request_handler(request):
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
-        if len(result) == 0:
-            return 0
-        else:
+        if len(result)>0 and result[0][4] == password:
             return 1
+
+        return 0
