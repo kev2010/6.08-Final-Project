@@ -31,15 +31,19 @@ def request_handler(request):
     if request['method'] == "POST":
         args = request['form']
         username = str(args['username'])
+        password = str(args['password'])
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
-        # c.execute('''DELETE FROM rooms''')
-        # c.execute('''DELETE FROM games''')
+
+        c.execute('''DROP TABLE users''')
+
+        c.execute('''DELETE FROM rooms''')
+        c.execute('''DELETE FROM games''')
         # c.execute('''DELETE FROM users''')
-        # c.execute('''DELETE FROM push_ups''')
+        c.execute('''DELETE FROM push_ups''')
 
         # conn.commit()
         # conn.close()
@@ -48,8 +52,8 @@ def request_handler(request):
         if len(result) == 0:
             conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
             c = conn.cursor()  # move cursor into database (allows us to execute commands)
-            c.execute('''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp);''')
-            c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
+            c.execute('''CREATE TABLE IF NOT EXISTS users (username text, room_id int, game_id int, last_ping timestamp, password text);''')
+            c.execute('''INSERT into users VALUES (?,?,?,?,?);''', (username, -1, -1, datetime.datetime.now(), password))
             conn.commit()  # commit commands
 
 
@@ -121,6 +125,8 @@ def gone_offline(username, room_id, game_id):
             c.execute("DELETE FROM users WHERE username=?", (username,))
             conn.commit()
             # return "deleted" + username
+
+
 
     conn.commit()  # commit commands
     conn.close()  # close connection to database
