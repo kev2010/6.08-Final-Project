@@ -210,8 +210,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
         game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
     except:
         game_state = ()
-    
-    return is_raise_legal(users, game_state, user)
+
     frames_query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
     frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
 

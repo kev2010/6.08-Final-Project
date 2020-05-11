@@ -154,11 +154,10 @@ def is_raise_legal(players, game_state, user):
                 if better[BET] > second_max_bet:
                     second_max_bet = better[BET]
         delta = max_bet - second_max_bet
-        player = [p for p in players if p[USERNAME] == user]
+        player = [p for p in players if p[USERNAME] == user][0]
         min_raise = max_bet + (delta if delta > BIG_BLIND else BIG_BLIND)
-        return (player, user, players)
-        # return (True, 
-        #         min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
+        return (True, 
+                min_raise, player[BALANCE] - BIG_BLIND, player[BALANCE])
 
 
 def is_fold_legal(players, game_state, user):
