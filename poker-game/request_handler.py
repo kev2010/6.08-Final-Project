@@ -218,7 +218,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
     if len(game_state) == 0:  #  game hasn't started yet
         if users[0][USERNAME] == user:
             possible_actions.append("start")
-    elif len(frames) == 1:  #  all frames are done processing
+    elif len(frames) >= 1:  #  all frames are done processing
         possible_actions = []
         if is_check_legal(users, game_state, user):
             possible_actions.append("check")
