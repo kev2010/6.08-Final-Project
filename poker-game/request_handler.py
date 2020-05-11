@@ -325,18 +325,18 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
         delete_frames = '''DELETE FROM frames_table WHERE time < ? AND room_id = ?'''
         frames_cursor.execute(delete_frames, (two_seconds_ago, room_id))
     
-    #   Hide the deck and other player cards
-    to_display = relevant_frames[0][STATE]
-    data = json.load(to_display)
-    del data["state"]["deck"]
-    for p in data["players"]:
-        if p["user"] != request["values"]["user"]:
-            p["cards"] = ""
+    # #   Hide the deck and other player cards
+    # to_display = relevant_frames[0][STATE]
+    # data = json.load(to_display)
+    # del data["state"]["deck"]
+    # for p in data["players"]:
+    #     if p["user"] != request["values"]["user"]:
+    #         p["cards"] = ""
     
-    to_display = json.dumps(data)
+    # to_display = json.dumps(data)
 
-    return to_display
-
+    # return to_display
+    return all_frames[0][STATE]
 
     # #   Delete all frames older than 2 seconds if there are >1 frames
     # if len(all_frames) > 1:

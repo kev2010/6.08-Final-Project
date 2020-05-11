@@ -1,4 +1,4 @@
-import { getCookie } from './cookies.js';
+// import { getCookie } from './cookies.js';
 
 const suitHTML = {
     "s": "&spades;",
@@ -16,8 +16,9 @@ document.getElementById('room-id').onsubmit = function() {
 
 const display = () => {
     let xhttp = new XMLHttpRequest();
-    let user = getUser();
-    var params = `user=${user}&type=spectate&room_id=${roomID}`;
+    // let user = getUser();
+    // var params = `user=${user}&type=spectate&room_id=${roomID}`;
+    var params = `type=spectate&room_id=${roomID}`;
     console.log(roomID);
     //  URL for PokerAPI
     let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py";
