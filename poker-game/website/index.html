@@ -9,14 +9,15 @@
 
 <body>
     <div>
-        <h1> Welcome to Poker!!! (made by bap - no u) </h1>
+        <h1> ESP32 Poker! </h1>
     </div>
 
-    <button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
-    <div id="id01" class="modal">
+    <button onclick="document.getElementById('login-screen').style.display='block'" style="width:auto;" id="login-button">Login</button>
+    <button onclick="document.getElementById('logout').style.display='block'" style="width:auto;" class="logout" id="logout-button" hidden>Logout</button>
+    <div id="login-screen" class="modal">
         <form class="modal-content animate" id="login">
             <div class="imgcontainer">
-                <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+                <span onclick="document.getElementById('login-screen').style.display='none'" class="close" title="Close Modal">&times;</span>
             </div>
 
             <div class="container">
@@ -33,7 +34,7 @@
             </div>
 
             <div class="container" style="background-color:#f1f1f1">
-                <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+                <button type="button" onclick="document.getElementById('login-screen').style.display='none'" class="cancelbtn">Cancel</button>
                 <span class="psw">Forgot <a href="#">password?</a></span>
             </div>
         </form>
@@ -41,7 +42,7 @@
 
     <div>
         <form id="room-id">
-            <label><b>Room ID:</b></label>
+            <label><b>Go to Room:</b></label>
             <input type="text" placeholder="Enter a Room ID" id="room" required>
             <input type="submit" value="Submit">
         </form>

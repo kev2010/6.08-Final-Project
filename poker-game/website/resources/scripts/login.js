@@ -16,6 +16,10 @@ document.getElementById('login').onsubmit = function() {
 
     if (isValidLogin(username, password)) {
         setCookie('user', username, 365);
+        login = document.getElementById('login-button');
+        login.hidden = true;
+        logout = document.getElementById('logout-button');
+        logout.hidden = false;
     }
 
     return false;
