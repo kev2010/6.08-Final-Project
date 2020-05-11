@@ -210,7 +210,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
         game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
     except:
         game_state = ()
-        
+
     frames_query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
     frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
 
@@ -218,7 +218,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
     if len(game_state) == 0:  #  game hasn't started yet
         if users[0][USERNAME] == user:
             possible_actions.append("start")
-    elif len(frames) == 1:  #  all frames are done processing
+    elif len(frames) >= 1:  #  all frames are done processing
         possible_actions = []
         if is_check_legal(users, game_state, user):
             possible_actions.append("check")
@@ -234,7 +234,10 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("fold")
         
         possible_actions.append("leave")
-        
+       
+    else:
+        return "Frames have length " + str(len(frames)) + " which is not 1"
+
     #return "5$start@bet@100@200@400@leave@fold@raise@50@150@500"
 
     return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
@@ -292,7 +295,7 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
                     "bal": 950,
                     "bet": 50,
                     "invested": 50,
-                    "cards": "",
+                    "cards": "hidden",
                     "position": 1,
                     "room_id": "123"
                 },
@@ -324,16 +327,17 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
     
     #   Hide the deck and other player cards
     to_display = relevant_frames[0][STATE]
-    data = json.load(to_display)
-    del data["state"]["deck"]
+    data = json.loads(to_display)
+    del data["state"][0]["deck"]
     for p in data["players"]:
         if p["user"] != request["values"]["user"]:
-            p["cards"] = ""
+            if p["cards"] != "":
+                p["cards"] = "hidden"
     
     to_display = json.dumps(data)
 
     return to_display
-
+    # return all_frames[0][STATE]
 
     # #   Delete all frames older than 2 seconds if there are >1 frames
     # if len(all_frames) > 1:
@@ -379,7 +383,7 @@ def post_handler(request, players_cursor, states_cursor, frames_cursor):
     elif action == "start" or action[0:5] == "start":
         start_game(players_cursor, states_cursor, user, room_id)
         
-    elif action == "leave":
+    elif action == "leave" or action[0:5] == "leave":
         leave_game(players_cursor, states_cursor, user, room_id)
     elif action == "check":
         check(players_cursor, states_cursor, user, room_id)

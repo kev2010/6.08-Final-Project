@@ -260,7 +260,7 @@ def fold(players_cursor, states_cursor, user, room_id):
         room_id (str): the id for the room user is in
     """
     players_query = '''SELECT * FROM players_table WHERE room_id = ? ORDER BY position ASC;'''
-    players = players_cursor.execute(players_query, room_id).fetchall()
+    players = players_cursor.execute(players_query, (room_id,)).fetchall()
     query = '''SELECT * FROM states_table WHERE room_id = ?;'''
     game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
     user_query = '''SELECT * FROM players_table WHERE user = ? AND  room_id = ?;'''
@@ -272,7 +272,7 @@ def fold(players_cursor, states_cursor, user, room_id):
                              room_id = ?'''
     players_cursor.execute(update_cards, ('', user, room_id))
 
-    users_playing_query = '''SELECT * FROM players_table WHERE cards != ? AND  room_id = ?;'''
+    users_playing_query = '''SELECT * FROM players_table WHERE cards != ? AND room_id = ?;'''
     users_playing = players_cursor.execute(users_playing_query, ('', room_id)).fetchall()
     #   If all but one player folded, then give the pot and start new hand
     if len(users_playing) == 1:
@@ -304,7 +304,7 @@ def fold(players_cursor, states_cursor, user, room_id):
                 update_action = ''' UPDATE states_table
                                     SET action = ?
                                     WHERE room_id = ?'''
-                states_cursor.execute(update_action, (position,))
+                states_cursor.execute(update_action, (position, room_id))
                 found = True
                 FRAMES.append(display_game(players_cursor, states_cursor, user, room_id))
                 break

@@ -211,6 +211,7 @@ def distribute_pots(players_cursor, states_cursor, user, room_id):
     #   Maps username to [chips invested, chips to add to bal, still live]
     all_playing = {p[USERNAME]: [p[INVESTED], 0, p[CARDS] != ''] for p in players if p[INVESTED] > 0}
     to_handle = [p for p in all_playing.keys()]
+    #   Logic to distribute side pots
     while len(to_handle) > 1:
         min_stack = min([all_playing[k][0] for k in to_handle])
         pot = min_stack * len(to_handle)

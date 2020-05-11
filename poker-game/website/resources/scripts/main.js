@@ -1,4 +1,4 @@
-import { getCookie } from './cookies.js';
+// import { getCookie } from './cookies.js';
 
 const suitHTML = {
     "s": "&spades;",
@@ -16,7 +16,9 @@ document.getElementById('room-id').onsubmit = function() {
 
 const display = () => {
     let xhttp = new XMLHttpRequest();
-    let user = getUser();
+    // let user = getUser();
+    let user = '';
+    // var params = `user=${user}&type=spectate&room_id=${roomID}`;
     var params = `user=${user}&type=spectate&room_id=${roomID}`;
     console.log(roomID);
     //  URL for PokerAPI
@@ -25,6 +27,7 @@ const display = () => {
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
+            console.log(this.response);
             let response = JSON.parse(this.response); // 89
 
             // Press f12 to see the console.log and see the full response body from the poker api
@@ -35,7 +38,14 @@ const display = () => {
                 players = response.players;
                 for (var i = 0; i < players.length; i++) {
                     var elt = document.getElementById("seat" + (i+1));
-                    var cards = players[i].cards.split(',');
+                    var cards = '';
+                    if (players[i].cards === 'hidden') {
+                        cards = ['  ', '  '];
+                    } else if (players[i].cards === '') {
+                        cards = "Folded";
+                    } else {
+                        var cards = players[i].cards.split(',');
+                    }
                     elt.innerHTML = `
                         <td>${players[i].user}</td>
                         <td>${players[i].bal}</td>
@@ -128,9 +138,12 @@ const displayHoleCards = (cards) => {
         if (suit === 's' || suit === 'c') {
             suitHTML = (suit === 's') ? "&spades;" : "&clubs;";
             color = "black";
-        } else {
+        } else if (suit === 'h' || suit === 'd') {
             suitHTML = (suit === 'h') ? "&hearts;" : "&diams;";
             color = "red";
+        } else {
+            suitHTML = "";
+            color = "black";
         }
         result += `
         <div class="card-small" id="flop2">

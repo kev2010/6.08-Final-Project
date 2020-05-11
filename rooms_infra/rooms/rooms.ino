@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "Giannis";
+char user[] = "Jerry";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -476,7 +476,16 @@ void loop() {
         // make POST request when joining room
         else {
           extract_room_id();
+
+          char room_id_copy[500];
+          memset(room_id_copy, 0, strlen(room_id_copy));
+          strcpy(room_id_copy, room_id);
+
           join_room_post_req(user, room_id);
+
+          memset(room_id, 0, strlen(room_id));
+          strcpy(room_id, room_id_copy);
+
 
           char delimiter[] = "$";
           char* ptr;
@@ -489,6 +498,7 @@ void loop() {
           Serial.println(game_selection);
 
           state = ROOM;
+
 
         }
       }
@@ -510,6 +520,7 @@ void loop() {
           break;
         }
       }
+
 
       if (flag) {
         selection = 0;
@@ -725,8 +736,9 @@ void loop() {
             state = POKER_RAISE;
           }
           else if (strcmp(action, "leave") == 0) {
-            //flag = true;
-            //state = MAIN_LOBBY;
+            flag = true; // want to refresh actions page
+            handle_action_post_req(user, action, 0, room_id);
+            state = MAIN_LOBBY;
           }
           else {
             flag = true; // want to refresh actions page
