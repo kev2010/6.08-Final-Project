@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "john";
+char user[] = "dude";
 
 char user2[] = "petros";
 char user3[] = "christos";
@@ -476,8 +476,6 @@ void loop() {
         // make POST request when joining room
         else {
           extract_room_id();
-          Serial.println("room id to join:");
-          Serial.println(room_id);
 
           char room_id_copy[500];
           memset(room_id_copy, 0, strlen(room_id_copy));
@@ -487,9 +485,6 @@ void loop() {
 
           memset(room_id, 0, strlen(room_id));
           strcpy(room_id, room_id_copy);
-
-          Serial.println("room id after post:");
-          Serial.println(room_id);
 
 
           char delimiter[] = "$";
@@ -503,11 +498,6 @@ void loop() {
           Serial.println(game_selection);
 
           state = ROOM;
-
-
-          Serial.println("room id after parsing:");
-          Serial.println(room_id);
-
 
 
         }
@@ -531,8 +521,6 @@ void loop() {
         }
       }
 
-      Serial.println("room id inside room before flag:");
-      Serial.println(room_id);
 
       if (flag) {
         selection = 0;
@@ -540,8 +528,6 @@ void loop() {
         flag = false;
         tft.fillScreen(TFT_BLACK); //fill background
         draw_room_screen(selection); // also extracts room id for future use
-        Serial.println("room id inside room after flag:");
-        Serial.println(room_id);
       }
 
       new_selection = update_selection(selection, no_of_selections);
@@ -750,8 +736,9 @@ void loop() {
             state = POKER_RAISE;
           }
           else if (strcmp(action, "leave") == 0) {
-            //flag = true;
-            //state = MAIN_LOBBY;
+            flag = true; // want to refresh actions page
+            handle_action_post_req(user, action, 0, room_id);
+            state = MAIN_LOBBY;
           }
           else {
             flag = true; // want to refresh actions page

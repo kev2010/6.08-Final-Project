@@ -210,7 +210,8 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
         game_state  = states_cursor.execute(query, (room_id,)).fetchall()[0]
     except:
         game_state = ()
-        
+    
+    return is_raise_legal(users, game_state, user)
     frames_query = '''SELECT * FROM frames_table WHERE room_id = ?;'''
     frames = frames_cursor.execute(frames_query, (room_id,)).fetchall()
 
@@ -218,7 +219,7 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
     if len(game_state) == 0:  #  game hasn't started yet
         if users[0][USERNAME] == user:
             possible_actions.append("start")
-    elif len(frames) == 1:  #  all frames are done processing
+    elif len(frames) >= 1:  #  all frames are done processing
         possible_actions = []
         if is_check_legal(users, game_state, user):
             possible_actions.append("check")
@@ -234,9 +235,16 @@ def get_actions_handler(request, players_cursor, states_cursor, frames_cursor):
             possible_actions.append("fold")
         
         possible_actions.append("leave")
+<<<<<<< HEAD
     else:
         raise ValueError
         
+=======
+       
+    else:
+        return "Frames have length " + str(len(frames)) + " which is not 1"
+ 
+>>>>>>> edcf4eaee6b03433a87c6e3c3b17e30871e22433
     #return "5$start@bet@100@200@400@leave@fold@raise@50@150@500"
 
     return str(len(possible_actions)) + "$" + "@".join(possible_actions) 
@@ -324,18 +332,18 @@ def get_spectate_handler(request, players_cursor, states_cursor, frames_cursor):
         delete_frames = '''DELETE FROM frames_table WHERE time < ? AND room_id = ?'''
         frames_cursor.execute(delete_frames, (two_seconds_ago, room_id))
     
-    #   Hide the deck and other player cards
-    to_display = relevant_frames[0][STATE]
-    data = json.load(to_display)
-    del data["state"]["deck"]
-    for p in data["players"]:
-        if p["user"] != request["values"]["user"]:
-            p["cards"] = ""
+    # #   Hide the deck and other player cards
+    # to_display = relevant_frames[0][STATE]
+    # data = json.load(to_display)
+    # del data["state"]["deck"]
+    # for p in data["players"]:
+    #     if p["user"] != request["values"]["user"]:
+    #         p["cards"] = ""
     
-    to_display = json.dumps(data)
+    # to_display = json.dumps(data)
 
-    return to_display
-
+    # return to_display
+    return all_frames[0][STATE]
 
     # #   Delete all frames older than 2 seconds if there are >1 frames
     # if len(all_frames) > 1:
