@@ -16,9 +16,8 @@ document.getElementById('room-id').onsubmit = function() {
 
 const display = () => {
     let xhttp = new XMLHttpRequest();
-    // let user = getUser();
-    let user = '';
-    // var params = `user=${user}&type=spectate&room_id=${roomID}`;
+    let user = getUser();
+    // let user = '';
     var params = `user=${user}&type=spectate&room_id=${roomID}`;
     console.log(roomID);
     //  URL for PokerAPI
