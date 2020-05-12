@@ -64,7 +64,6 @@ const isValidLogin = (username, password) => {
         let xhttp = new XMLHttpRequest();
         var params = `username=${username}&password=${password}`;
         let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
-        xhttp.open("GET", url+params, true);
         xhttp.onload = () => {
             console.log(this.status);
             if (this.status >= 200 && this.status < 300) {
@@ -98,7 +97,8 @@ const isValidLogin = (username, password) => {
                 statusText: xhr.statusText
             });
         };
-        xhttp.send();
+        xhttp.open("GET", url+params, true);
+        xhttp.send(null);
  
     });
 
