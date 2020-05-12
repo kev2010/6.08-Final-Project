@@ -26,7 +26,11 @@ logoutButton.onclick = () => {
 
 updateLogin();
 
-document.getElementById('login').onsubmit = async function() { 
+var loginInfo = document.getElementById("login");
+function handleForm(event) { event.preventDefault(); } 
+loginInfo.addEventListener('submit', handleForm);
+
+loginInfo.onsubmit = async function() { 
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
     console.log(isValidLogin(username, password));
