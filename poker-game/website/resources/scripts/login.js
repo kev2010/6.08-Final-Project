@@ -82,6 +82,7 @@ const isValidLogin = (username, password) => {
                 // });
                 resolve(response === 1);
             } else {
+                console.log('uhph');
                 reject({
                     status: this.status,
                     statusText: xhttp.statusText
