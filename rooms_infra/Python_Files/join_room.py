@@ -9,6 +9,7 @@ def request_handler(request):
         username = str(args['username'])
         room_id = str(args['room_id'])
 
+        helpers.create_db()
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
