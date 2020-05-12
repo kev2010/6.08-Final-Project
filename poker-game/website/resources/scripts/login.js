@@ -38,9 +38,7 @@ const isValidLogin = (username, password) => {
 
             // Press f12 to see the console.log and see the full response body from the poker api
             console.log(response);
-            let to_display = JSON.stringify(response);
-            let valid = respone.valid;
-            return (valid === "True");
+            return (response === 1);
         } else {
             throw "Login GET request failed!";
         }
