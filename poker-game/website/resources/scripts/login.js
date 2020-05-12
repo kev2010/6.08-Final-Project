@@ -1,7 +1,7 @@
 // import { setCookie } from './cookies.js';
 
 // Get the modal
-var modal = document.getElementById('id01');
+var modal = document.getElementById('login-button');
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
@@ -9,6 +9,16 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+
+const updateLogin = () => {
+    //  Change display for login/logout
+    var loginButton = document.getElementById('login-button');
+    var logoutButton = document.getElementById('logout-button');
+    loginButton.hidden = getCookie("user") != "";
+    logoutButton.hidden = getCookie("user") === "";
+}
+
+updateLogin();
 
 document.getElementById('login').onsubmit = async function() { 
     username = document.getElementById('username').value;
@@ -21,10 +31,7 @@ document.getElementById('login').onsubmit = async function() {
     if (login) {
         console.log('setting cookie');
         setCookie('user', username, 365);
-        login = document.getElementById('login-button');
-        login.hidden = true;
-        logout = document.getElementById('logout-button');
-        logout.hidden = false;
+        updateLogin();
     }
     // });
     console.log("hi");
@@ -77,4 +84,19 @@ function setCookie(cname, cvalue, exdays) {
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
     console.log("asdfs");
     console.log(document.cookie);
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
 }
