@@ -24,14 +24,13 @@ logoutButton.onclick = () => {
     updateLogin();
 }
 
-
 updateLogin();
 
-document.getElementById('login').onsubmit = function() { 
+document.getElementById('login').onsubmit = async function() { 
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
     console.log(isValidLogin(username, password));
-    var login = isValidLogin(username, password);
+    let login = await isValidLogin(username, password);
     // login = Promise.resolve(isValidLogin(username, password));
     // login.then((valid) => {
     console.log('async');
@@ -57,32 +56,72 @@ document.getElementById('login').onsubmit = function() {
 }
 
 const isValidLogin = (username, password) => {
-    // return true;
-    let xhttp = new XMLHttpRequest();
-    var params = `username=${username}&password=${password}`;
-    //  TODO: CHANGE THIS URL
-    let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
-    
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
-            let response = JSON.parse(this.response); // 89
+    return new Promise((resolve, reject) => {
+        let xhttp = new XMLHttpRequest();
+        var params = `username=${username}&password=${password}`;
+        let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
+        xhttp.open("GET", url+params, true);
+        xhttp.onload = () => {
+            if (this.status >= 200 && this.status < 300) {
+                 // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
+                let response = JSON.parse(this.response); // 89
 
-            // Press f12 to see the console.log and see the full response body from the poker api
-            console.log(response);
-            console.log(typeof(response));
-            console.log(response === 1);
-            console.log(typeof 1);
+                // Press f12 to see the console.log and see the full response body from the poker api
+                console.log(response);
+                console.log(typeof(response));
+                console.log(response === 1);
+                console.log(typeof 1);
 
-            // return new Promise((resolve, reject) => {
-            //     var val = response === 1;
-            //     resolve(val);
-            // });
-            return response === 1;
+                // return new Promise((resolve, reject) => {
+                //     var val = response === 1;
+                //     resolve(val);
+                // });
+                resolve(response === 1);
+            } else {
+                reject({
+                    status: this.status,
+                    statusText: xhttp.statusText
+                });
+            }
         }
-    }
-    xhttp.open("GET", url+params, true);
-    xhttp.send(null);
+        xhr.onerror = function () {
+            reject({
+                status: this.status,
+                statusText: xhr.statusText
+            });
+        };
+        xhr.send();
+ 
+    });
+
+
+
+    // // return true;
+    // let xhttp = new XMLHttpRequest();
+    // var params = `username=${username}&password=${password}`;
+    // //  TODO: CHANGE THIS URL
+    // let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
+    
+    // xhttp.onreadystatechange = function() {
+    //     if (this.readyState == 4 && this.status == 200) {
+    //         // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
+    //         let response = JSON.parse(this.response); // 89
+
+    //         // Press f12 to see the console.log and see the full response body from the poker api
+    //         console.log(response);
+    //         console.log(typeof(response));
+    //         console.log(response === 1);
+    //         console.log(typeof 1);
+
+    //         // return new Promise((resolve, reject) => {
+    //         //     var val = response === 1;
+    //         //     resolve(val);
+    //         // });
+    //         return response === 1;
+    //     }
+    // }
+    // xhttp.open("GET", url+params, true);
+    // xhttp.send(null);
 }
 
 function setCookie(cname, cvalue, exdays) {
