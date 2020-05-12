@@ -15,5 +15,6 @@ def request_handler(request):
         conn.close()  # close connection to database
 
         if len(result)>0 and result[0][4] == password:
-            return 1
-        return 0
+            return "1"
+        return "0"
+

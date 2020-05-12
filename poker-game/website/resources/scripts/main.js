@@ -21,7 +21,7 @@ const display = () => {
     var params = `user=${user}&type=spectate&room_id=${roomID}`;
     console.log(roomID);
     //  URL for PokerAPI
-    let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py";
+    let url = "http://608dev-2.net/sandbox/sc/team079/team079/poker-game/request_handler.py?";
     
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -71,7 +71,7 @@ const display = () => {
         }
     }
 
-    xhttp.open("GET", url+"?"+params, true);
+    xhttp.open("GET", url+params, true);
     xhttp.send(null);
 }
 
