@@ -18,6 +18,13 @@ const updateLogin = () => {
     logoutButton.hidden = getCookie("user") === "";
 }
 
+var logoutButton = document.getElementById('logout-button');
+logoutButton.onclick = () => {
+    setCookie('user', "", 365);
+    updateLogin();
+}
+
+
 updateLogin();
 
 document.getElementById('login').onsubmit = async function() { 
