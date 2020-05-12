@@ -41,30 +41,31 @@ document.getElementById('login').onsubmit = async function() {
 }
 
 const isValidLogin = (username, password) => {
-    let xhttp = new XMLHttpRequest();
-    var params = `username=${username}&password=${password}`;
-    //  TODO: CHANGE THIS URL
-    let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
+    return true;
+    // let xhttp = new XMLHttpRequest();
+    // var params = `username=${username}&password=${password}`;
+    // //  TODO: CHANGE THIS URL
+    // let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
     
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
-            let response = JSON.parse(this.response); // 89
+    // xhttp.onreadystatechange = function() {
+    //     if (this.readyState == 4 && this.status == 200) {
+    //         // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
+    //         let response = JSON.parse(this.response); // 89
 
-            // Press f12 to see the console.log and see the full response body from the poker api
-            console.log(response);
-            console.log(typeof(response));
-            console.log(response === 1);
-            console.log(typeof 1);
+    //         // Press f12 to see the console.log and see the full response body from the poker api
+    //         console.log(response);
+    //         console.log(typeof(response));
+    //         console.log(response === 1);
+    //         console.log(typeof 1);
 
-            return new Promise((resolve, reject) => {
-                var val = response === 1;
-                resolve(val);
-            });
-        }
-    }
-    xhttp.open("GET", url+params, true);
-    xhttp.send(null);
+    //         return new Promise((resolve, reject) => {
+    //             var val = response === 1;
+    //             resolve(val);
+    //         });
+    //     }
+    // }
+    // xhttp.open("GET", url+params, true);
+    // xhttp.send(null);
 }
 
 function setCookie(cname, cvalue, exdays) {
