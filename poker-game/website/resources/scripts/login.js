@@ -88,13 +88,13 @@ const isValidLogin = (username, password) => {
                 });
             }
         }
-        xhr.onerror = function () {
+        xhttp.onerror = function () {
             reject({
                 status: this.status,
                 statusText: xhr.statusText
             });
         };
-        xhr.send();
+        xhttp.send();
  
     });
 
