@@ -83,7 +83,7 @@ const isValidLogin = (username, password) => {
                 //     var val = response === 1;
                 //     resolve(val);
                 // });
-                resolve(response === "1");
+                resolve(response === 1);
             } else {
                 console.log('uhph');
                 reject({
