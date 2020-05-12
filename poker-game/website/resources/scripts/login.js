@@ -38,6 +38,7 @@ const isValidLogin = (username, password) => {
 
             // Press f12 to see the console.log and see the full response body from the poker api
             console.log(response);
+            console.log(typeof(response));
             return (response === "1");
         }
     }
