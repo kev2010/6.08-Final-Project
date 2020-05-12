@@ -14,19 +14,28 @@ document.getElementById('login').onsubmit = async function() {
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
     console.log(isValidLogin(username, password));
-    // var login = await isValidLogin(username, password);
-    login = Promise.resolve(isValidLogin(username, password));
-    login.then((valid) => {
-        console.log('async');
-        if (valid) {
-            console.log('setting cookie');
-            setCookie('user', username, 365);
-            login = document.getElementById('login-button');
-            login.hidden = true;
-            logout = document.getElementById('logout-button');
-            logout.hidden = false;
-        }
-    });
+    var login = await isValidLogin(username, password);
+    // login = Promise.resolve(isValidLogin(username, password));
+    // login.then((valid) => {
+    //     console.log('async');
+    //     if (valid) {
+    //         console.log('setting cookie');
+    //         setCookie('user', username, 365);
+    //         login = document.getElementById('login-button');
+    //         login.hidden = true;
+    //         logout = document.getElementById('logout-button');
+    //         logout.hidden = false;
+    //     }
+    // });
+    console.log("hi");
+    if (valid) {
+        console.log('setting cookie');
+        setCookie('user', username, 365);
+        login = document.getElementById('login-button');
+        login.hidden = true;
+        logout = document.getElementById('logout-button');
+        logout.hidden = false;
+    }
 
     return false;
 }
@@ -47,7 +56,11 @@ const isValidLogin = (username, password) => {
             console.log(typeof(response));
             console.log(response === 1);
             console.log(typeof 1);
-            return (response === 1);
+
+            return new Promise((resolve, reject) => {
+                var val = response === 1;
+                resolve(val);
+            });
         }
     }
     xhttp.open("GET", url+params, true);
