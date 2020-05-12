@@ -31,7 +31,7 @@ document.getElementById('login').onsubmit = async function() {
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
     console.log(isValidLogin(username, password));
-    var login = await isValidLogin(username, password);
+    var login = isValidLogin(username, password);
     // login = Promise.resolve(isValidLogin(username, password));
     // login.then((valid) => {
     console.log('async');
@@ -56,7 +56,7 @@ document.getElementById('login').onsubmit = async function() {
     return false;
 }
 
-const isValidLogin = async (username, password) => {
+const isValidLogin = (username, password) => {
     // return true;
     let xhttp = new XMLHttpRequest();
     var params = `username=${username}&password=${password}`;
@@ -74,11 +74,11 @@ const isValidLogin = async (username, password) => {
             console.log(response === 1);
             console.log(typeof 1);
 
-            return new Promise((resolve, reject) => {
-                var val = response === 1;
-                resolve(val);
-            });
-            // return response === 1;
+            // return new Promise((resolve, reject) => {
+            //     var val = response === 1;
+            //     resolve(val);
+            // });
+            return response === 1;
         }
     }
     xhttp.open("GET", url+params, true);
