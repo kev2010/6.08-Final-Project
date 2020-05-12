@@ -15,6 +15,7 @@ document.getElementById('login').onsubmit = function() {
     password = document.getElementById('password').value;
 
     if (isValidLogin(username, password)) {
+        console.log('setting cookie');
         setCookie('user', username, 365);
         login = document.getElementById('login-button');
         login.hidden = true;
@@ -39,7 +40,7 @@ const isValidLogin = (username, password) => {
             // Press f12 to see the console.log and see the full response body from the poker api
             console.log(response);
             console.log(typeof(response));
-            return (response === "1");
+            return (response === 1);
         }
     }
     xhttp.open("GET", url+params, true);
