@@ -41,6 +41,7 @@ const isValidLogin = (username, password) => {
             console.log(response);
             return (response === 1);
         }
+    }
     xhttp.open("GET", url+params, true);
     xhttp.send(null);
 }
