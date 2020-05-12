@@ -33,7 +33,7 @@ loginInfo.addEventListener('submit', handleForm);
 loginInfo.onsubmit = async function() { 
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
-    console.log(isValidLogin(username, password));
+    console.log("bruh");
     let login = await isValidLogin(username, password);
     // login = Promise.resolve(isValidLogin(username, password));
     // login.then((valid) => {
