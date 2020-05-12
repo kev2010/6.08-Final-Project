@@ -17,6 +17,7 @@ document.getElementById('login').onsubmit = async function() {
     // var login = await isValidLogin(username, password);
     login = Promise.resolve(isValidLogin(username, password));
     login.then((valid) => {
+        console.log('async');
         if (valid) {
             console.log('setting cookie');
             setCookie('user', username, 365);
