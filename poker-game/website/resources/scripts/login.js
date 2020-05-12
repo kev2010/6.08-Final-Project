@@ -32,6 +32,7 @@ const isValidLogin = (username, password) => {
     let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
     
     xhttp.onreadystatechange = function() {
+
         if (this.readyState == 4 && this.status == 200) {
             // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
             let response = JSON.parse(this.response); // 89
@@ -39,10 +40,7 @@ const isValidLogin = (username, password) => {
             // Press f12 to see the console.log and see the full response body from the poker api
             console.log(response);
             return (response === 1);
-        } else {
-            throw "Login GET request failed!";
         }
-    }
     xhttp.open("GET", url+params, true);
     xhttp.send(null);
 }
