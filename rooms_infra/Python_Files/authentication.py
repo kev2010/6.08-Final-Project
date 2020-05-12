@@ -16,5 +16,4 @@ def request_handler(request):
 
         if len(result)>0 and result[0][4] == password:
             return 1
-
         return 0
