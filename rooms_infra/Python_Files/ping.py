@@ -21,11 +21,12 @@ def request_handler(request):
         args = request['form']
         username = str(args['username'])
         password = str(args['password'])
-        helpers.create_db()
+
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
 
+        helpers.create_db(conn, c)
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
         # c.execute('''DROP TABLE users''')
