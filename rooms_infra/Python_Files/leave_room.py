@@ -36,11 +36,14 @@ def request_handler(request):
         c.execute("UPDATE users SET game_id = -1 WHERE username =?", (username,))
 
         conn.commit()  # commit commands
-        conn.close()  # close connection to database
 
         if is_host:
-            helpers.delete_room(room_id)
+            helpers.delete_room(room_id, conn, c)
+            conn.commit()  # commit commands
+            conn.close()  # close connection to database
             return "Room deleted because host left."
 
         else:
+            conn.commit()  # commit commands
+            conn.close()  # close connection to database
             return "You have successfully left. \n Welcome back to the lobby."

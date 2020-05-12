@@ -54,7 +54,7 @@ def request_handler(request):
 
         #Check if anyone else needs to be kicked (because they haven't pinged in 10 seconds)
 
-        helpers.check_online()
+        helpers.check_online(conn, c)
 
         c.execute("UPDATE users SET last_ping = ? WHERE username = ?", (str(datetime.datetime.now()), username))
         conn.commit()
