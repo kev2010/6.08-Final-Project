@@ -32,7 +32,7 @@ const isValidLogin = (username, password) => {
     let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
     
     xhttp.onreadystatechange = function() {
-
+        console.log(this.response);
         if (this.readyState == 4 && this.status == 200) {
             // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
             let response = JSON.parse(this.response); // 89
