@@ -10,7 +10,7 @@ window.onclick = function(event) {
     }
 }
 
-document.getElementById('login').onsubmit = async function() { 
+document.getElementById('login').onsubmit = function() { 
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
     console.log(isValidLogin(username, password));
@@ -28,19 +28,21 @@ document.getElementById('login').onsubmit = async function() {
     //     }
     // });
     console.log("hi");
-    if (valid) {
-        console.log('setting cookie');
-        setCookie('user', username, 365);
-        login = document.getElementById('login-button');
-        login.hidden = true;
-        logout = document.getElementById('logout-button');
-        logout.hidden = false;
-    }
+    isValidLogin(username, password).then(valid => {
+        if (valid) {
+            console.log('setting cookie');
+            setCookie('user', username, 365);
+            login = document.getElementById('login-button');
+            login.hidden = true;
+            logout = document.getElementById('logout-button');
+            logout.hidden = false;
+        }
+    })
 
     return false;
 }
 
-const isValidLogin = (username, password) => {
+const isValidLogin = async (username, password) => {
     return true;
     // let xhttp = new XMLHttpRequest();
     // var params = `username=${username}&password=${password}`;
