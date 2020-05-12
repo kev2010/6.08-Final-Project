@@ -60,11 +60,12 @@ loginInfo.onsubmit = async function() {
 }
 
 const isValidLogin = (username, password) => {
-    return new Promise((resolve, reject) => {
-        let xhttp = new XMLHttpRequest();
+    return new Promise(function (resolve, reject) {
+        var xhttp = new XMLHttpRequest();
         var params = `username=${username}&password=${password}`;
         let url = "http://608dev-2.net/sandbox/sc/team079/team079/rooms_infra/Python_Files/authentication.py?";
-        xhttp.onload = () => {
+        xhttp.open("GET", url+params, true);
+        xhttp.onload = function() {
             console.log(this.status);
             if (this.status >= 200 && this.status < 300) {
                 console.log("looks good");
@@ -82,7 +83,7 @@ const isValidLogin = (username, password) => {
                 //     var val = response === 1;
                 //     resolve(val);
                 // });
-                resolve(response === 1);
+                resolve(response === "1");
             } else {
                 console.log('uhph');
                 reject({
@@ -91,14 +92,7 @@ const isValidLogin = (username, password) => {
                 });
             }
         }
-        xhttp.onerror = function () {
-            reject({
-                status: this.status,
-                statusText: xhr.statusText
-            });
-        };
-        xhttp.open("GET", url+params, true);
-        xhttp.send(null);
+        xhttp.send();
  
     });
 
