@@ -1,14 +1,14 @@
 // import { setCookie } from './cookies.js';
 
-// Get the modal
-var modal = document.getElementById('login-button');
+// // Get the modal
+// var modal = document.getElementById('login-button');
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
+// // When the user clicks anywhere outside of the modal, close it
+// window.onclick = function(event) {
+//     if (event.target == modal) {
+//         modal.style.display = "none";
+//     }
+// }
 
 const updateLogin = () => {
     //  Change display for login/logout
