@@ -16,7 +16,7 @@ def request_handler(request):
         # c.execute('''DELETE FROM games''')
         # c.execute('''DELETE FROM users''')
 
-        result = c.execute('''SELECT * FROM users''').fetchall()
+        result = c.execute('''SELECT * FROM rooms''').fetchall()
         conn.commit()  # commit commands
         conn.close()  # close connection to database
 
