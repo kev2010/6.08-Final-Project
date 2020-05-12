@@ -67,6 +67,8 @@ const isValidLogin = (username, password) => {
         xhttp.open("GET", url+params, true);
         xhttp.onload = () => {
             if (this.status >= 200 && this.status < 300) {
+                console.log("looks good");
+                console.log(this.status);
                  // XMLHttp will provide the servers response as text,s we need to parse to turn it into JSON
                 let response = JSON.parse(this.response); // 89
 
