@@ -74,11 +74,11 @@ const isValidLogin = async (username, password) => {
             console.log(response === 1);
             console.log(typeof 1);
 
-            // return new Promise((resolve, reject) => {
-            //     var val = response === 1;
-            //     resolve(val);
-            // });
-            return response === 1;
+            return new Promise((resolve, reject) => {
+                var val = response === 1;
+                resolve(val);
+            });
+            // return response === 1;
         }
     }
     xhttp.open("GET", url+params, true);
