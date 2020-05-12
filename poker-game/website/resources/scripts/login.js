@@ -10,18 +10,22 @@ window.onclick = function(event) {
     }
 }
 
-document.getElementById('login').onsubmit = function() { 
+document.getElementById('login').onsubmit = async function() { 
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
     console.log(isValidLogin(username, password));
-    if (isValidLogin(username, password)) {
-        console.log('setting cookie');
-        setCookie('user', username, 365);
-        login = document.getElementById('login-button');
-        login.hidden = true;
-        logout = document.getElementById('logout-button');
-        logout.hidden = false;
-    }
+    // var login = await isValidLogin(username, password);
+    login = Promise.resolve(isValidLogin(username, password));
+    login.then((valid) => {
+        if (valid) {
+            console.log('setting cookie');
+            setCookie('user', username, 365);
+            login = document.getElementById('login-button');
+            login.hidden = true;
+            logout = document.getElementById('logout-button');
+            logout.hidden = false;
+        }
+    });
 
     return false;
 }
