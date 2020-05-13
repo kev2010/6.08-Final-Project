@@ -18,6 +18,8 @@ def create_db(conn, c):
 
 def check_online(conn, c):
     #checks for everyone in the users db and removes and deletes from games/rooms if they haven't been active for >10s
+    c.execute("DELETE FROM games WHERE capacity=?", (0,))
+    c.execute("DELETE FROM rooms WHERE capacity=?", (0,))
 
     result = c.execute('''SELECT * FROM users WHERE last_ping < ?''', (datetime.datetime.now() - datetime.timedelta(seconds=30),)).fetchall()
     #
