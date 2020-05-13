@@ -4,6 +4,8 @@ import sqlite3
 #from helpers import *
 import datetime
 
+# HELLO GIANNIS
+
 db = '__HOME__/project.db'
 
 GAME_ID_TO_NAME = {0: "Poker", 1: "Blackjack", 2: "PushUps"}
