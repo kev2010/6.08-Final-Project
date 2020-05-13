@@ -20,7 +20,7 @@ def request_handler(request):
         result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
 
         if len(result) > 0:
-            helpers.gone_offline(username, result[1], result[2], conn, c)
+            helpers.gone_offline(username, result[0][1], result[0][2], conn, c)
 
 
         return "1"
