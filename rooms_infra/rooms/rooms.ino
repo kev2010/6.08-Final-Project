@@ -10,7 +10,7 @@ MPU6050 imu; //imu object called, appropriately, imu
 char network[] = "NETGEAR_EXT_2";  //SSID for 6.08 Lab
 char password[] = "vastbug510"; //Password for 6.08 Lab
 
-char user[] = "GiannisK";
+char user[] = "Giannis";
 char pswd[] = "Kaklamanis";
 
 char user2[] = "petros";
@@ -405,7 +405,7 @@ void loop() {
         } else if (selection == 1) {
           state = JOIN_LOBBY;
         } else if (selection == 2) { // logout
-          //logout(user);
+          logout(user);
           state = LOGIN_PAGE;
         }
       }
@@ -738,8 +738,8 @@ void loop() {
           }
           else if (strcmp(action, "leave") == 0) {
             flag = true; // want to refresh actions page
-            handle_action_post_req(user, action, 0, room_id);
-            state = MAIN_LOBBY;
+            //handle_action_post_req(user, "leave", 0, room_id);
+            state = ROOM;
           }
           else {
             flag = true; // want to refresh actions page
