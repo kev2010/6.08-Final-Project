@@ -58,7 +58,7 @@ def gone_offline(username, room_id, game_id, conn, c):
             # return "deleted" + username
     else:
         c.execute("DELETE FROM users WHERE username=?", (username,))
-        res = c.execute("SELECT * FROM rooms WHERE host_username=?", (username,)).fetchall()
+        # res = c.execute("SELECT * FROM rooms WHERE host_username=?", (username,)).fetchall()
         # for r in res:
         #     delete_room(r[0], conn, c)
         conn.commit()
