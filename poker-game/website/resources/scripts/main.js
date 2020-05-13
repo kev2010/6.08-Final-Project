@@ -66,8 +66,8 @@ const display = () => {
             }
 
             // Now, target the DIV in question, and set the innerHTML to the response
-            let targetDiv = document.getElementById("instructor-answer");
-            targetDiv.innerHTML = to_display;
+            // let targetDiv = document.getElementById("instructor-answer");
+            // targetDiv.innerHTML = to_display;
         }
     }
 

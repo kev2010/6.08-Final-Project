@@ -7,11 +7,12 @@ TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 
 MPU6050 imu; //imu object called, appropriately, imu
 
-char network[] = "BTHub6-3JRW";  //SSID for 6.08 Lab
-char password[] = "HVpPptcx3DTE"; //Password for 6.08 Lab
 
-char user[] = "Baptiste";
-char pswd[] = "password";
+char network[] = "HOME-175F";  //SSID for 6.08 Lab
+char password[] = "7349810255"; //Password for 6.08 Lab
+
+char user[] = "kev2018";
+char pswd[] = "safepassword";
 
 char user2[] = "petros";
 char user3[] = "christos";
