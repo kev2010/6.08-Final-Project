@@ -3,12 +3,31 @@
   <component name="ChangeListManager">
     <list default="true" id="a5b5c8e6-7d51-4198-9a26-20bce35b69b9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/authentication.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/authentication.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rooms_infra/Python_Files/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/rooms_infra/Python_Files/login.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand>
+      <path>
+        <item name="Database" type="3277223f:DatabaseStructure$DbRootGroup" />
+        <item name="players" type="feb32156:DbDataSourceImpl" />
+      </path>
+    </expand>
+    <select />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -28,6 +47,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
@@ -95,7 +115,10 @@
       <workItem from="1588450462325" duration="8252000" />
       <workItem from="1588892358508" duration="2088000" />
       <workItem from="1589152333728" duration="734000" />
-      <workItem from="1589222103444" duration="2204000" />
+      <workItem from="1589222103444" duration="5139000" />
+      <workItem from="1589319666936" duration="240000" />
+      <workItem from="1589323182750" duration="267000" />
+      <workItem from="1589328617714" duration="4165000" />
     </task>
     <servers />
   </component>
@@ -140,6 +163,10 @@
       <screen x="0" y="23" width="1680" height="1027" />
     </state>
     <state width="1638" height="280" key="GridCell.Tab.0.right/-1080.23.1080.1897/0.23.1680.1027@0.23.1680.1027" timestamp="1588159861354" />
+    <state width="239" height="498" key="HiddenNamespacesPopup" timestamp="1589331311976">
+      <screen x="-1080" y="-627" width="1080" height="1897" />
+    </state>
+    <state width="239" height="498" key="HiddenNamespacesPopup/-1080.-627.1080.1897/0.23.1680.1027@-1080.-627.1080.1897" timestamp="1589331311976" />
     <state x="623" y="461" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1587948901751">
       <screen x="0" y="23" width="1680" height="1027" />
     </state>

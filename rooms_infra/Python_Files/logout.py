@@ -1,10 +1,9 @@
 import sqlite3
-#import sys
-#sys.path.insert(0, "~/team079/rooms_infra/Python_Files/helpers.py")
-#from helpers import *
 import datetime
-
-# HELLO GIANNIS
+import random
+import sys
+sys.path.append('__HOME__/team079/rooms_infra/Python_Files')
+import helpers
 
 db = '__HOME__/project.db'
 
@@ -17,8 +16,11 @@ def request_handler(request):
 
         conn = sqlite3.connect(db)  # connect to that database (will create if it doesn't already exist)
         c = conn.cursor()  # move cursor into database (allows us to execute commands)
-        c.execute('''INSERT into users VALUES (?,?,?,?);''', (username, -1, -1, datetime.datetime.now()))
-        conn.commit()  # commit commands
-        conn.close()  # close connection to database
 
-        return "Hello user "+username+", you are online!"
+        result = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchall()
+
+        if len(result) > 0:
+            helpers.gone_offline(username, result[0][1], result[0][2], conn, c)
+
+
+        return "1"

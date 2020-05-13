@@ -8,7 +8,7 @@ state_db = '__HOME__/team079/poker-game/state.db'
 frames_db = '__HOME__/team079/poker-game/frames.db'
 
 #   Constants
-MAX_PLAYERS = 3
+MAX_PLAYERS = 6
 SMALL_BLIND = 25
 BIG_BLIND = 50
 STARTING_STACK = 1000
